@@ -1,18 +1,5 @@
-<?php	
-	include_once 'lib/devices.class.php';
-	date_default_timezone_set('Asia/Manila');
-
-	$now = date("H:i");
-	$hour = intval(substr($now, 0, 2));
-	$sdate;
-
-	if ($hour >= 0 && $hour < 8 ) {
-			$sdate = date("m/d/Y", strtotime("yesterday"));
-	} elseif ($hour >= 8 && $hour <= 23) {
-			$sdate = date("m/d/Y");
-	}
-
-?><!DOCTYPE html>
+<?php include_once 'lib/init.php'?>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -31,18 +18,14 @@
 
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBIHIWYF28n_7UpQiud5ZNQP6C4G3LmTtU&sensor=false&language=ko"></script>
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-
-	<script type="application/javascript" src="co"></script>
 <script type="text/javascript">
   setTimeout(function(){
-      window.location.href = window.location.href; 
+      window.location.reload(true);
   },900000); // refresh 10 minutes
 </script>
 <script type="text/javascript">
 
-	var key = {'serveraddr':'http://<?php echo $_SERVER['HTTP_HOST'].':'.$_SERVER['SERVER_PORT'];?>',
-				'serverdate':'<?php echo date("m/d/Y");?>', 'servertime':'<?php echo date("H:i");?>',
-			   'sdate':'<?php echo $sdate;?>', 'numraindevices':0, 'loadedraindevices':0, 
+	var key = {'sdate':'<?php echo $sdate;?>', 'numraindevices':0, 'loadedraindevices':0,
 			   'marker' : [
 			   		{'min':0.01, 'max':5, 'name':'lighter', 'src':'images/rain-lighter'},
 			   		{'min':5, 'max':25, 'name':'light', 'src':'images/rain-light'}, 
@@ -99,8 +82,6 @@
 				var cur = rainfall_devices[i]; 
 				if (cur['status_id'] == null || cur['status_id'] == 0) {
 					postGetData(cur.dev_id, key['sdate'], key['sdate'], 1, onRainfallDataResponseSuccess);
-				} else {
-					continue;
 				}
 			}
 
@@ -116,10 +97,7 @@
 					} else {
 						postGetData(cur.dev_id, key['sdate'], key['sdate'], "", onWaterlevelDataResponseSuccess);
 					}	
-				} else {
-					continue;
 				}
-				
 				
 			}
 		}, 200);
@@ -129,8 +107,6 @@
 				var cur = temperature_devices[i]; 
 				if (cur['status_id'] == null || cur['status_id'] == 0) {
 					postGetData(cur.dev_id, key['sdate'], key['sdate'], 96, onTemperatureDataResponseSuccess);
-				} else {
-					continue;
 				}
 			}
 
@@ -139,7 +115,7 @@
 
 	function postGetData(dev_id, sdate, edate, limit, successcallback) {
 		$.ajax({
-				url: key['serveraddr'] + '/bantaypanahon/data.php',
+				url: DOCUMENT_ROOT + 'data.php',
 				type: "POST",
 				data: {start: 0,
 		  		 limit: limit,
@@ -230,7 +206,7 @@
   			center: DOST_CENTER,
   			disableDefaultUI: true,
   			draggableCursor:'crosshair'
-		}
+		};
 		
 		cumulative_rainfall_map = new google.maps.Map(document.getElementById(divcanvas), mapOptions);
 		
@@ -323,7 +299,7 @@
 		var maindiv = document.getElementById(div);
 		var table = $('<table/>').appendTo(maindiv);
 		var sdate = $('<td><a title="Click to change" href="#" id="sdate">'+key['sdate']+'</a></td>');
-		var datepicker = $('<input type="text" style="height: 0px; width:0px; border: 0px;" id="dtpicker2"/>');
+		var datepicker = $('<input type="text" style="height: 0; width:0; border: 0;" id="dtpicker2"/>');
 		datepicker.appendTo(sdate);
 
 		$('<tr/>').append($('<th>Rainfall</th>'))
@@ -407,7 +383,7 @@
 			row[1] = {
 					v:parseFloat(json.data[j].waterlevel / 100), 
 					f:(json.data[j].waterlevel / 100) + ' m'
-				}
+				};
 			
 			datatable.addRow(row);
 			
@@ -590,9 +566,7 @@
 		for (var i=0; i<o.length;i++) {
 			if (o[i][key] == val) {
 				ret = o[i];
-				if (greedy) {
-					continue;
-				} else {
+				if (!greedy) {
 					break;
 				}
 			}
