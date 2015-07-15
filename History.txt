@@ -1,0 +1,61 @@
+History
+
+
+--- ABOVE UPDATES ARE NOT YET UPLOADED TO PRODUCTION SERVER ---
+
+05/14/15
+Added. Migrated the updates of bantay Panahon from development server to production server(http://dost6.info.tm/bantaypanahon/) 
+Changed. Waterlevel chart's unit of measurement from 'cm'(centimeters) to 'm'(meters) 
+
+05/04/15
+Added. Exact last occurrence time of max temperature now included in ticker updates
+Changed. Map localization from en-us(English-United States) to ko(Korean)
+
+04/28/15
+Added. Max Temperature for the day for each station (last occurence).
+
+03/13/15
++Added. Waterlevel Map to view which stations has increased/decreased its waterlevel via corresponding markers on the map
+
+01/28/2014
++Added. Debug mode. To quickly change device status from ok to not ok via map. Accessible via a switch at the lower right of devices map. *nfps
+
+01/27/2015
++Added. Device Status Map
++Added. Automatically hides devices whos staus is not ok according to the administrators decisions
+
+--- ABOVE UPDATES ARE NOT YET UPLOADED TO PRODUCTION SERVER ---
+
+01/16/2015
++Added. Automatically refresh page every 10 minutes for index.php
+
+12/29/2014
+* Changed. Rainfall map panning now locked in Western Visayas region
+
+12/09/2014
+* Fixed. Waterlevel MOnitoring for previous day not return 24-hour reading
+
+12/08/2014
+* Fixed. Missing '6m' on y-axis label of water level charts
+* Fixed. Erroneous reading after 12midnight to 7:45 AM
+
+12/03/2014
++ Added Date Select in Waterlevel Monitoring
+
+12/02/2014
+* Fixed - Display issues on smaller screen resolutions e.g. 1024x768
+
+10/10/2014
+* Changed unit measurements of waterlevel readings from 'cm' to m'
++ Added 'nodata' image on waterlevel charts that doesn't have readings
+
+08/31/2014
+
+*Fixed – Incorrect Cumulative Icon shown for some values (e.g. 5, 25, and 50)
+* Changed – Header banner to be more modernized
++ Added – Additional information for cumulative rainfall legends
+
+
+NOTE:
+
+*NFPS - not for production server

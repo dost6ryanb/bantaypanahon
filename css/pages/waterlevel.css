@@ -1,0 +1,23 @@
+#container {
+/*	min-width:1212px;
+	max-width:1716px;*/
+}
+.chart {
+	width:400px;
+	height:300px;
+	margin:2px;
+	background-color:#d8d8d8;
+	display:inline-block;
+	float:left;
+}
+.provincelabel {
+	clear:both;
+	background: #2869E1;
+	padding: 10px;
+	color:white;
+}
+
+
+#datetimepicker_container h2{
+	display:inline-block;
+}

@@ -1,0 +1,106 @@
+#map-canvas { 
+	height: 520px;
+	width:70%;
+	float:left;
+	display: inline-block;
+}
+#rainfall-canvas { 
+	height: 520px;
+	width:30%;	
+	overflow: scroll;
+	font-size: 9px;
+	
+}
+
+#rainfall-canvas table {
+	box-sizing: border-box;
+	border-collapse:collapse;
+}
+
+#rainfall-canvas table th,
+#rainfall-canvas table td{
+	border-style:dotted;
+	border-spacing:0;
+	border-width:1px;
+}
+
+.legend {
+    margin: 4px;
+    white-space: nowrap;
+    clear: both;
+}
+
+.legend img {
+    width: 24px;
+}
+
+.legendtitle {
+    clear: both;
+    font-weight: bolder;
+    text-align: center;
+}
+#togglelegends {
+    margin: 10px;
+    clear: both;
+}
+#ticker1 {
+	display: none;
+	background-color: #181B61;
+	color:white;
+
+}
+.province_tr {
+	background-color: #ececec;
+}
+.selected_device_tr {
+	background-color: #00FFFF !important;
+	font-weight:bold;
+}
+
+.chartWithOverlay {
+   position: relative;
+   width:240px;
+   height: 200px;
+	margin:2px;
+	background-color:#d8d8d8;
+}
+
+.chart {
+	width:240px;
+   height:180px;
+   float:left;
+}
+
+.overlay {
+	color:white;
+       height: 6px;
+       z-index: 1;
+       left: 60px;
+       top: 60px;
+	   font-size:8pt;
+	   background:#2869E1;
+}
+
+.divrowwrapper {
+	/*float:left;*/
+	display: inline-block;
+}
+
+#charts_div_container {
+	overflow-x: scroll;
+		overflow-y: hidden;
+	white-space: nowrap;
+}
+
+#legends {
+	background: rgba(220, 220, 255, 0.5);
+    padding: 6px;
+}
+
+#legends #togglelegends {
+	background:#2869E1;
+	color:white;
+	border:0;
+	border-radius:5px;
+	float:left;
+}

@@ -1,0 +1,135 @@
+html { 
+	height: 100% 
+}
+body { 
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	font-family:verdana;
+}
+
+.col1 {
+	min-width: 958px;
+	overflow: scroll;
+}
+
+.centeralign {
+	text-align: center;
+}
+
+#drrmudost {
+	margin:70px 0 0 0px;
+	color: white;
+  text-shadow:
+   -1px -1px 0 #000,  
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+     1px 1px 0 #000;
+	 white-space:nowrap;
+}
+
+.latedata {
+	background:#F4ACF3;
+}
+
+.nodata {
+	background:#F100C6;
+}
+
+.dataok {
+	background:white;
+}
+
+.rainlighter {
+	background:#CBE4ED;
+}
+
+.rainlight {
+	background:#00ffff;
+}
+
+.rainmoderate {
+	background:#0000ff;
+	color:white;
+}
+
+.rainheavy {
+	background:#0000a0;
+	color:white;
+}
+
+.rainintense {
+	background:#ff8040;
+	color:white;
+}
+
+.raintorrential {
+	background:red;	
+}
+
+
+#banner {
+	display:block;
+    float: left;
+    height: 200px;
+}
+
+#menu ul{
+    z-index: 3;
+}
+#logo {
+    left:0;
+	margin:0;
+	padding:0;
+    position: absolute;
+    z-index: 2;
+
+}
+
+#logo_right {
+    margin:0;
+    padding:0;
+    right:0;
+    position: absolute;
+    z-index: 1;
+}
+
+
+
+#footerbanner {
+	padding: 30px 0 10px 0;
+	font-size:9pt;
+	color:black;
+    clear: both;
+}
+
+
+
+#contactus {
+     
+    
+}
+
+#contactus p {
+    margin: 0;
+    padding: 0;
+    line-height: 2px;
+}
+
+.contactname {
+    font-weight: bold;
+}
+
+.contact {
+    display: inline;
+    float: left;
+    width: 360px;
+    background: #0089E9;   
+    border-color: #57B8E8;
+    border-width: 1px;
+    border-style: solid;
+    font-size: 7pt; 
+}
+
+
+

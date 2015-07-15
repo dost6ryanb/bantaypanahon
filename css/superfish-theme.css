@@ -1,0 +1,126 @@
+/*** COLOR SKIN ***/
+
+/* main ul element */
+.sf-menu {
+    border-right: 1px solid FUCHSIA;
+    float:left;
+}
+
+/* general link styles*/
+.sf-menu a {
+    display: block;
+    padding:9px 13px;
+    text-decoration:none;
+    border-top: 1px solid;
+    border-left: 1px solid;
+    border-bottom: 1px solid;
+}
+
+/*** 1st Level ***/
+
+/* 1st level links, no hover, no visits */
+.sf-menu li a {
+    color: yellow;
+    background-color: green;
+    border-color: red;
+}
+/* 1st level links, while hovering over sub menu */
+.sf-menu li.sfHover a{
+    color: black;
+    background-color: silver;
+}
+
+/* 1st level links, hover */
+.sf-menu li a:hover {
+    color: white;
+    background-color: lime;
+}
+
+/* 1st level current page */
+.sf-menu .current_page_item a,
+.sf-menu .current_page_ancestor a,
+.sf-menu .current_page_parent a {
+    border-bottom-color: white;
+    background-color: TEAL;
+}
+
+/* 1st level down triangles with pure css*/
+.sf-menu li .sf-sub-indicator {
+    text-indent:-9999px;
+    line-height: 0;
+    border-color:YELLOW transparent transparent;
+    border-style:solid;
+    border-width:4px; /*controls size of triangle */
+    display:inline-block;
+    margin-left:5px;
+}
+
+/*** 2nd level ***/
+
+/* sub menu */
+.sf-menu ul {
+    border-right:1px solid;
+    border-bottom:1px solid;
+    border-color: yellow;
+}
+.sf-menu li:hover ul,
+.sf-menu li.sfHover ul {
+    top:32px; /* overriding essential styles- adjust if you have gaps between first level and drop-down sub menu*/
+}
+.sf-menu ul ul {
+    margin-top:0; /*unlikely to need adjusting */
+}
+
+/* 2nd level links, no hover */
+.sf-menu li li a, .sf-menu li.sfHover li a {
+    color: orange;
+    background-color: blue;
+    border-color: green;
+    border-bottom: 0;
+}
+
+/* 2nd level links, while hovering over sub menu */
+.sf-menu li li.sfHover a{
+    color: black;
+    background-color: silver;
+}
+
+/* 2nd level links, hover */
+.sf-menu li li a:hover, .sf-menu li.sfHover li a:hover {
+    color: white;
+    background-color: aqua;
+}
+
+/* 2nd level current page */
+.sf-menu li li.current_page_item a,
+.sf-menu li li.current_page_ancestor a,
+.sf-menu li li.current_page_parent a {
+    background-color: TEAL;
+}
+
+/* 2nd level side triangles with pure CSS */
+.sf-menu li li .sf-sub-indicator { /*right arrow*/
+    border-color: transparent transparent transparent WHITE;
+}
+
+/*** 3rd Level and beyond ***/
+
+/* 3rd level links, no hover */
+.sf-menu li li li a, .sf-menu li.sfHover li li a {
+    color: blue;
+    background-color: red;
+    border-color: blue;
+}
+
+/* 3rd level links, hover */
+.sf-menu li li li a:hover, .sf-menu li.sfHover li li a:hover {
+    color: white;
+    background-color: pink;
+}
+
+/* 2nd level current page */
+.sf-menu li li li.current_page_item a,
+.sf-menu li li li.current_page_ancestor a,
+.sf-menu li li li.current_page_parent a {
+    background-color: TEAL;
+}

@@ -1,0 +1,48 @@
+#map-canvas { 
+	height: 720px;
+	min-width: 1024px;
+	width:100%;
+	margin:0px;
+
+}
+
+
+
+.divrowwrapper {
+	/*float:left;*/
+	display: inline-block;
+}
+
+.legend {
+    margin: 4px;
+    white-space: nowrap;
+    clear: both;
+}
+
+.legend img {
+    width: 24px;
+}
+
+.legendtitle {
+    clear: both;
+    font-weight: bolder;
+    text-align: center;
+}
+
+#togglelegends {
+    margin: 10px;
+    clear: both;
+}
+
+#legends {
+	background: rgba(220, 220, 255, 0.5);
+    padding: 6px;
+}
+
+#legends #togglelegends {
+	background:#2869E1;
+	color:white;
+	border:0;
+	border-radius:5px;
+	float:left;
+}
