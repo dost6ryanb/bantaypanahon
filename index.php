@@ -15,16 +15,12 @@
 <link rel="stylesheet" type="text/css" href='css/style.css' />
 <link rel="stylesheet" type="text/css" href='css/screen.css' />
 <link rel="stylesheet" type="text/css" href='css/pages/index.css' />
-
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBIHIWYF28n_7UpQiud5ZNQP6C4G3LmTtU&sensor=false&language=ko"></script>
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 <script type="text/javascript">
-  setTimeout(function(){
-      window.location.reload(true);
-  },900000); // refresh 10 minutes
-</script>
-<script type="text/javascript">
-
+	setTimeout(function(){
+		window.location.reload(true);
+	},900000); // refresh 10 minutes
 	var key = {'sdate':'<?php echo $sdate;?>', 'numraindevices':0, 'loadedraindevices':0,
 			   'marker' : [
 			   		{'min':0.01, 'max':5, 'name':'lighter', 'src':'images/rain-lighter'},
@@ -261,7 +257,6 @@
 	        lat = lat.toFixed(6);
 	        var lng = pnt.lng();
 	        lng = lng.toFixed(6);
-	        //console.log("Latitude: " + lat + "  Longitude: " + lng);               
 	    });
 	}	
 
@@ -585,7 +580,7 @@
 			<li ><a href="#" class='currentPage'>Home</a></li>
 			<li><a href="rainfall.php">Rainfall Monitoring</a></li>
 			<li><a href="waterlevel.php">Waterlevel Monitoring</a></li>
-			<!-- ?<li><a href="devices.php">Devices Monitoring</a></li> -->
+			<li><a href="devices.php">Devices Monitoring</a></li>
 			<li><a href="waterlevel2.php">Waterlevel Map</a></li>
 		</ul>
 	</div>

@@ -1,18 +1,5 @@
-<?php	
-	include_once 'lib/devices.class.php';
-	date_default_timezone_set('Asia/Manila');
-
-	$now = date("H:i");
-	$hour = intval(substr($now, 0, 2));
-	$sdate;
-
-	if ($hour >= 0 && $hour < 8 ) {
-			$sdate = date("m/d/Y", strtotime("yesterday"));
-	} elseif ($hour >= 8 && $hour <= 23) {
-			$sdate = date("m/d/Y");
-	}
-
-?><!DOCTYPE html>
+<?php include_once 'lib/init.php'?>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
