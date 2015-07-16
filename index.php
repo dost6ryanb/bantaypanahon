@@ -140,14 +140,16 @@
 			updateRainfallTable(device_id, '[NO DATA]', '', '', 'nodata');
 		} else {
 			var device = search(rainfall_devices, 'dev_id', device_id);
-			var timeread = data.data[0].dateTimeRead.substring(10).substring(0, 6);
+			//var timeread = data.data[0].dateTimeRead.substring(10).substring(0, 6);
 			var devicedtr = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
 			var serverdtr = Date.parseExact(key['serverdate']+ ' '+ key['servertime']+':00', 'MM/dd/yyyy HH:mm:ss');
 
+			var hour12time = devicedtr.toString("h:mm tt");
+
 			if (key['sdate'] == key['serverdate'] && devicedtr.add({minutes:15}).compareTo(serverdtr) == -1) { //late
-				updateRainfallTable(device_id, timeread, data.data[0].rain_value, data.data[0].rain_cumulative, 'latedata');
+				updateRainfallTable(device_id, hour12time, data.data[0].rain_value, data.data[0].rain_cumulative, 'latedata');
 			} else {
-				updateRainfallTable(device_id, timeread, data.data[0].rain_value, data.data[0].rain_cumulative, 'dataok');
+				updateRainfallTable(device_id, hour12time, data.data[0].rain_value, data.data[0].rain_cumulative, 'dataok');
 			}
 			
 			var rc = parseFloat(data.data[0].rain_cumulative);
@@ -293,7 +295,7 @@
 		var prevProvince = '';
 		var maindiv = document.getElementById(div);
 		var table = $('<table/>').appendTo(maindiv);
-		var sdate = $('<td><a title="Click to change" href="#" id="sdate">' + key['sdate'] + '</a></td>');
+		var sdate = $('<td colspan="3"><a title="Click to change" href="#" id="sdate">' + key['sdate'] + '</a></td>');
 		var datepicker = $('<input type="text" style="height: 0; width:0; border: 0;" id="dtpicker2"/>');
 		datepicker.appendTo(sdate);
 
@@ -323,9 +325,9 @@
 		});
 
 
-		$('<tr><th>Server DateTime</th><td id="serverdtr"><table><tr><td>' + SERVER_DATE + '</td></tr> <tr><td>' + SERVER_TIME + '</tr></td></table></td><tr>').appendTo(table);
-		$('<tr><th>Total Devices</th><td id="numraindevices">' + rainfall_devices.length + '</td><tr>').appendTo(table);
-		$('<tr><th>Loaded</th><td id="loadedraindevices">0</td><tr>').appendTo(table);
+		$('<tr><th>Server DateTime</th><td id="serverdtr" colspan="3"><table><tr><td colspan="3">' + SERVER_DATE + '</td></tr> <tr><td colspan="3">' + SERVER_TIME + '</tr></td></table></td><tr>').appendTo(table);
+		$('<tr><th>Total Devices</th><td id="numraindevices" colspan="3">' + rainfall_devices.length + '</td><tr>').appendTo(table);
+		$('<tr><th>Loaded</th><td id="loadedraindevices" colspan="3">0</td><tr>').appendTo(table);
 		for (var i = 0; i < rainfall_devices.length; i++) {
 			var cur = rainfall_devices[i];
 
@@ -334,7 +336,7 @@
 				prevProvince = cur.province_name;
 				$('<tr/>').addClass('province_tr')
 					.append($('<th>' + prevProvince + '</th>'))
-					.append($('<th>Time (HH:MM)</th>'))
+					.append($('<th>Time</th>'))
 					.append($('<th>Rain Value (mm)</th>'))
 					.append($('<th>Cumulative (mm)</th>')).appendTo(table);
 			}
