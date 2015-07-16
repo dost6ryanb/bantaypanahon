@@ -30,8 +30,8 @@
 	var devices_map;
 	var devices_map_markers = [];
 	var lastValidCenter;
-	var allowEdit = false;
-
+	var ALLOWEDIT = false;
+	var TRYAUTH = '';
 	$.xhrPool = [];
 		$.xhrPool.abortAll = function() {
     		$(this).each(function(idx, jqXHR) {
@@ -192,19 +192,36 @@
 	function initControls2(container) {
 		controlscontainer = $(document.getElementById(container));
 		devices_map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(document.getElementById(container));
-		$('<button>&nbsp;Allow Editing&nbsp;</button>')
-			.on('click', function() {
-				var ans = confirm('Debug?');
+		var unlockediting = $('<button>Unlock Editing</button>');
 
-				if (ans == true) {
-					$(this).html('<p>&nbsp;Click marker to change status&nbsp;</p>')
-						.off('click');
-					allowEdit = true; 
-				} else {
-
+		unlockediting.on('click', function() {
+			if (!ALLOWEDIT) {
+				var ans = prompt('[TODO] Enter passphrase: (*hint: macbookair pass)');
+				if (ans != null) {
+					$.ajax({
+						url: DOCUMENT_ROOT + 'auth.php',
+						type: "POST",
+						data: {tryauth: ans
+						},
+						dataType: 'json',
+					}).done(function(data) {
+						if (data['success']) {
+							unlockediting.text('Lock Editing');
+							ALLOWEDIT = true;
+							TRYAUTH = ans;
+						} else {
+							alert('Sorry. Wrong passphrase.');
+						}
+					});
 				}
-			})
-			.appendTo(controlscontainer);
+
+			} else {
+				unlockediting.text('Unlock Editing');
+				ALLOWEDIT = false;
+				TRYAUTH = '';
+			}
+		})
+		.appendTo(controlscontainer);
 	}
 
 	function createMarker(device) {
@@ -259,7 +276,7 @@
 
 	function attachMarkerClickEvent(marker, dev_id, status_id) {
 		google.maps.event.addListener(marker, 'click', function() {
-			if (allowEdit == true) {
+			if (ALLOWEDIT == true) {
 			
 				var newstatus_id;
 				if (status_id == null || status_id == 0) {
@@ -272,7 +289,7 @@
 
 				postUpdateDeviceStatus(dev_id, newstatus_id);
 			} else {
-				console.log('action not allowed!');
+				console.log('Action not allowed!');
 			}
 		});
 	}
@@ -321,6 +338,7 @@
 			type: "POST",
 			data: {dev_id: dev_id,
 		  		status_id: status_id,
+				tryauth: TRYAUTH
 		  	},
 			dataType: 'json',
 			})
@@ -329,7 +347,6 @@
 	}
 
 	function onSuccessPostUpdate(data) {
-		console.log(data);
 		var device_id = data['dev_id'];
 		var status_id = data['status_id'];
 
@@ -354,7 +371,7 @@
 	}
 
 	function onFailPostUpdate(data) {
-		console.log('fail');
+		console.log('POST fail');
 	}
 
 	

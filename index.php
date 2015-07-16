@@ -349,7 +349,7 @@
 			}
 
 			$('<tr/>', {'data-dev_id': cur.dev_id})
-				.append($('<td>' + cur.municipality_name + ' - ' + cur.location_name + '</td>'))
+				.append($('<td nowrap="">' + cur.municipality_name + ' - ' + cur.location_name + '</td>'))
 				.append($('<td/>', {'data-col': 'dtr'}))
 				.append($('<td/>', {'data-col': 'rv'}))
 				.append($('<td/>', {'data-col': 'cr'})).appendTo(table);
