@@ -203,6 +203,11 @@
   			maxZoom:null,
   			center: DOST_CENTER,
   			disableDefaultUI: true,
+			zoomControl: true,
+			zoomControlOptions: {
+				style: google.maps.ZoomControlStyle.LARGE,
+				position: google.maps.ControlPosition.RIGHT_CENTER
+			},
   			draggableCursor:'crosshair'
 		};
 		
@@ -269,6 +274,7 @@
 		$('<button id="togglelegends">Hide Legend</button>')
 			.on('click', function() {
 				$('.legend').toggle();
+				$('.legendtitle').toggle();
                 if ($(this).text() == "Show Legend") {
                     $(this).text('Hide Legend');
                 } else {
@@ -512,17 +518,21 @@
 		var device_id = data.device[0].dev_id;
 		var div = 'line-chart-marker_'+ device_id;
 
-		if (data.count == -1 || // fmon.predict 404
-			data.count ==  0 || // sensor no reading according to fmon.predict
-			data.data.length == 0  || // predict reports that it has reading but actually doesnt have
-			data.data[0].waterlevel == null || data.data[0].waterlevel=='' // errouneous readings
-			) {
-			$(document.getElementById(div)).css({'background':'url(images/nodata.png)'});
-		} else {
-			drawChartWaterlevel(div, data);
-		}
+		var device = search(waterlevel_devices, 'dev_id', device_id);
 
-		
+		if (device['status_id'] != null && device['status_id'] != 0) {
+			$(document.getElementById(div)).css({'background':'url(images/disabled.png)'});
+		} else {
+			if (data.count == -1 || // fmon.predict 404
+				data.count ==  0 || // sensor no reading according to fmon.predict
+				data.data.length == 0  || // predict reports that it has reading but actually doesnt have
+				data.data[0].waterlevel == null || data.data[0].waterlevel=='' // errouneous readings
+			) {
+				$(document.getElementById(div)).css({'background':'url(images/nodata.png)'});
+			} else {
+				drawChartWaterlevel(div, data);
+			}
+		}
 	}
 
 	function updateTemperatureTicker(data) {
