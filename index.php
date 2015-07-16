@@ -137,12 +137,12 @@
 			data.data.length == 0  || // predict reports that it has reading but actually doesnt have
 			data.data[0].rain_cumulative == null || data.data[0].rain_cumulative=='' // errouneous readings
 			) {
-			updateRainfallTable(device_id, '--', '--', '--', 'nodata');
+			updateRainfallTable(device_id, '[NO DATA]', '', '', 'nodata');
 		} else {
 			var device = search(rainfall_devices, 'dev_id', device_id);
 			var timeread = data.data[0].dateTimeRead.substring(10).substring(0, 6);
 			var devicedtr = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-			var serverdtr = Date.parseExact(key['serverdate']+ ' '+key['servertime']+':00', 'MM/dd/yyyy HH:mm:ss');
+			var serverdtr = Date.parseExact(key['serverdate']+ ' '+ key['servertime']+':00', 'MM/dd/yyyy HH:mm:ss');
 
 			if (key['sdate'] == key['serverdate'] && devicedtr.add({minutes:15}).compareTo(serverdtr) == -1) { //late
 				updateRainfallTable(device_id, timeread, data.data[0].rain_value, data.data[0].rain_cumulative, 'latedata');
@@ -289,11 +289,11 @@
 	}
 
 	function initRainfallTable(div) {
-	
+
 		var prevProvince = '';
 		var maindiv = document.getElementById(div);
 		var table = $('<table/>').appendTo(maindiv);
-		var sdate = $('<td><a title="Click to change" href="#" id="sdate">'+key['sdate']+'</a></td>');
+		var sdate = $('<td><a title="Click to change" href="#" id="sdate">' + key['sdate'] + '</a></td>');
 		var datepicker = $('<input type="text" style="height: 0; width:0; border: 0;" id="dtpicker2"/>');
 		datepicker.appendTo(sdate);
 
@@ -302,51 +302,51 @@
 			.appendTo(table);
 
 		$('#dtpicker2').datepicker({
-			onSelect : function(data) {
-							sdate.find('a').text(data);
-							key['sdate'] = data;
-							key['numraindevices'] = 0;
-							key['loadedraindevices'] = 0;
-							$.xhrPool.abortAll();
-							clearMarkers();
-							clearRainfallTable();
-							clearAllTicker('ticker1list');
-							clearAllTicker('ticker2list');
-							initFetchData(true);
-						}/*,
-					altField: '#datepicker_start',
-					altFormat : 'mm/dd/yy',
-					dateFormat : 'yymmdd'*/
+			onSelect: function (data) {
+				sdate.find('a').text(data);
+				key['sdate'] = data;
+				key['numraindevices'] = 0;
+				key['loadedraindevices'] = 0;
+				$.xhrPool.abortAll();
+				clearMarkers();
+				clearRainfallTable();
+				clearAllTicker('ticker1list');
+				clearAllTicker('ticker2list');
+				initFetchData(true);
+			}/*,
+			 altField: '#datepicker_start',
+			 altFormat : 'mm/dd/yy',
+			 dateFormat : 'yymmdd'*/
 		});
-		$('#sdate').click(function(){
-	   		$('#dtpicker2').datepicker('show');
-    	});
-    	
+		$('#sdate').click(function () {
+			$('#dtpicker2').datepicker('show');
+		});
 
-		$('<tr><th>Server DateTime</th><td id="serverdtr">'+key['serverdate']+' '+ key['servertime']+'</td><tr>').appendTo(table);
-		$('<tr><th>Total Devices</th><td id="numraindevices">'+rainfall_devices.length+'</td><tr>').appendTo(table);
+
+		$('<tr><th>Server DateTime</th><td id="serverdtr"><table><tr><td>' + SERVER_DATE + '</td></tr> <tr><td>' + SERVER_TIME + '</tr></td></table></td><tr>').appendTo(table);
+		$('<tr><th>Total Devices</th><td id="numraindevices">' + rainfall_devices.length + '</td><tr>').appendTo(table);
 		$('<tr><th>Loaded</th><td id="loadedraindevices">0</td><tr>').appendTo(table);
-		for(var i=0;i<rainfall_devices.length;i++) {
+		for (var i = 0; i < rainfall_devices.length; i++) {
 			var cur = rainfall_devices[i];
 
-			
+
 			if (cur['province_name'] != prevProvince) {
 				prevProvince = cur.province_name;
 				$('<tr/>').addClass('province_tr')
-					.append($('<th>'+prevProvince+'</th>'))
+					.append($('<th>' + prevProvince + '</th>'))
 					.append($('<th>Time (HH:MM)</th>'))
 					.append($('<th>Rain Value (mm)</th>'))
 					.append($('<th>Cumulative (mm)</th>')).appendTo(table);
 			}
 
-			$('<tr/>', {'data-dev_id':cur.dev_id})
-				.append($('<td>'+cur.municipality_name+ ' - ' + cur.location_name+'</td>'))
-				.append($('<td/>', {'data-col':'dtr'}))
-				.append($('<td/>', {'data-col':'rv'}))
-				.append($('<td/>', {'data-col':'cr'})).appendTo(table);
+			$('<tr/>', {'data-dev_id': cur.dev_id})
+				.append($('<td>' + cur.municipality_name + ' - ' + cur.location_name + '</td>'))
+				.append($('<td/>', {'data-col': 'dtr'}))
+				.append($('<td/>', {'data-col': 'rv'}))
+				.append($('<td/>', {'data-col': 'cr'})).appendTo(table);
 
 			if (cur['status_id'] != null && cur['status_id'] != 0) {
-				updateRainfallTable(cur['dev_id'], '-', '-', '-', 'nodata');
+				updateRainfallTable(cur['dev_id'], '[DISABLED]', '', '', 'disabled');
 			}
 
 		}
