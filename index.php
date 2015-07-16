@@ -76,8 +76,10 @@
 		setTimeout(function() {
 			for(var i=0;i<rainfall_devices.length;i++) {
 				var cur = rainfall_devices[i]; 
-				if (cur['status_id'] == null || cur['status_id'] == 0) {
+				if (cur['status_id'] == null || cur['status_id'] == '0') {
 					postGetData(cur.dev_id, key['sdate'], key['sdate'], 1, onRainfallDataResponseSuccess);
+				} else {
+					console.log("skipping dev_id: " + cur['dev_id']);
 				}
 			}
 
@@ -100,7 +102,7 @@
 		setTimeout(function() {
 			for(var i=0;i<temperature_devices.length;i++) {
 				var cur = temperature_devices[i]; 
-				if (cur['status_id'] == null || cur['status_id'] == 0) {
+				if (cur['status_id'] == null || cur['status_id'] == '0') {
 					postGetData(cur.dev_id, key['sdate'], key['sdate'], 96, onTemperatureDataResponseSuccess);
 				}
 			}

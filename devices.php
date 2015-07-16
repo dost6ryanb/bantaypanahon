@@ -5,13 +5,7 @@
 <meta charset="utf-8">
 <title>DOST VI DRRMU - Devices</title>
 <script type="text/javascript" src='js/jquery-1.11.1.min.js'></script>
-<script type="text/javascript" src='js/jquery-ui.min.js'></script>
-<script type="text/javascript" src='js/date-en-US.js'></script>
 <script type="text/javascript" src='js/jquery.scrollTo.min.js'></script>
-<script type="text/javascript" src='js/jquery.easy-ticker.min.js'></script>
-<link rel="stylesheet" href='css/jquery-ui.min.css'>
-<link rel="stylesheet" href='css/jquery-ui.theme.min.css'>
-<link rel="stylesheet" href='css/jquery-ui.structure.min.css'>
 <link rel="stylesheet" type="text/css" href='css/style.css' />
 <link rel="stylesheet" type="text/css" href='css/screen.css' />
 <link rel="stylesheet" type="text/css" href='css/pages/devices.css' />
@@ -19,16 +13,8 @@
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBIHIWYF28n_7UpQiud5ZNQP6C4G3LmTtU&sensor=false"></script>
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 <script type="text/javascript">
-  setTimeout(function(){
-      window.location.href = window.location.href; 
-  },900000); // refresh 10 minutes
-</script>
-<script type="text/javascript">
 
-	var key = {'serveraddr':'http://<?php echo $_SERVER['HTTP_HOST'].':'.$_SERVER['SERVER_PORT'];?>',
-				'serverdate':'<?php echo date("m/d/Y");?>', 'servertime':'<?php echo date("H:i");?>',
-			   'sdate':'<?php echo $sdate;?>', 'numdevices':0, 'loadeddevices':0, 
-			   'marker' : [
+	var key = {'marker' : [
 			   		{'name':'Rain1', 'src':'images/rain1'},
 			   		{'name':'Rain2', 'src':'images/rain2'}, 
 			   		{'name':'Waterlevel' , 'src':'images/waterlevel'}, 
@@ -86,6 +72,11 @@
   			maxZoom:null,
   			center: DOST_CENTER,
   			disableDefaultUI: true,
+			zoomControl: true,
+			zoomControlOptions: {
+				style: google.maps.ZoomControlStyle.LARGE,
+				position: google.maps.ControlPosition.RIGHT_CENTER
+			},
   			//draggableCursor:'crosshair'
 		}
 		
@@ -201,7 +192,7 @@
 	function initControls2(container) {
 		controlscontainer = $(document.getElementById(container));
 		devices_map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(document.getElementById(container));
-		$('<p>&nbsp;Allow Editing&nbsp;</p>')
+		$('<button>&nbsp;Allow Editing&nbsp;</button>')
 			.on('click', function() {
 				var ans = confirm('Debug?');
 
@@ -326,7 +317,7 @@
 
 	function postUpdateDeviceStatus(dev_id, status_id) {
 		$.ajax({
-			url: key['serveraddr'] + '/bantaypanahon/update.php',
+			url: DOCUMENT_ROOT + 'update.php',
 			type: "POST",
 			data: {dev_id: dev_id,
 		  		status_id: status_id,
