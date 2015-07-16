@@ -87,14 +87,13 @@
 
 			for(var i=0;i<waterlevel_devices.length;i++) {
 				var cur = waterlevel_devices[i];
-				if (cur['status_id'] != null || cur['status_id'] != 0) {
+				if (cur['status_id'] == null || cur['status_id'] == '0') {
 					if(typeof history === 'undefined') {
 						postGetData(cur.dev_id, key['sdate'], "", "", onWaterlevelDataResponseSuccess);
 					} else {
 						postGetData(cur.dev_id, key['sdate'], key['sdate'], "", onWaterlevelDataResponseSuccess);
 					}	
 				}
-				
 			}
 		}, 200);
 
@@ -365,11 +364,16 @@
 		var charts_container = document.getElementById(chartdiv);	
 		var chart_wrapper = $('<div/>').attr({'class':'innerWrap'}).appendTo(charts_container);
 		for(var i=0;i<waterlevel_devices.length;i++) {
-			var cur = waterlevel_devices[i];
-			$('<div/>').attr({'id':'chart_div_'+cur['dev_id'], 'class':'chartWithOverlay list divrowwrapper'})
-				.append($('<p/>').addClass('overlay').text(cur['municipality_name'] + ' - '+ cur['location_name']))
-				.append($('<div/>', {'id':"line-chart-marker_"+cur['dev_id']}).addClass('chart'))
+			var device = waterlevel_devices[i];
+			$('<div/>').attr({'id':'chart_div_'+device['dev_id'], 'class':'chartWithOverlay list divrowwrapper'})
+				.append($('<p/>').addClass('overlay').text(device['municipality_name'] + ' - '+ device['location_name']))
+				.append($('<div/>', {'id':"line-chart-marker_"+device['dev_id']}).addClass('chart'))
 				.appendTo(chart_wrapper);
+
+			var div = 'line-chart-marker_'+ device['dev_id'];
+			if (device['status_id'] != null && device['status_id'] != 0) {
+				$(document.getElementById(div)).css({'background':'url(images/disabled.png)'});
+			}
 		}	
 	}
 
@@ -517,22 +521,16 @@
 	function updateWaterlevelChart(data) {
 		var device_id = data.device[0].dev_id;
 		var div = 'line-chart-marker_'+ device_id;
-
-		var device = search(waterlevel_devices, 'dev_id', device_id);
-
-		if (device['status_id'] != null && device['status_id'] != 0) {
-			$(document.getElementById(div)).css({'background':'url(images/disabled.png)'});
+		if (data.count == -1 || // fmon.predict 404
+			data.count == 0 || // sensor no reading according to fmon.predict
+			data.data.length == 0 || // predict reports that it has reading but actually doesnt have
+			data.data[0].waterlevel == null || data.data[0].waterlevel == '' // errouneous readings
+		) {
+			$(document.getElementById(div)).css({'background': 'url(images/nodata.png)'});
 		} else {
-			if (data.count == -1 || // fmon.predict 404
-				data.count ==  0 || // sensor no reading according to fmon.predict
-				data.data.length == 0  || // predict reports that it has reading but actually doesnt have
-				data.data[0].waterlevel == null || data.data[0].waterlevel=='' // errouneous readings
-			) {
-				$(document.getElementById(div)).css({'background':'url(images/nodata.png)'});
-			} else {
-				drawChartWaterlevel(div, data);
-			}
+			drawChartWaterlevel(div, data);
 		}
+
 	}
 
 	function updateTemperatureTicker(data) {
