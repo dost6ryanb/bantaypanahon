@@ -1,18 +1,5 @@
-<?php	
-	include_once 'lib/devices.class.php';
-	date_default_timezone_set('Asia/Manila');
-
-	$now = date("H:i");
-	$hour = intval(substr($now, 0, 2));
-	$sdate;
-
-	if ($hour >= 0 && $hour < 8 ) {
-			$sdate = date("m/d/Y", strtotime("yesterday"));
-	} elseif ($hour >= 8 && $hour <= 23) {
-			$sdate = date("m/d/Y");
-	}
-
-?><html>
+<?php include_once 'lib/init.php'?>
+<html>
 <head>
 	<title>DOST VI - DRRMU - Waterlevel Monitoring</title>
 	<script type="text/javascript" src='js/jquery-1.11.1.min.js'></script>
@@ -27,14 +14,13 @@
 	<link rel="stylesheet" type="text/css" href='css/superfish.css' />
 	<link rel="stylesheet" type="text/css" href='css/pages/waterlevel.css' />
 	<script type="text/javascript">
-		var key = {'serveraddr':'http://<?php echo $_SERVER['HTTP_HOST'].':'.$_SERVER['SERVER_PORT'];?>',
-				'serverdate':'<?php echo date("m/d/Y");?>', 'sdate':'<?php echo $sdate;?>','servertime':'<?php echo date("H:i");?>'}
+		var key = {'sdate':'<?php echo $sdate;?>'};
 		google.load("visualization", "1", {packages:["corechart"]});
 	    google.load('visualization', '1', {packages:['table']});
 	  
 	  	google.setOnLoadCallback(function() {
 		 	$( document ).ready(function() {
-		 		key['sdate'] = Date.today().toString('MM/dd/yyyy');
+		 		//key['sdate'] = Date.today().toString('MM/dd/yyyy');
 	  	 		initializeChartDivs('charts_div_container');
 	  	 		initializeDateTimePicker('datetimepicker_container');
 	  	 		initFetchData();
@@ -63,9 +49,9 @@
 
 	  	function initializeDateTimePicker(div) {
 	  		var container = $(document.getElementById(div));	
-	  		$('<h2>Waterlevel Reading for  </h2>').appendTo(container);
-	  		var datepicker = $('<input type="text" style="height: 0px; width:0px; border: 0px;" id="dtpicker"/>');
-			var sdate = $('<a title="Click to change" href="#" id="sdate">'+key['sdate']+'</a>');
+	  		$('<h2>Waterlevel Reading for &nbsp;</h2>').appendTo(container);
+	  		var datepicker = $('<input type="text" style="height: 0px; width:0px; border: 0px;z-index: 10000; position: relative" id="dtpicker"/>');
+			var sdate = $('<a title="Click to change" href="#" id="sdate">'+SERVER_DATE+'</a>');
 			datepicker.appendTo(container);
 			sdate.appendTo(container);
 			
@@ -89,7 +75,7 @@
 	  	}
 
 		function initializeChartDivs(div) {
-			var charts_container = $(document.getElementById(div));	
+			var charts_container = $(document.getElementById(div));
 			charts_container.empty();
 			//charts_container.append($('<h4>Latest Waterlevel Reading @ ' + key['serverdate']+' '+ key['servertime'] +'</h4>'));
 			
@@ -99,11 +85,13 @@
 			for(var i=0;i<waterlevel_devices.length;i++) {
 				var cur = waterlevel_devices[i];
 				if (cur['province_name'] != prevProvince) {
-					prevProvince = cur.province_name;
+					prevProvince = cur['province_name'];
 					$('<br/><h3 class="provincelabel">'+prevProvince+'</h3>').appendTo(charts_container);
 				}
-				$('<div/>').attr({'id':'chart_div_'+waterlevel_devices[i].dev_id, 'class':'chart'}).text(waterlevel_devices.location_name).appendTo(charts_container);
-				//postGetData(waterlevel_devices[i].dev_id, '', '');
+				var chart = $('<div/>').attr({'id':'chart_div_'+waterlevel_devices[i].dev_id, 'class':'chart'}).text(waterlevel_devices.location_name).appendTo(charts_container);
+				if (cur['status_id'] != null && cur['status_id'] != 0) {
+					chart.css({'background':'url(images/disabled.png)', 'background-size':'100%', 'background-repeat':'no-repeat'});
+				}
 			}
 
 		}
@@ -113,11 +101,16 @@
 
 			for(var i=0;i<waterlevel_devices.length;i++) {
 				var cur = waterlevel_devices[i];
-				if(typeof history === 'undefined') {
-					postGetData(cur.dev_id, key['sdate'], "", "", onWaterlevelDataResponseSuccess);
+				if (cur['status_id'] != null && cur['status_id'] != 0) {
+					console.log('skipping ' + cur['dev_id']);
 				} else {
-					postGetData(cur.dev_id, key['sdate'], key['sdate'], "144", onWaterlevelDataResponseSuccess);
+					if(typeof history === 'undefined') {
+						postGetData(cur['dev_id'], key['sdate'], "", "", onWaterlevelDataResponseSuccess);
+					} else {
+						postGetData(cur['dev_id'], key['sdate'], key['sdate'], "144", onWaterlevelDataResponseSuccess);
+					}
 				}
+
 				
 			}
 		}, 200);
@@ -127,7 +120,7 @@
 
 		function postGetData(dev_id, sdate, edate, limit, successcallback) {
 			$.ajax({
-					url: key['serveraddr'] + '/bantaypanahon/data.php',
+					url: DOCUMENT_ROOT + 'data.php',
 					type: "POST",
 					data: {start: 0,
 			  		 limit: limit,
@@ -146,12 +139,15 @@
 			var device_id = data.device[0].dev_id;
 			var div = 'chart_div_'+ device_id;
 
-			if (data.count == -1 || // fmon.predict 404
-				data.count ==  0 || // sensor no reading according to fmon.predict
+			if (data.count == -1) {  // fmon.predict 404
+
+
+			} else if (data.count ==  0 || // sensor no reading according to fmon.predict
 				data.data.length == 0  || // predict reports that it has reading but actually doesnt have
 				data.data[0].waterlevel == null || data.data[0].waterlevel=='' // errouneous readings
 				) {
-				$(document.getElementById(div)).hide();
+				//$(document.getElementById(div)).hide();
+				$(document.getElementById(div)).css({'background':'url(images/nodata.png)', 'background-size':'100%', 'background-repeat':'no-repeat'});
 			} else {
 				drawChartWaterlevel(div, data);
 			}
@@ -236,7 +232,8 @@
                 <li ><a href="index.php">Home</a></li>
                 <li><a href="rainfall.php">Rainfall Monitoring</a></li>
                 <li><a href="#" class='currentPage'>Waterlevel Monitoring</a></li>
-                <li><a href="waterlevel2.php">Waterlevel Map</a></li>
+				<li><a href="waterlevel2.php">Waterlevel Map</a></li>
+				<li><a href="devices.php">Devices Monitoring</a></li>
             </ul>
 		</div>
 	    </div>

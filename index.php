@@ -131,7 +131,7 @@
 		var device_id = data.device[0].dev_id;
 
 		$('#loadedraindevices').text(++key['loadedraindevices']);
-
+			onRainfallDataResponseFail(device_id);
 		if (data.count == -1) {// cannot reach predict
 			//TODO either add retry or initiate retry;
 		} else if (data.count ==  0 ||// sensor no reading according to fmon.predict
@@ -177,7 +177,7 @@
 	}
 
 	function onRainfallDataResponseFail(dev_id) {
-		var retryhtml = '<a href=javascript:retryFetchRain('+dev_id+')>retry</a>';
+		var retryhtml = '<a href=javascript:retryFetchRain('+dev_id+')>Retry</a>';
 		updateRainfallTable(dev_id, retryhtml, null, null);
 	}
 
@@ -592,8 +592,8 @@
 			<li ><a href="#" class='currentPage'>Home</a></li>
 			<li><a href="rainfall.php">Rainfall Monitoring</a></li>
 			<li><a href="waterlevel.php">Waterlevel Monitoring</a></li>
-			<li><a href="devices.php">Devices Monitoring</a></li>
 			<li><a href="waterlevel2.php">Waterlevel Map</a></li>
+			<li><a href="devices.php">Devices Monitoring</a></li>
 		</ul>
 	</div>
 	</div>
