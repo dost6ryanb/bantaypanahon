@@ -1,4 +1,5 @@
-<?php	include_once 'lib/devices.class.php';date_default_timezone_set('Asia/Manila');?><html>
+<?php include_once 'lib/init.php'?>
+<html>
 <head>
 	<title>DOST VI - DRRMU - Rainfall Monitoring</title>
 	<script type="text/javascript" src='js/jquery-1.11.1.min.js'></script>
@@ -13,8 +14,7 @@
 	<link rel="stylesheet" type="text/css" href='css/pages/rainfall.css' />
 </head>
 <script type="text/javascript">
-	var key = {'serveraddr':'http://<?php echo $_SERVER['HTTP_HOST'].':'.$_SERVER['SERVER_PORT'];?>',
-				'serverdate':'<?php echo date("m/d/Y");?>', 'servertime':'<?php echo date("H:i");?>',
+	var key = {'serverdate':'<?php echo $sdate;?>', 'servertime':'<?php echo date("H:i");?>',
 				'provinces' : ['Aklan', 'Antique', 'Capiz', 'Guimaras', 'Iloilo', 'Negros Occidental'],
 				'durations' : [{'label': '1 hr', 'minutes':'60'},
 								{'label': '2 hr', 'minutes':'120'},
@@ -37,7 +37,6 @@
 	var xtblcounter = 0;
 	$(document).ready(function() {
 		$("button").button();
-
 
 		initProvincesSelect('provinces');
 		initDurationSelect('durations');
@@ -73,8 +72,7 @@
 
 	function initRainfalltable(div, province, duration) {
 		var div = $(document.getElementById(div));
-		
-		
+
 		var table = $('<table/>', {'class':'xtbl', 'id':'xtbl_'+ ++xtblcounter, 'data-duration':duration}).prependTo(div);
 		//$('<tr><th>Server DateTime</th><td id="serverdtr">'+key['serverdate']+' '+ key['servertime']+'</td><tr>').appendTo(table);
 		$('<tr/>').append($('<th colspan="2">Cumulative Rainfall Reading of '+ province +' for the last '+ parseInt(duration/60) +' hour/s.</th><'))
@@ -87,21 +85,24 @@
 							      },
 							      text: true})
 					)).appendTo(table);
+
 		$('<tr class="ui-widget-header"><th>Municipality</th><th>Location</th><th>Cumulative (mm)</th><tr>').appendTo(table);
+
 		for(var i=0;i<rainfall_devices.length;i++) {
-			if (rainfall_devices[i].province_name == province) {
-				$('<tr/>', {'data-dev_id':rainfall_devices[i].dev_id})
-				.append($('<td>'+rainfall_devices[i].municipality_name+'</td>'))
-				.append($('<td>'+rainfall_devices[i].location_name+'</td>'))
+			var cur = rainfall_devices[i];
+			if (cur['province_name'] == province) {
+				$('<tr/>', {'data-dev_id':cur['dev_id']})
+				.append($('<td>'+cur['municipality_name']+'</td>'))
+				.append($('<td>'+cur['location_name']+'</td>'))
 				.append($('<td/>', {'data-col':'cr'})).appendTo(table);
-				postGetData('xtbl_'+xtblcounter, rainfall_devices[i].dev_id, "", "", duration);
+				postGetData('xtbl_'+xtblcounter, cur['dev_id'], "", "", duration);
 			}
 		}
 	}
 
 	function postGetData( xtbl, dev_id, sdate, limit, duration) {
 		$.ajax({
-				url: key['serveraddr'] + '/bantaypanahon/data.php',
+				url: DOCUMENT_ROOT + 'data.php',
 				type: "POST",
 				data: {start: 0,
 		  		 limit: limit,
@@ -113,35 +114,34 @@
 			tryCount: 0,
 			retry:20})
 		.done(function(d){onRainfallDataResponseSuccess(d, xtbl, duration);})
-		.fail(function(f, n){onRainfallDataResponseFail(xtbl, dev_id);});
+		.fail(function(f, n){onRainfallDataResponseFail(xtbl, dev_id, duration);});
 	}
 
 	function onRainfallDataResponseSuccess(data, xtbl, duration) {
 		var device_id = data.device[0].dev_id;
-		
 
 		$('#loadedraindevices').text(++key['loadedraindevices']);
 
 		if (data.count == -1) {// cannot reach predict
-			//TODO either add retry or initiate retry;
+			onRainfallDataResponseFail(xtbl, device_id, duration);
 		} else if (data.count ==  0 ||// sensor no reading according to fmon.predict
 			data.data.length == 0  || // predict reports that it has reading but actually doesnt have
 			data.data[0].rain_cumulative == null || data.data[0].rain_cumulative=='' // errouneous readings
 			) {
-			updateRainfallTable(xtbl, device_id, '--', 'nodata') ;
+			updateRainfallTable(xtbl, device_id, '[NO DATA]', 'nodata') ;
 		} else {			
 			var rain_cumulative = solveforcumulative(data, duration)
 			updateRainfallTable(xtbl, device_id, rain_cumulative) ;
 		}
 	}
 
-	function onRainfallDataResponseFail(xtbl, dev_id) {
-		var retryhtml = "<a href=javascript:retryFetchRain('"+xtbl+"',"+dev_id+')>retry</a>';
+	function onRainfallDataResponseFail(xtbl, dev_id, duration) {
+		var retryhtml = "<a href=javascript:retryFetchRain('"+xtbl+"'," + dev_id + "," + duration + ")>Retry</a>";
 		updateRainfallTable(xtbl, dev_id, retryhtml, null, null);
 	}
     
-    function retryFetchRain(xtbl, dev_id) {
-		postGetData(xtbl, dev_id, key['sdate'], 1, onRainfallDataResponseSuccess);
+    function retryFetchRain(xtbl, dev_id, duration) {
+		postGetData(xtbl, dev_id, "", "", duration );
 		updateRainfallTable(xtbl, dev_id, '', '', '');
 	}
 
