@@ -95,7 +95,11 @@
 				.append($('<td>'+cur['municipality_name']+'</td>'))
 				.append($('<td>'+cur['location_name']+'</td>'))
 				.append($('<td/>', {'data-col':'cr'})).appendTo(table);
-				postGetData('xtbl_'+xtblcounter, cur['dev_id'], "", "", duration);
+				if (cur['status_id'] == null || cur['status_id'] == '0') {
+					postGetData('xtbl_'+xtblcounter, cur['dev_id'], "", "", duration);
+				} else {
+					updateRainfallTable('xtbl_'+xtblcounter, cur['dev_id'], "[DISABLED]", 'disabled') ;
+				}
 			}
 		}
 	}
