@@ -1,6 +1,9 @@
 <?php
 $dev_id = $_POST['dev_id'];
 $status_id = $_POST['status_id'];
+$tryauth = $_POST['tryauth'];
+
+if (empty($tryauth) || $tryauth <> "orddrrmu6") return;
 
 if (empty($dev_id) || (empty($status_id) && $status_id <> 0)) return;
 

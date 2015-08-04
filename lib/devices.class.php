@@ -7,7 +7,7 @@ class Devices {
 	public static function getAllDevices() {
 		//$strDatabaseFile = str_replace("\\", "/", $_ENV["S2G_DB_PATH"]);
 
-		$connection = new PDO("sqlite:sqlite.db");
+		$connection = new PDO("sqlite:database/sqlite.db");
 
 		$query = 'select devices.dev_id, provinces.name as province_name, districts.name as district_name, municipalities.name as municipality_name, locations.name as location_name, types.name as type_name, projects.name as project_name, devices.posx, devices.posy, devices.status_id '.
 				 'from devices '.
@@ -26,7 +26,7 @@ class Devices {
 
 	public static function GetAllDevicesWithParameter($param) {
 
-		$connection = new PDO("sqlite:sqlite.db");
+		$connection = new PDO("sqlite:database/sqlite.db");
 
 		$types = '';
 		switch ($param) {
@@ -60,7 +60,7 @@ class Devices {
 	}
 
 	public static function updateStatusId($dev_id, $status_id) {
-		$connection = new PDO("sqlite:sqlite.db");
+		$connection = new PDO("sqlite:database/sqlite.db");
 
 		$query = 'update devices '
 				 .'set status_id='.$status_id

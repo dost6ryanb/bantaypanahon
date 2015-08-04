@@ -76,8 +76,10 @@
 		setTimeout(function() {
 			for(var i=0;i<rainfall_devices.length;i++) {
 				var cur = rainfall_devices[i]; 
-				if (cur['status_id'] == null || cur['status_id'] == 0) {
+				if (cur['status_id'] == null || cur['status_id'] == '0') {
 					postGetData(cur.dev_id, key['sdate'], key['sdate'], 1, onRainfallDataResponseSuccess);
+				} else {
+					console.log("skipping dev_id: " + cur['dev_id']);
 				}
 			}
 
@@ -87,21 +89,20 @@
 
 			for(var i=0;i<waterlevel_devices.length;i++) {
 				var cur = waterlevel_devices[i];
-				if (cur['status_id'] != null || cur['status_id'] != 0) {
+				if (cur['status_id'] == null || cur['status_id'] == '0') {
 					if(typeof history === 'undefined') {
 						postGetData(cur.dev_id, key['sdate'], "", "", onWaterlevelDataResponseSuccess);
 					} else {
 						postGetData(cur.dev_id, key['sdate'], key['sdate'], "", onWaterlevelDataResponseSuccess);
 					}	
 				}
-				
 			}
 		}, 200);
 
 		setTimeout(function() {
 			for(var i=0;i<temperature_devices.length;i++) {
 				var cur = temperature_devices[i]; 
-				if (cur['status_id'] == null || cur['status_id'] == 0) {
+				if (cur['status_id'] == null || cur['status_id'] == '0') {
 					postGetData(cur.dev_id, key['sdate'], key['sdate'], 96, onTemperatureDataResponseSuccess);
 				}
 			}
@@ -137,17 +138,19 @@
 			data.data.length == 0  || // predict reports that it has reading but actually doesnt have
 			data.data[0].rain_cumulative == null || data.data[0].rain_cumulative=='' // errouneous readings
 			) {
-			updateRainfallTable(device_id, '--', '--', '--', 'nodata');
+			updateRainfallTable(device_id, '[NO DATA]', '', '', 'nodata');
 		} else {
 			var device = search(rainfall_devices, 'dev_id', device_id);
-			var timeread = data.data[0].dateTimeRead.substring(10).substring(0, 6);
+			//var timeread = data.data[0].dateTimeRead.substring(10).substring(0, 6);
 			var devicedtr = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-			var serverdtr = Date.parseExact(key['serverdate']+ ' '+key['servertime']+':00', 'MM/dd/yyyy HH:mm:ss');
+			var serverdtr = Date.parseExact(key['serverdate']+ ' '+ key['servertime']+':00', 'MM/dd/yyyy HH:mm:ss');
+
+			var hour12time = devicedtr.toString("h:mm tt");
 
 			if (key['sdate'] == key['serverdate'] && devicedtr.add({minutes:15}).compareTo(serverdtr) == -1) { //late
-				updateRainfallTable(device_id, timeread, data.data[0].rain_value, data.data[0].rain_cumulative, 'latedata');
+				updateRainfallTable(device_id, hour12time, data.data[0].rain_value, data.data[0].rain_cumulative, 'latedata');
 			} else {
-				updateRainfallTable(device_id, timeread, data.data[0].rain_value, data.data[0].rain_cumulative, 'dataok');
+				updateRainfallTable(device_id, hour12time, data.data[0].rain_value, data.data[0].rain_cumulative, 'dataok');
 			}
 			
 			var rc = parseFloat(data.data[0].rain_cumulative);
@@ -201,6 +204,11 @@
   			maxZoom:null,
   			center: DOST_CENTER,
   			disableDefaultUI: true,
+			zoomControl: true,
+			zoomControlOptions: {
+				style: google.maps.ZoomControlStyle.LARGE,
+				position: google.maps.ControlPosition.RIGHT_CENTER
+			},
   			draggableCursor:'crosshair'
 		};
 		
@@ -267,6 +275,7 @@
 		$('<button id="togglelegends">Hide Legend</button>')
 			.on('click', function() {
 				$('.legend').toggle();
+				$('.legendtitle').toggle();
                 if ($(this).text() == "Show Legend") {
                     $(this).text('Hide Legend');
                 } else {
@@ -289,11 +298,11 @@
 	}
 
 	function initRainfallTable(div) {
-	
+
 		var prevProvince = '';
 		var maindiv = document.getElementById(div);
 		var table = $('<table/>').appendTo(maindiv);
-		var sdate = $('<td><a title="Click to change" href="#" id="sdate">'+key['sdate']+'</a></td>');
+		var sdate = $('<td colspan="3"><a title="Click to change" href="#" id="sdate">' + key['sdate'] + '</a></td>');
 		var datepicker = $('<input type="text" style="height: 0; width:0; border: 0;" id="dtpicker2"/>');
 		datepicker.appendTo(sdate);
 
@@ -302,51 +311,51 @@
 			.appendTo(table);
 
 		$('#dtpicker2').datepicker({
-			onSelect : function(data) {
-							sdate.find('a').text(data);
-							key['sdate'] = data;
-							key['numraindevices'] = 0;
-							key['loadedraindevices'] = 0;
-							$.xhrPool.abortAll();
-							clearMarkers();
-							clearRainfallTable();
-							clearAllTicker('ticker1list');
-							clearAllTicker('ticker2list');
-							initFetchData(true);
-						}/*,
-					altField: '#datepicker_start',
-					altFormat : 'mm/dd/yy',
-					dateFormat : 'yymmdd'*/
+			onSelect: function (data) {
+				sdate.find('a').text(data);
+				key['sdate'] = data;
+				key['numraindevices'] = 0;
+				key['loadedraindevices'] = 0;
+				$.xhrPool.abortAll();
+				clearMarkers();
+				clearRainfallTable();
+				clearAllTicker('ticker1list');
+				clearAllTicker('ticker2list');
+				initFetchData(true);
+			}/*,
+			 altField: '#datepicker_start',
+			 altFormat : 'mm/dd/yy',
+			 dateFormat : 'yymmdd'*/
 		});
-		$('#sdate').click(function(){
-	   		$('#dtpicker2').datepicker('show');
-    	});
-    	
+		$('#sdate').click(function () {
+			$('#dtpicker2').datepicker('show');
+		});
 
-		$('<tr><th>Server DateTime</th><td id="serverdtr">'+key['serverdate']+' '+ key['servertime']+'</td><tr>').appendTo(table);
-		$('<tr><th>Total Devices</th><td id="numraindevices">'+rainfall_devices.length+'</td><tr>').appendTo(table);
-		$('<tr><th>Loaded</th><td id="loadedraindevices">0</td><tr>').appendTo(table);
-		for(var i=0;i<rainfall_devices.length;i++) {
+
+		$('<tr><th>Server DateTime</th><td id="serverdtr" colspan="3"><table><tr><td colspan="3">' + SERVER_DATE + '</td></tr> <tr><td colspan="3">' + SERVER_TIME + '</tr></td></table></td><tr>').appendTo(table);
+		$('<tr><th>Total Devices</th><td id="numraindevices" colspan="3">' + rainfall_devices.length + '</td><tr>').appendTo(table);
+		$('<tr><th>Loaded</th><td id="loadedraindevices" colspan="3">0</td><tr>').appendTo(table);
+		for (var i = 0; i < rainfall_devices.length; i++) {
 			var cur = rainfall_devices[i];
 
-			
+
 			if (cur['province_name'] != prevProvince) {
 				prevProvince = cur.province_name;
 				$('<tr/>').addClass('province_tr')
-					.append($('<th>'+prevProvince+'</th>'))
-					.append($('<th>Time (HH:MM)</th>'))
+					.append($('<th>' + prevProvince + '</th>'))
+					.append($('<th>Time</th>'))
 					.append($('<th>Rain Value (mm)</th>'))
 					.append($('<th>Cumulative (mm)</th>')).appendTo(table);
 			}
 
-			$('<tr/>', {'data-dev_id':cur.dev_id})
-				.append($('<td>'+cur.municipality_name+ ' - ' + cur.location_name+'</td>'))
-				.append($('<td/>', {'data-col':'dtr'}))
-				.append($('<td/>', {'data-col':'rv'}))
-				.append($('<td/>', {'data-col':'cr'})).appendTo(table);
+			$('<tr/>', {'data-dev_id': cur.dev_id})
+				.append($('<td nowrap="">' + cur.municipality_name + ' - ' + cur.location_name + '</td>'))
+				.append($('<td/>', {'data-col': 'dtr'}))
+				.append($('<td/>', {'data-col': 'rv'}))
+				.append($('<td/>', {'data-col': 'cr'})).appendTo(table);
 
 			if (cur['status_id'] != null && cur['status_id'] != 0) {
-				updateRainfallTable(cur['dev_id'], '-', '-', '-', 'nodata');
+				updateRainfallTable(cur['dev_id'], '[DISABLED]', '', '', 'disabled');
 			}
 
 		}
@@ -357,11 +366,16 @@
 		var charts_container = document.getElementById(chartdiv);	
 		var chart_wrapper = $('<div/>').attr({'class':'innerWrap'}).appendTo(charts_container);
 		for(var i=0;i<waterlevel_devices.length;i++) {
-			var cur = waterlevel_devices[i];
-			$('<div/>').attr({'id':'chart_div_'+cur['dev_id'], 'class':'chartWithOverlay list divrowwrapper'})
-				.append($('<p/>').addClass('overlay').text(cur['municipality_name'] + ' - '+ cur['location_name']))
-				.append($('<div/>', {'id':"line-chart-marker_"+cur['dev_id']}).addClass('chart'))
+			var device = waterlevel_devices[i];
+			$('<div/>').attr({'id':'chart_div_'+device['dev_id'], 'class':'chartWithOverlay list divrowwrapper'})
+				.append($('<p/>').addClass('overlay').text(device['municipality_name'] + ' - '+ device['location_name']))
+				.append($('<div/>', {'id':"line-chart-marker_"+device['dev_id']}).addClass('chart'))
 				.appendTo(chart_wrapper);
+
+			var div = 'line-chart-marker_'+ device['dev_id'];
+			if (device['status_id'] != null && device['status_id'] != 0) {
+				$(document.getElementById(div)).css({'background':'url(images/disabled.png)'});
+			}
 		}	
 	}
 
@@ -509,18 +523,16 @@
 	function updateWaterlevelChart(data) {
 		var device_id = data.device[0].dev_id;
 		var div = 'line-chart-marker_'+ device_id;
-
 		if (data.count == -1 || // fmon.predict 404
-			data.count ==  0 || // sensor no reading according to fmon.predict
-			data.data.length == 0  || // predict reports that it has reading but actually doesnt have
-			data.data[0].waterlevel == null || data.data[0].waterlevel=='' // errouneous readings
-			) {
-			$(document.getElementById(div)).css({'background':'url(images/nodata.png)'});
+			data.count == 0 || // sensor no reading according to fmon.predict
+			data.data.length == 0 || // predict reports that it has reading but actually doesnt have
+			data.data[0].waterlevel == null || data.data[0].waterlevel == '' // errouneous readings
+		) {
+			$(document.getElementById(div)).css({'background': 'url(images/nodata.png)'});
 		} else {
 			drawChartWaterlevel(div, data);
 		}
 
-		
 	}
 
 	function updateTemperatureTicker(data) {
