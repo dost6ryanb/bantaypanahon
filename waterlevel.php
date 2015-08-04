@@ -236,7 +236,8 @@
                 <li ><a href="index.php">Home</a></li>
                 <li><a href="rainfall.php">Rainfall Monitoring</a></li>
                 <li><a href="#" class='currentPage'>Waterlevel Monitoring</a></li>
-                <li><a href="waterlevel2.php">Waterlevel Map</a></li>
+				<li><a href="waterlevel2.php">Waterlevel Map</a></li>
+				<li><a href="devices.php">Devices Monitoring</a></li>
             </ul>
 		</div>
 	    </div>
