@@ -1,4 +1,12 @@
 History
+7/31/15
+Changed.Rainfall table now explicitly shows if station staus (DISABLED/NODATA)
+Changed.Rainfall table now uses common human date time format (e.g. July, 16, 2015 3:03 PM) 
+Added.Water level chart properly displays appropriate labels for DISABLED devices
+Added.Installation notes for mac/linux type OSes in github repository (https://github.com/dost6ryanb/bantaypanahon)
+
+6/15/15
+Added. 3 station device_id 1 CapSU Pillar, Iloilo and 2 Bago City
 
 
 --- ABOVE UPDATES ARE NOT YET UPLOADED TO PRODUCTION SERVER ---
