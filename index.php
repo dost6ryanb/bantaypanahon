@@ -112,7 +112,7 @@
 
 	function postGetData(dev_id, sdate, edate, limit, successcallback) {
 		$.ajax({
-				url: DOCUMENT_ROOT + '000/data.php',
+				url: DOCUMENT_ROOT + 'data.php',
 				type: "POST",
 				data: {start: 0,
 		  		 limit: limit,
