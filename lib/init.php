@@ -13,7 +13,7 @@ include_once 'lib/devices.class.php';
 	}
 ?>
 <script type="text/javascript" >
-    var DOCUMENT_ROOT = "http://localhost/~DRRMU-VI/bantaypanahon/";
+    var DOCUMENT_ROOT = "http://localhost/bantaypanahon/";
     var SERVER_DATE = '<?php echo date("F d,Y");?>';
     var SERVER_TIME = '<?php echo date("g:i A");?>';
 </script>
