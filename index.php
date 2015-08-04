@@ -112,7 +112,7 @@
 
 	function postGetData(dev_id, sdate, edate, limit, successcallback) {
 		$.ajax({
-				url: DOCUMENT_ROOT + 'data.php',
+				url: DOCUMENT_ROOT + '000/data.php',
 				type: "POST",
 				data: {start: 0,
 		  		 limit: limit,
@@ -131,7 +131,7 @@
 		var device_id = data.device[0].dev_id;
 
 		$('#loadedraindevices').text(++key['loadedraindevices']);
-
+			onRainfallDataResponseFail(device_id);
 		if (data.count == -1) {// cannot reach predict
 			//TODO either add retry or initiate retry;
 		} else if (data.count ==  0 ||// sensor no reading according to fmon.predict
@@ -177,7 +177,7 @@
 	}
 
 	function onRainfallDataResponseFail(dev_id) {
-		var retryhtml = '<a href=javascript:retryFetchRain('+dev_id+')>retry</a>';
+		var retryhtml = '<a href=javascript:retryFetchRain('+dev_id+')>Retry</a>';
 		updateRainfallTable(dev_id, retryhtml, null, null);
 	}
 
