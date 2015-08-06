@@ -22,6 +22,7 @@
 		window.location.reload(true);
 	},900000); // refresh 10 minutes
 	var key = {'sdate':'<?php echo $sdate;?>', 'numraindevices':0, 'loadedraindevices':0,
+			   'serverdate':'<?php echo date("m/d/Y");?>', 'servertime':'<?php echo date("H:i");?>',
 			   'marker' : [
 			   		{'min':0.01, 'max':5, 'name':'lighter', 'src':'images/rain-lighter'},
 			   		{'min':5, 'max':25, 'name':'light', 'src':'images/rain-light'}, 
