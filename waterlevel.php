@@ -165,8 +165,8 @@
 			
 			
 			datatable.addColumn('number', 'Waterlevel Above 12 Meter'); //add column from index i
+			datatable.addColumn('number', 'Waterlevel Above 12 Meter'); //add column from index i
 			datatable.addColumn('number', 'Waterlevel Above 5 Meter'); //add column from index i
-			datatable.addColumn('number', 'Waterlevel Above 1 Meter'); //add column from index i
 			//j - index of data
 			// i - index of column
 			for(var j=0;j<json.data.length;j++) {
@@ -189,8 +189,8 @@
 				//}
 				if (j == 0 || j == json.data.length - 1) {
 					row[2] = 12.0;
-					row[3] = 5.0;
-					row[4] = 1.0;
+					row[3] = 8.0;
+					row[4] = 5.0
 				} else {
 
 				}
@@ -230,7 +230,8 @@
 				 viewWindow : {
 				 	min : 0,
 				 	max: 12
-				 }
+				 },
+				 baseline: 2.0,
 			  },
 			  legend : {
 			  	position:"none",
@@ -245,12 +246,12 @@
 			  allowHtml: true,
 			  interpolateNulls: true,
 			  lineWidth: 0,
-			  areaOpacity: 0.7,
+			  areaOpacity: 0.5,
 			  series: {
 	          	0: { areaOpacity: 0.0, lineWidth: 2.0 },
 	            1: {color: "red", visibleInLegend : false, labelInLegend: "Above 12 meters"},
 	            2: {color: "orange", labelInLegend: "Above 5 meters"},
-	            3: {color: "yellow", labelInLegend: "Above 1 meter"}
+	            3: {color: "yellow", labelInLegend: "Above 1 meter"},
 	          }
 	        };
 			var chart =  new google.visualization.ComboChart(document.getElementById(chartdiv));
