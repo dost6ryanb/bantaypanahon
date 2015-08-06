@@ -243,6 +243,7 @@
    			type: type}
 		);
 
+		console.log(title);
 		attachMarkerClickEvent(marker, device_id, status_id);
 
 		return marker;
@@ -253,14 +254,16 @@
 
 		var obj = search(key['marker'], 'name', type);
 		if (obj != null) {
-			if (status_id == null || status_id == 0) {
+			if (status_id == null || status_id == '0') {
 				marker_url =  obj['src'] +'.png';
-			} else if (status_id == 1) {
+			} else if (status_id == '1') {
 				marker_url = obj['src'] +'-notok.png';
 			} 
 		} else {
 			console.log('no icon for ' + type);
 		}
+
+		console.log(marker_url);
 		var image = {
    			url: marker_url,
    			size: new google.maps.Size(32, 37),
@@ -279,10 +282,10 @@
 			if (ALLOWEDIT == true) {
 			
 				var newstatus_id;
-				if (status_id == null || status_id == 0) {
-					newstatus_id = 1;
-				} else if(status_id == 1) {
-					newstatus_id = 0;
+				if (status_id == null || status_id == '0') {
+					newstatus_id = '1';
+				} else if(status_id == '1') {
+					newstatus_id = '0';
 				} else {
 					newstatus_id = null;
 				}
