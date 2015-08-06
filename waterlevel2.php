@@ -351,20 +351,29 @@
 		var datatable = new google.visualization.DataTable();
 		datatable.addColumn('datetime', 'DateTimeRead');
 		datatable.addColumn('number', 'Waterlevel'); //add column from index i
+
 		
 		//j - index of data
 		// i - index of column
 		for(var j=0;j<json.data.length;j++) {
 			var row = Array(2);
+			var value = json.data[j].waterlevel / 100;
+			var formattedvalue = value + ' m';
+
 			row[0] = Date.parseExact(json.data[j][json.column[0]], 'yyyy-MM-dd HH:mm:ss');
-			row[1] = {
-					v:parseFloat(json.data[j].waterlevel / 100), 
-					f:(json.data[j].waterlevel / 100) + ' m'
-				}
+				row[1] = {
+					v:parseFloat(value), 
+					f:formattedvalue
+				};
+
 			
 			datatable.addRow(row);
 			
 		}
+
+		//console.log(datatable);
+		//return;
+
 		var d = Date.parseExact(json.data[json.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
 		var d2 = Date.parseExact(json.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
 

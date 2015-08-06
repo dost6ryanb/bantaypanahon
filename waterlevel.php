@@ -163,15 +163,37 @@
 			datatable.addColumn('datetime', 'DateTimeRead');
 			datatable.addColumn('number', 'Waterlevel'); //add column from index i
 			
+			
+			datatable.addColumn('number', 'Waterlevel Above 12 Meter'); //add column from index i
+			datatable.addColumn('number', 'Waterlevel Above 5 Meter'); //add column from index i
+			datatable.addColumn('number', 'Waterlevel Above 1 Meter'); //add column from index i
 			//j - index of data
 			// i - index of column
 			for(var j=0;j<json.data.length;j++) {
-				var row = Array(2);
+				var row = Array(5);
+				var value = json.data[j].waterlevel / 100;
+				var formattedvalue = value + ' m';
+
 				row[0] = Date.parseExact(json.data[j][json.column[0]], 'yyyy-MM-dd HH:mm:ss');
-				row[1] = {
-						v:parseFloat(json.data[j].waterlevel / 100), 
-						f:(json.data[j].waterlevel / 100) + ' m'
-					}
+
+				//if (value > 1) {
+					/*row[2] = {
+						v:parseFloat(value), 
+						f:formattedvalue
+					};*/
+				//} else {
+					row[1] = {
+						v:parseFloat(value), 
+						f:formattedvalue
+					};
+				//}
+				if (j == 0 || j == json.data.length - 1) {
+					row[2] = 12.0;
+					row[3] = 5.0;
+					row[4] = 1.0;
+				} else {
+
+				}
 				
 				datatable.addRow(row);
 				
@@ -189,7 +211,7 @@
 			var title_enddatetime = d2.toString('MMMM d yyyy h:mm:ss tt');
 			
 			var options = {
-	          title: json.device[0].province + ' ' + json.device[0].municipality + ' - ' + json.device[0].location +' @ ' + title_enddatetime ,
+	          title: json.device[0].municipality + ' - ' + json.device[0].location +' @ ' + title_enddatetime ,
 
 			  hAxis: {
 			    title: 'Waterlevel: '+(json.data[0].waterlevel / 100 )+ ' m',
@@ -204,15 +226,32 @@
 				format: '# m',
 				 minValue: '0',
 				 maxValue: '12',
-				 gridlines : {count : 13}
+				 gridlines : {count : 13},
+				 viewWindow : {
+				 	min : 0,
+				 	max: 12
+				 }
 			  },
 			  legend : {
-			  	position : 'none'
+			  	position:"none",
+			  	maxLines: 4
 			  },
+			  // chartArea : {
+			  // 	backgroundColor: "#ff6666"
+			  // }	,
 			  pointsize: 3,
 			  seriesType: 'area',
 			  crosshair : {trigger: 'both'},
-			  allowHtml: true
+			  allowHtml: true,
+			  interpolateNulls: true,
+			  lineWidth: 0,
+			  areaOpacity: 0.7,
+			  series: {
+	          	0: { areaOpacity: 0.0, lineWidth: 2.0 },
+	            1: {color: "red", visibleInLegend : false, labelInLegend: "Above 12 meters"},
+	            2: {color: "orange", labelInLegend: "Above 5 meters"},
+	            3: {color: "yellow", labelInLegend: "Above 1 meter"}
+	          }
 	        };
 			var chart =  new google.visualization.ComboChart(document.getElementById(chartdiv));
 	        chart.draw(datatable, options);

@@ -8,7 +8,7 @@ A project by Department of Science and Technology Regional Office No. VI
 
 PDO sqlite module must be enabled
 
--- Install notes on Mac OS X
+-- Install notes on Mac OS X/Linux
 
 run the following commands
     
