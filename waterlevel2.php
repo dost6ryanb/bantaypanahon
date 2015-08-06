@@ -121,10 +121,12 @@
 			var devicedtr = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
 			var serverdtr = Date.parseExact(key['serverdate']+ ' '+key['servertime']+':00', 'MM/dd/yyyy HH:mm:ss');
 
+			var hour12time = devicedtr.toString("h:mm tt");
+
 			if (key['sdate'] == key['serverdate'] && devicedtr.add({minutes:15}).compareTo(serverdtr) == -1) { //late
-				updateWaterlevelTable(device_id, timeread, data.data[0].waterlevel / 100,  'latedata');
+				updateWaterlevelTable(device_id, hour12time, data.data[0].waterlevel / 100,  'latedata');
 			} else {
-				updateWaterlevelTable(device_id, timeread, data.data[0].waterlevel / 100, 'dataok');
+				updateWaterlevelTable(device_id, hour12time, data.data[0].waterlevel / 100, 'dataok');
 			}
 			
 
@@ -323,8 +325,8 @@
 			}
 
 		}
-		$('<h4><b>x</b> <span style="font-weight:normal;">mark means waterlevel monitoring station is</span> <b>down</b>.</h4>').appendTo(maindiv);
-		$('<h4><b>-</b> <span style="font-weight:normal;">mark means waterlevel monitoring station is sending </span> <b>empty data</b>.</h4>').appendTo(maindiv);
+		//$('<h4><b>x</b> <span style="font-weight:normal;">mark means waterlevel monitoring station is</span> <b>down</b>.</h4>').appendTo(maindiv);
+		//$('<h4><b>-</b> <span style="font-weight:normal;">mark means waterlevel monitoring station is sending </span> <b>empty data</b>.</h4>').appendTo(maindiv);
 	}
 
 
@@ -337,6 +339,11 @@
 				.append($('<p/>').addClass('overlay').text(cur['municipality_name'] + ' - '+ cur['location_name']))
 				.append($('<div/>', {'id':"line-chart-marker_"+cur['dev_id']}).addClass('chart'))
 				.appendTo(chart_wrapper);
+
+			var div = 'line-chart-marker_'+ cur['dev_id'];
+			if (cur['status_id'] != null && cur['status_id'] != 0) {
+				$(document.getElementById(div)).css({'background':'url(images/disabled.png)'});
+			}
 		}	
 	}
 
@@ -412,7 +419,7 @@
 
 	}
 
-	function clearRainfallTable() {
+	function clearWaterlevelTable() {
 		for(var i=0;i<waterlevel_devices.length;i++) {
 			updateWaterlevelTable(waterlevel_devices[i]['dev_id'], null, null, null)
 		}
