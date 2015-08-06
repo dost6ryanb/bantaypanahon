@@ -1,19 +1,5 @@
-<?php	
-	include_once 'lib/devices.class.php';
-	date_default_timezone_set('Asia/Manila');
-
-	$now = date("H:i");
-	$hour = intval(substr($now, 0, 2));
-	$sdate;
-
-	if ($hour >= 0 && $hour < 8 ) {
-			$sdate = date("m/d/Y", strtotime("yesterday"));
-	} elseif ($hour >= 8 && $hour <= 23) {
-			$sdate = date("m/d/Y");
-	}
-
-?><!DOCTYPE html>
-<html lang="en">
+<?php include_once 'lib/init.php'?>
+<html>
 <head>
 <meta charset="utf-8">
 <title>DOST VI DRRMU - Waterlevel Map</title>
@@ -38,8 +24,7 @@
 </script>
 <script type="text/javascript">
 
-	var key = {'serveraddr':'http://<?php echo $_SERVER['HTTP_HOST'].':'.$_SERVER['SERVER_PORT'];?>',
-				'serverdate':'<?php echo date("m/d/Y");?>', 'servertime':'<?php echo date("H:i");?>',
+	var key = {'serverdate':'<?php echo date("m/d/Y");?>', 'servertime':'<?php echo date("H:i");?>',
 			   'sdate':'<?php echo $sdate;?>', 'numwaterleveldevices':0, 'loadedwaterleveldevices':0			   	
 			  };
 
@@ -86,24 +71,21 @@
 
 			for(var i=0;i<waterlevel_devices.length;i++) {
 				var cur = waterlevel_devices[i];
-				if (cur['status_id'] != null || cur['status_id'] != 0) {
+				if (cur['status_id'] == null || cur['status_id'] == 0) {
 					if(typeof history === 'undefined') {
 						postGetData(cur.dev_id, key['sdate'], "", "", onWaterlevelDataResponseSuccess);
 					} else {
 						postGetData(cur.dev_id, key['sdate'], key['sdate'], "", onWaterlevelDataResponseSuccess);
-					}	
-				} else {
-					continue;
+					}
+				
 				}
-				
-				
 			}
 		}, 200);
 	}
 
 	function postGetData(dev_id, sdate, edate, limit, successcallback) {
 		$.ajax({
-				url: key['serveraddr'] + '/bantaypanahon/data.php',
+				url: DOCUMENT_ROOT + 'data.php',
 				type: "POST",
 				data: {start: 0,
 		  		 limit: limit,
@@ -127,12 +109,12 @@
 		$('#loadedwaterleveldevices').text(++key['loadedwaterleveldevices']);
 
 		if (data.count == -1) {// cannot reach predict
-			//TODO either add retry or initiate retry;
+			onWaterlevelDataResponseFail(device_id);
 		} else if (data.count ==  0 ||// sensor no reading according to fmon.predict
 			data.data.length == 0  || // predict reports that it has reading but actually doesnt have
 			data.data[0].waterlevel == null || data.data[0].waterlevel=='' // errouneous readings
 			) {
-			updateWaterlevelTable(device_id, '-', '-', 'nodata');
+			updateWaterlevelTable(device_id, '[NO DATA]', '', 'nodata');
 		} else {
 			var device = search(waterlevel_devices, 'dev_id', device_id);
 			var timeread = data.data[0].dateTimeRead.substring(10).substring(0, 6);
@@ -140,9 +122,9 @@
 			var serverdtr = Date.parseExact(key['serverdate']+ ' '+key['servertime']+':00', 'MM/dd/yyyy HH:mm:ss');
 
 			if (key['sdate'] == key['serverdate'] && devicedtr.add({minutes:15}).compareTo(serverdtr) == -1) { //late
-				updateWaterlevelTable(device_id, timeread, data.data[0].waterlevel,  'latedata');
+				updateWaterlevelTable(device_id, timeread, data.data[0].waterlevel / 100,  'latedata');
 			} else {
-				updateWaterlevelTable(device_id, timeread, data.data[0].waterlevel, 'dataok');
+				updateWaterlevelTable(device_id, timeread, data.data[0].waterlevel / 100, 'dataok');
 			}
 			
 
@@ -166,7 +148,7 @@
 	}
 
 	function onWaterlevelDataResponseFail(dev_id) {
-		var retryhtml = '<a href=javascript:retryFetchWaterlevel('+dev_id+')>retry</a>';
+		var retryhtml = '<a href=javascript:retryFetchWaterlevel('+dev_id+')>Retry</a>';
 		updateWaterlevelTable(dev_id, retryhtml, null, null);
 	}
 
@@ -337,7 +319,7 @@
 				.append($('<td/>', {'data-col':'wl'})).appendTo(table);
 
 			if (cur['status_id'] != null && cur['status_id'] != 0) {
-				updateWaterlevelTable(cur['dev_id'], 'x', 'x', 'nodata');
+				updateWaterlevelTable(cur['dev_id'], '[DISABLED]', "", 'disabled');
 			}
 
 		}
@@ -421,13 +403,7 @@
 		var wl = $('tr[data-dev_id=\''+device_id+'\'] td[data-col=\'wl\']' );
 
 		if (dateTimeRead != null) dtr.html(dateTimeRead); else dtr.text('');
-		
-		if (waterlevel != null && waterlevel != 'x' && waterlevel != '-') {
-			waterlevel = (parseFloat(waterlevel) / 100).toFixed(2);
-			wl.text(waterlevel);
-		} else {
-			wl.text(waterlevel);
-		}
+		if (waterlevel != null ) wl.text(waterlevel); else wl.text('');
 
 		if (dataclass != 'undefined') {
 			dtr.removeClass().addClass(dataclass);
