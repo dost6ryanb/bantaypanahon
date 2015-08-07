@@ -12,6 +12,7 @@
 }
 
 .chart {
+	width:400px;
 	height:280px;
 	background-color:#d8d8d8;
 }
