@@ -216,7 +216,7 @@
 			var title_enddatetime = d2.toString('MMMM d yyyy h:mm:ss tt');
 			
 			var options = {
-	          //title: json.device[0].municipality + ' - ' + json.device[0].location +' @ ' + title_enddatetime ,
+	          title: title_enddatetime ,
 			  hAxis: {
 			    title: 'Waterlevel: '+(json.data[0].waterlevel / 100 )+ ' m',
 				format : 'LLL d h:mm:ss a',
