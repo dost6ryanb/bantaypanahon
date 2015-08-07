@@ -88,10 +88,15 @@
 					prevProvince = cur['province_name'];
 					$('<br/><h3 class="provincelabel">'+prevProvince+'</h3>').appendTo(charts_container);
 				}
-				var chart = $('<div/>').attr({'id':'chart_div_'+waterlevel_devices[i].dev_id, 'class':'chart'}).text(waterlevel_devices.location_name).appendTo(charts_container);
+				var chart_title = cur['municipality_name'] + ' - '+ cur['location_name'];
+				var chart_div = $('<div></div>')
+					.attr({'id':'chart_div_'+cur['dev_id'], 'class':'chart_div'}).appendTo(charts_container);
+				chart_div.html('<div class="chart_overlay"><p>' + chart_title + '</p></div><div id="chart_' + cur['dev_id'] + '" class="chart"></div>');
+					
 				if (cur['status_id'] != null && cur['status_id'] != 0) {
-					chart.css({'background':'url(images/disabled.png)', 'background-size':'100%', 'background-repeat':'no-repeat'});
+					chart_div.css({'background':'url(images/disabled.png)', 'background-size':'100%', 'background-repeat':'no-repeat'});
 				}
+
 			}
 
 		}
@@ -137,7 +142,7 @@
 
 		function onWaterlevelDataResponseSuccess(data) {
 			var device_id = data.device[0].dev_id;
-			var div = 'chart_div_'+ device_id;
+			var div = 'chart_'+ device_id;
 
 			if (data.count == -1) {  // fmon.predict 404
 
@@ -211,8 +216,7 @@
 			var title_enddatetime = d2.toString('MMMM d yyyy h:mm:ss tt');
 			
 			var options = {
-	          title: json.device[0].municipality + ' - ' + json.device[0].location +' @ ' + title_enddatetime ,
-
+	          //title: json.device[0].municipality + ' - ' + json.device[0].location +' @ ' + title_enddatetime ,
 			  hAxis: {
 			    title: 'Waterlevel: '+(json.data[0].waterlevel / 100 )+ ' m',
 				format : 'LLL d h:mm:ss a',

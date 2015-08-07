@@ -2,14 +2,20 @@
 /*	min-width:1212px;
 	max-width:1716px;*/
 }
-.chart {
+.chart_div {
 	width:400px;
 	height:300px;
 	margin:2px;
-	background-color:#d8d8d8;
+	
 	display:inline-block;
 	float:left;
 }
+
+.chart {
+	height:280px;
+	background-color:#d8d8d8;
+}
+
 .provincelabel {
 	clear:both;
 	background: #2869E1;
@@ -21,3 +27,18 @@
 #datetimepicker_container h2{
 	display:inline-block;
 }
+
+.chart_overlay {
+    color: white;
+    height: 20px;
+    z-index: 100;
+    left: 60px;
+    top: 60px;
+    font-size: 8pt;
+    background: #2869E1;
+ }
+
+ .chart_overlay p {
+ 	padding: 4px;
+ 	margin: 0;
+ }
