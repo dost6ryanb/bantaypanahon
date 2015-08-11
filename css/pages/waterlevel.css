@@ -29,6 +29,10 @@
 	display:inline-block;
 }
 
+#charts_div_container {
+	padding: 10px;
+}
+
 .chart_overlay {
     color: white;
     height: 20px;

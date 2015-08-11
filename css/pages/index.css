@@ -1,13 +1,13 @@
 #map-canvas {
     height: 520px;
-    width: 70%;
+    width: 920px;
     float: left;
     display: inline-block;
 }
 
 #rainfall-canvas {
     height: 520px;
-    width: 30%;
+    /*width: 30%;*/
     overflow: scroll;
 
 }
