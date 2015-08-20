@@ -254,8 +254,8 @@
 			  series: {
 	          	0: { areaOpacity: 0.0, lineWidth: 2.0 },
 	            1: {color: "red", visibleInLegend : false, labelInLegend: "Above 12 meters"},
-	            2: {color: "orange", labelInLegend: "Above 5 meters"},
-	            3: {color: "yellow", labelInLegend: "Above 1 meter"},
+	            2: {color: "orange", labelInLegend: "Above 8 meters"},
+	            3: {color: "yellow", labelInLegend: "Above 5 meter"},
 	          }
 	        };
 			var chart =  new google.visualization.ComboChart(document.getElementById(chartdiv));
