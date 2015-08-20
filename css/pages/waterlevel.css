@@ -12,6 +12,7 @@
 }
 
 .chart {
+	width:400px;
 	height:280px;
 	background-color:#d8d8d8;
 }
@@ -26,6 +27,10 @@
 
 #datetimepicker_container h2{
 	display:inline-block;
+}
+
+#charts_div_container {
+	padding: 10px;
 }
 
 .chart_overlay {

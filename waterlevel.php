@@ -94,7 +94,7 @@
 				chart_div.html('<div class="chart_overlay"><p>' + chart_title + '</p></div><div id="chart_' + cur['dev_id'] + '" class="chart"></div>');
 					
 				if (cur['status_id'] != null && cur['status_id'] != 0) {
-					chart_div.css({'background':'url(images/disabled.png)', 'background-size':'100%', 'background-repeat':'no-repeat'});
+					$("#chart_" + cur['dev_id']).css({'background':'url(images/disabled.png)', 'background-size':'100%', 'background-repeat':'no-repeat'});
 				}
 
 			}
