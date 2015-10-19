@@ -77,11 +77,11 @@
 		setTimeout(function() {
 			for(var i=0;i<rainfall_devices.length;i++) {
 				var cur = rainfall_devices[i]; 
-				if (cur['status_id'] == null || cur['status_id'] == '0') {
+				//if (cur['status_id'] == null || cur['status_id'] == '0') {
 					postGetData(cur.dev_id, key['sdate'], key['sdate'], 1, onRainfallDataResponseSuccess);
-				} else {
-					console.log("skipping dev_id: " + cur['dev_id']);
-				}
+				//} else {
+				//	console.log("skipping dev_id: " + cur['dev_id']);
+				//}
 			}
 
 		}, 200);
@@ -90,22 +90,22 @@
 
 			for(var i=0;i<waterlevel_devices.length;i++) {
 				var cur = waterlevel_devices[i];
-				if (cur['status_id'] == null || cur['status_id'] == '0') {
+				//if (cur['status_id'] == null || cur['status_id'] == '0') {
 					if(typeof history === 'undefined') {
 						postGetData(cur.dev_id, key['sdate'], "", "", onWaterlevelDataResponseSuccess);
 					} else {
-						postGetData(cur.dev_id, key['sdate'], key['sdate'], "", onWaterlevelDataResponseSuccess);
+						postGetData(cur.dev_id, key['sdate'], key['sdate'], "144", onWaterlevelDataResponseSuccess);
 					}	
-				}
+				//}
 			}
 		}, 200);
 
 		setTimeout(function() {
 			for(var i=0;i<temperature_devices.length;i++) {
 				var cur = temperature_devices[i]; 
-				if (cur['status_id'] == null || cur['status_id'] == '0') {
+				//if (cur['status_id'] == null || cur['status_id'] == '0') {
 					postGetData(cur.dev_id, key['sdate'], key['sdate'], 96, onTemperatureDataResponseSuccess);
-				}
+				//}
 			}
 
 		}, 200);
@@ -355,9 +355,9 @@
 				.append($('<td/>', {'data-col': 'rv'}))
 				.append($('<td/>', {'data-col': 'cr'})).appendTo(table);
 
-			if (cur['status_id'] != null && cur['status_id'] != 0) {
-				updateRainfallTable(cur['dev_id'], '[DISABLED]', '', '', 'disabled');
-			}
+			//if (cur['status_id'] != null && cur['status_id'] != 0) {
+			//	updateRainfallTable(cur['dev_id'], '[DISABLED]', '', '', 'disabled');
+			//}
 
 		}
 	}
@@ -374,9 +374,9 @@
 				.appendTo(chart_wrapper);
 
 			var div = 'line-chart-marker_'+ device['dev_id'];
-			if (device['status_id'] != null && device['status_id'] != 0) {
-				$(document.getElementById(div)).css({'background':'url(images/disabled.png)'});
-			}
+			//if (device['status_id'] != null && device['status_id'] != 0) {
+			//	$(document.getElementById(div)).css({'background':'url(images/disabled.png)'});
+			//}
 		}	
 	}
 

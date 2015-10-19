@@ -16,7 +16,7 @@
 	<script type="text/javascript">
 		var key = {'sdate':'<?php echo $sdate;?>'};
 		google.load("visualization", "1", {packages:["corechart"]});
-	    google.load('visualization', '1', {packages:['table']});
+	    //google.load('visualization', '1', {packages:['table']});
 	  
 	  	google.setOnLoadCallback(function() {
 		 	$( document ).ready(function() {
