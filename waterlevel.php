@@ -104,21 +104,18 @@
 		function initFetchData(history) {
 			setTimeout(function() {
 
-			for(var i=0;i<waterlevel_devices.length;i++) {
-				var cur = waterlevel_devices[i];
-				if (cur['status_id'] != null && cur['status_id'] != 0) {
-					console.log('skipping ' + cur['dev_id']);
-				} else {
-					if(typeof history === 'undefined') {
-						postGetData(cur['dev_id'], key['sdate'], "", "", onWaterlevelDataResponseSuccess);
-					} else {
+				for(var i=0;i<waterlevel_devices.length;i++) {
+					var cur = waterlevel_devices[i];
+
+					if (history) {
 						postGetData(cur['dev_id'], key['sdate'], key['sdate'], "144", onWaterlevelDataResponseSuccess);
-					}
+					} else {
+						if (cur['status_id'] == null || cur['status_id'] == '0') {
+							postGetData(cur['dev_id'], key['sdate'], "", "", onWaterlevelDataResponseSuccess);
+						}
+					}	
 				}
-				//if (i >= 3) break;
-				
-			}
-		}, 200);
+			}, 200);
 		}
 
 

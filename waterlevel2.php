@@ -71,13 +71,12 @@
 
 			for(var i=0;i<waterlevel_devices.length;i++) {
 				var cur = waterlevel_devices[i];
-				if (cur['status_id'] == null || cur['status_id'] == 0) {
-					if(typeof history === 'undefined') {
-						postGetData(cur.dev_id, key['sdate'], "", "", onWaterlevelDataResponseSuccess);
-					} else {
-						postGetData(cur.dev_id, key['sdate'], key['sdate'], "", onWaterlevelDataResponseSuccess);
+				if (history) {
+					postGetData(cur['dev_id'], key['sdate'], key['sdate'], "144", onWaterlevelDataResponseSuccess);
+				} else {
+					if (cur['status_id'] == null || cur['status_id'] == '0') {
+						postGetData(cur['dev_id'], key['sdate'], "", "", onWaterlevelDataResponseSuccess);
 					}
-				
 				}
 			}
 		}, 200);

@@ -1,13 +1,13 @@
 #map-canvas {
     height: 520px;
-    width: 920px;
+    width: 70%;
     float: left;
     display: inline-block;
 }
 
 #rainfall-canvas {
     height: 520px;
-    /*width: 30%;*/
+    width: 30%;
     overflow: scroll;
 
 }
@@ -15,6 +15,7 @@
 #rainfall-canvas table {
     box-sizing: border-box;
     border-collapse: collapse;
+    max-width: 530px;
 }
 
 #rainfall-canvas table th,
@@ -23,6 +24,7 @@
     border-spacing: 0;
     border-width: 1px;
     font-size: x-small;
+    table-layout: fixed;
 }
 
 .legend {
