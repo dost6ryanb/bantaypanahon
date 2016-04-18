@@ -3,7 +3,7 @@
 <head>
 	<title>DOST VI - DRRMU - Rainfall Monitoring</title>
 	<script type="text/javascript" src='js/jquery-1.11.1.min.js'></script>
-<script type="text/javascript" src='js/jquery-ui.min.js'></script>
+	<script type="text/javascript" src='js/jquery-ui.min.js'></script>
 	<script type="text/javascript" src='js/date-en-US.js'></script>
 	<link rel="stylesheet" href='css/jquery-ui.min.css'>
 	<link rel="stylesheet" href='css/jquery-ui.theme.min.css'>

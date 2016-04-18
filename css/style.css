@@ -137,5 +137,10 @@ body {
     font-size: 7pt; 
 }
 
+#header .beta-link {
+    background-color: #009933;
+    color: #ffffff;
+}
+
 
 

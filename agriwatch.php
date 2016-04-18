@@ -3,21 +3,22 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>DOST VI DRRMU - Home</title>
+<title>DOST VI DRRMU - AgriWatch</title>
 <script type="text/javascript" src='js/jquery-1.11.1.min.js'></script>
 <script type="text/javascript" src='js/jquery-ui.min.js'></script>
 <script type="text/javascript" src='js/date-en-US.js'></script>
 <script type="text/javascript" src='js/jquery.scrollTo.min.js'></script>
 <script type="text/javascript" src='js/jquery.easy-ticker.min.js'></script>
-<script type="text/javascript" src='js/heat-index.js'></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=geometry,places&ext=.js&key=AIzaSyBIHIWYF28n_7UpQiud5ZNQP6C4G3LmTtU"></script>
+<script type="text/javascript" src='js/markerwithlabel.js'></script>
 <link rel="stylesheet" href='css/jquery-ui.min.css'>
 <link rel="stylesheet" href='css/jquery-ui.theme.min.css'>
 <link rel="stylesheet" href='css/jquery-ui.structure.min.css'>
 <link rel="stylesheet" type="text/css" href='css/style.css' />
 <link rel="stylesheet" type="text/css" href='css/screen.css' />
-<link rel="stylesheet" type="text/css" href='css/pages/index.css' />
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBIHIWYF28n_7UpQiud5ZNQP6C4G3LmTtU&sensor=false"></script>
-<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<link rel="stylesheet" type="text/css" href='css/pages/agriwatch.css' />
+
+
 <script type="text/javascript">
 	setTimeout(function(){
 		window.location.reload(true);
@@ -39,16 +40,13 @@
 	var cumulative_rainfall_map_markers = [];
 	var lastValidCenter;
 
-	google.load("visualization", "1", {packages:["corechart"]});
-	google.load('visualization', '1', {packages:['table']});
-
 	$.xhrPool = [];
-	$.xhrPool.abortAll = function() {
-		$(this).each(function(idx, jqXHR) {
-   			jqXHR.abort();
-		});
-		$.xhrPool.length = 0
-	};
+		$.xhrPool.abortAll = function() {
+    		$(this).each(function(idx, jqXHR) {
+       			jqXHR.abort();
+    		});
+    		$.xhrPool.length = 0
+		};
 
 	$.ajaxSetup({
 	    beforeSend: function(jqXHR) {
@@ -62,16 +60,21 @@
 	    }
 	});
 
-	$(document).ready(function() {
+	google.maps.event.addDomListener(window, 'load', function() {
+		initMap("map-canvas");
+		initMapLegends('legends');
+		initRainfallTable("rainfall-canvas");
+		initAgriWatchControls("map-canvas", "rainfall-canvas");
+		initFetchDataMonthly();
+	});
+
+/*	$(document).ready(function() {
       	initMap("map-canvas");
 		initMapLegends('legends');
 		initRainfallTable("rainfall-canvas");
-		initTicker('ticker1');
-		initTicker('ticker2');
-		initChartDivs('charts_div_container');
 		initFetchData();
 
-    });
+    });*/
 
 
 	function initFetchData(history) {
@@ -90,39 +93,36 @@
 
 		}, 200);
 		
-		setTimeout(function() {
+	}
 
-			for(var i=0;i<waterlevel_devices.length;i++) {
-				var cur = waterlevel_devices[i];
-					if (history) {
-						postGetData(cur['dev_id'], key['sdate'], key['sdate'], "144", onWaterlevelDataResponseSuccess);
-					} else {
-						if (cur['status_id'] == null || cur['status_id'] == '0') {
-							postGetData(cur['dev_id'], key['sdate'], "", "", onWaterlevelDataResponseSuccess);
-						}
-					}	
-			}
-		}, 200);
+	function initFetchDataMonthly() {
+		var date = new Date(), y = date.getFullYear(), m = date.getMonth();
+		var firstDay = new Date(y, m, 1);
+		//var lastDay = new Date(y, m + 1, 0);
+		var lastDay = date;
+		//console.log(firstDay.toString('dd/MM/yyyy'));
+		//console.log(lastDay.toString('dd/MM/yyyy'));
 
-		setTimeout(function() {
-			for(var i=0;i<temperature_devices.length;i++) {
-				var cur = temperature_devices[i]; 
+		var startdate = firstDay.toString('MM/dd/yyyy');
+		var enddate = lastDay.toString('MM/dd/yyyy');
+
+
+		for(var i=0;i<rainfall_devices.length;i++) {
+				var cur = rainfall_devices[i]; 
 				if (history) {
-					postGetData(cur.dev_id, key['sdate'], key['sdate'], 96, onTemperatureDataResponseSuccess);
+					postGetData(cur['dev_id'], startdate, enddate, 1, onRainfallDataResponseSuccess);
 				} else {
 					if (cur['status_id'] == null || cur['status_id'] == '0') {
-						postGetData(cur.dev_id, key['sdate'], "", "", onTemperatureDataResponseSuccess);
-					}
+						postGetData(cur['dev_id'], startdate, enddate, 1, onRainfallDataResponseSuccess);
+					} // else SKIP
 				}
+				//if (i >= 20) break;
 			}
-
-		}, 200);
 	}
 
 	function postGetData(dev_id, sdate, edate, limit, successcallback) {
 		$.ajax({
 				url: DOCUMENT_ROOT + 'data.php',
-				//url:'http://localhost/dost6arc/api/archive',
 				type: "POST",
 				data: {start: 0,
 		  		 limit: limit,
@@ -143,7 +143,7 @@
 		console.log(data);
 
 		$('#loadedraindevices').text(++key['loadedraindevices']);
-
+			onRainfallDataResponseFail(device_id);
 		if (data.count == -1) {// cannot reach predict
 			//TODO either add retry or initiate retry;
 		} else if (data.count ==  0 ||// sensor no reading according to fmon.predict
@@ -176,9 +176,8 @@
 					} else {
 						marker_url = limit['src']+'.png';
 					}
-					addMarker(device['dev_id'], device['posx'], device['posy'], device['municipality_name'] + ' - ' + device['location_name'], device['type_name'], marker_url);
+					addMarker(device['dev_id'], device['posx'], device['posy'], device['municipality_name'] + ' - ' + device['location_name'], device['type_name'], marker_url, rc + " mm");
 					var text =  "[Cumulative Rainfall] "+device['municipality_name'] + ' - ' + device['location_name'] + ' : ' + data.data[0].rain_cumulative + ' mm';
-					addTicker(text, 'ticker1list');
 
 					break;
 				} 
@@ -198,13 +197,6 @@
 		updateRainfallTable(dev_id, '', '', '');
 	}
 
-	function onWaterlevelDataResponseSuccess(data) {
-		updateWaterlevelChart(data)
-	}
-
-	function onTemperatureDataResponseSuccess(data) {
-		updateTemperatureTicker(data);
-	}
 
 	function initMap(divcanvas) {
 		var DOST_CENTER = new google.maps.LatLng(10.712317, 122.562362); //DOST CENTER
@@ -222,7 +214,7 @@
 				position: google.maps.ControlPosition.RIGHT_CENTER
 			},
   			draggableCursor:'crosshair',
-  			styles: [{"featureType":"administrative.land_parcel","stylers":[{"visibility":"off"}]},{"featureType":"poi","stylers":[{"visibility":"off"}]},{"featureType":"road","stylers":[{"visibility":"off"}]},{"featureType":"road.highway","stylers":[{"visibility":"on"}]},{"featureType":"road.arterial","stylers":[{"visibility":"on"}]},{"featureType":"landscape","stylers":[{"lightness":47}]},{"featureType":"water","stylers":[{"lightness":39}]}]
+  			mapTypeId: google.maps.MapTypeId.HYBRID
 		};
 		
 		cumulative_rainfall_map = new google.maps.Map(document.getElementById(divcanvas), mapOptions);
@@ -278,17 +270,19 @@
 	        lat = lat.toFixed(6);
 	        var lng = pnt.lng();
 	        lng = lng.toFixed(6);
+	        console.log(lat + ', '+lng);
 	    });
 	}	
 
 	function initMapLegends(container) {
+
 		legendscontainer = $(document.getElementById(container));
 		cumulative_rainfall_map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById(container));
 		
 		$('<button id="togglelegends">Hide Legend</button>')
 			.on('click', function() {
-				$('.legend').toggle();
-				$('.legendtitle').toggle();
+				$('#' + container + ' .legend').toggle();
+				$('#' + container + ' .legendtitle').toggle();
                 if ($(this).text() == "Show Legend") {
                     $(this).text('Hide Legend');
                 } else {
@@ -304,10 +298,33 @@
 		$('<div class="legend"><img src="'+key['marker'][4].src+'.png" > 75mm to less than 100mm</div class="legend">').appendTo(legendscontainer);
 		$('<div class="legend"><img src="'+key['marker'][5].src+'.png" > 100mm or more</div class="legend">').appendTo(legendscontainer);
 		$('<div class="legend"><img src="images/overlay_now.png" > currently raining</div>').appendTo(legendscontainer);
+
+	
+
 	}
 
-	function initTicker(ticker) {
-		$(document.getElementById(ticker)).css({'display':'block'}).easyTicker({visible:1, interval: 3500});
+	function initMapLegends2(container, cropname) {
+		var legendscontainer = $(document.getElementById(container));
+		if (legendscontainer.length > 0) {
+		    legendscontainer.remove();
+		 }
+
+		 console.log(legendscontainer.length);
+
+		  legendscontainer = $('<div/>', {id : container}).appendTo($('#map-canvas'));
+
+		  cumulative_rainfall_map.controls[google.maps.ControlPosition.TOP_LEFT].push(document.getElementById(container));
+		  
+		  var crop = search(crops, 'name', cropname, false);
+		  console.log('loading ' + crop['name']);
+
+		  $('<div class="legendtitle">' + crop['name'] + ' (<i>'+ crop['scientific_name'] +'</i>) - ' + crop['desc'] + '</div class="legend">').appendTo(legendscontainer);
+
+		  for (var i=0;i<crop['legends'].length;i++) {
+		    var legend = crop['legends'][i];
+		    $('<div class="legend"><div class="legendboxes" style="background-color:'+ legend['hex'] + ';"></div><span>' + " " +  legend['name'] + '<span></div>').appendTo(legendscontainer);
+		  }
+		  $('<div class="legend"></div>').appendTo(legendscontainer);
 	}
 
 	function initRainfallTable(div) {
@@ -332,8 +349,6 @@
 				$.xhrPool.abortAll();
 				clearMarkers();
 				clearRainfallTable();
-				clearAllTicker('ticker1list');
-				clearAllTicker('ticker2list');
 				initFetchData(true);
 			}/*,
 			 altField: '#datepicker_start',
@@ -375,80 +390,7 @@
 	}
 
 
-	function initChartDivs(chartdiv) {
-		var charts_container = document.getElementById(chartdiv);	
-		var chart_wrapper = $('<div/>').attr({'class':'innerWrap'}).appendTo(charts_container);
-		for(var i=0;i<waterlevel_devices.length;i++) {
-			var device = waterlevel_devices[i];
-			$('<div/>').attr({'id':'chart_div_'+device['dev_id'], 'class':'chartWithOverlay list divrowwrapper'})
-				.append($('<p/>').addClass('overlay').text(device['municipality_name'] + ' - '+ device['location_name']))
-				.append($('<div/>', {'id':"line-chart-marker_"+device['dev_id']}).addClass('chart'))
-				.appendTo(chart_wrapper);
-
-			var div = 'line-chart-marker_'+ device['dev_id'];
-			if (device['status_id'] != null && device['status_id'] != 0) {
-				$(document.getElementById(div)).css({'background':'url(images/disabled.png)'});
-			}
-		}	
-	}
-
-	function drawChartWaterlevel(chartdiv, json) {
-		var datatable = new google.visualization.DataTable();
-		datatable.addColumn('datetime', 'DateTimeRead');
-		datatable.addColumn('number', 'Waterlevel'); //add column from index i
-		
-		//j - index of data
-		// i - index of column
-		for(var j=0;j<json.data.length;j++) {
-			var row = Array(2);
-			row[0] = Date.parseExact(json.data[j][json.column[0]], 'yyyy-MM-dd HH:mm:ss');
-			row[1] = {
-					v:parseFloat(json.data[j].waterlevel / 100), 
-					f:(json.data[j].waterlevel / 100) + ' m'
-				};
-			
-			datatable.addRow(row);
-			
-		}
-		var d = Date.parseExact(json.data[json.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-		var d2 = Date.parseExact(json.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-
-		//var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); //from last data
-		var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); // from 8:00 AM
-		var title_enddatetime = d2.toString('MMMM d yyyy h:mm:ss tt');
-		
-		var options = {
-          title: title_enddatetime ,
-
-		  hAxis: {
-		   title: 'Waterlevel: '+(json.data[0].waterlevel / 100 )+ ' m',
-			format : 'LLL d h:mm:ss a',
-			viewWindow : {	min:d,max : d2},
-			gridlines : {color : 'none'},
-			textStyle : {fontSize: 10},
-			textPosition : 'none'
-		  },
-		   vAxis: {
-			  	title: '',
-				format: '# m',
-				minValue: '0',
-				maxValue: '12',
-				gridlines : {count : 13}
-			  },
-		  legend : {
-		  	position : 'none'
-		  },
-		  pointsize: 3,
-		  seriesType: 'area',
-		  crosshair : {trigger: 'both'},
-		  allowHtml: true
-        };
-		var chart =  new google.visualization.ComboChart(document.getElementById(chartdiv));
-        chart.draw(datatable, options);
-		//$('<div/>').text('Waterlevel: '+json.data[0].waterlevel+ ' cm').css({'height':'20px'}).appendTo('#'+chartdiv);
-	  }
-	  
-
+	
 	function updateRainfallTable(device_id, dateTimeRead, rainvalue, raincumulative, dataclass) {
 		var tr = $('tr[data-dev_id=\''+device_id+'\']');
 		var dtr = $('tr[data-dev_id=\''+device_id+'\'] td[data-col=\'dtr\']' );
@@ -474,21 +416,33 @@
 		
 	}
 
-	function addMarker(device_id, posx, posy, title, type, marker_url) {
+	function addMarker(device_id, posx, posy, title, type, marker_url, label) {
 		var pos = new google.maps.LatLng( posx, posy);
 		var image = {
    			url: marker_url,
    			size: new google.maps.Size(32, 37),
    			origin: new google.maps.Point(0,0),
-   			anchor: new google.maps.Point(16, 37)};
+   			anchor: new google.maps.Point(10, 37)};
 
-		var marker = new google.maps.Marker({
+		/*var marker = new google.maps.Marker({
    			position: pos,
 			icon: image,
     		map: cumulative_rainfall_map,
    			title:title + " (" + device_id + ")"}//,
 			//url: server_name+base_url+'device/latest/'+ data.device[0].dev_id
-		);
+		);*/
+
+		var marker = new MarkerWithLabel({
+	        position: pos,
+	        icon : image,
+	        map: cumulative_rainfall_map,
+	        draggable: false,
+	        raiseOnDrag: true,
+	        labelContent: label,
+	        labelAnchor: new google.maps.Point(0,24),
+	        labelClass: "legend-labels", // the CSS class for the label
+	        labelInBackground: false
+    	});
 
 		cumulative_rainfall_map_markers.push(marker);
 
@@ -533,65 +487,6 @@
 	  cumulative_rainfall_map_markers = [];
 	}
 
-	function updateWaterlevelChart(data) {
-		var device_id = data.device[0].dev_id;
-		var div = 'line-chart-marker_'+ device_id;
-		if (data.count == -1 || // fmon.predict 404
-			data.count == 0 || // sensor no reading according to fmon.predict
-			data.data.length == 0 || // predict reports that it has reading but actually doesnt have
-			data.data[0].waterlevel == null || data.data[0].waterlevel == '' // errouneous readings
-		) {
-			$(document.getElementById(div)).css({'background': 'url(images/nodata.png)'});
-		} else {
-			drawChartWaterlevel(div, data);
-		}
-
-	}
-
-	function updateTemperatureTicker(data) {
-		if (data.count == 0 || data.data == null || data.device[0].minmax['max'] == null) return;
-		var text = "";
-		var device_id = data.device[0].dev_id;
-		var device = search(temperature_devices, 'dev_id', device_id);
-		
-		var municipality = device['municipality_name'];
-		var location = device['location_name'];
-		var max = data.device[0].minmax['max'];
-
-		var time = search(data.data, 'air_temperature', max, true);
-
-		//console.log(time);
-
-		if (time != null) {
-			var d = Date.parseExact(time['dateTimeRead'], 'yyyy-MM-dd HH:mm:ss');
-			time = d.toString('h:mm tt'); 
-		} else {
-			time = 'unknown';
-		}
-
-		var current_time = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss').toString('h:mm tt');
-		var current_temperature = parseFloat(data.data[0].air_temperature);
-		var humidity = parseFloat(data.data[0].air_humidity);
-
-		//console.log(current_temperature);
-		//console.log(humidity);
-
-		var heat_index = (HI.heatIndex({temperature: current_temperature, humidity: humidity})).toFixed(2);
-
-		console.log(heat_index);
-
-		text += "[" + current_time + ']: ' + municipality + ' - Temp/Heat Index: ' + current_temperature  + '/' + heat_index + ' \u2103. Max Temp: ' + max + ' last ' + time ;
-		addTicker(text, 'ticker2list');
-	}
-
-	function addTicker(text, tickerlist) {
-		$('<li/>').text(text).appendTo($('#' +tickerlist));
-	}
-
-	function clearAllTicker(tickerlist) {
-		$('#' + tickerlist).empty();
-	}
-
 	function search(o, key, val, greedy) {
 		var ret = null;
 		for (var i=0; i<o.length;i++) {
@@ -604,21 +499,120 @@
 		}
 		return ret;
 	}
+
+function initAgriWatchControls(elMap, rainfall_div) {
+	controlscontainer = $('<div/>', {id : 'controlscontainer'}).appendTo( $('#'+elMap));
+
+	cumulative_rainfall_map.controls[google.maps.ControlPosition.TOP_RIGHT].push(document.getElementById('controlscontainer'));
+
+		//the crops toggler
+	$('<button id="toggle-rice">Rice</button>')
+	.on('click', function() {
+	   initCrop('Rice');
+	})
+	.appendTo(controlscontainer);
+
+	$('<button id="toggle-corn">Corn</button>')
+	.on('click', function() {
+	   initCrop('Corn');
+	})
+	.appendTo(controlscontainer);
+
+	//Rainfall table visibilty toggler
+	$('<button id="toggle-rainfalltable">*</button>')
+	.on('click', function() {
+	  toggleRainfallTable(elMap, rainfall_div);
+	})
+	.appendTo(controlscontainer);
+	toggleRainfallTable(elMap, rainfall_div);
+}
+
+function toggleRainfallTable(map_div, rainfall_div) {
+	var m = $(document.getElementById(map_div));
+	var r = $(document.getElementById(rainfall_div));
+
+	if (r.is(":hidden")) {
+		r.show();
+		m.width("70%");
+	} else {
+		r.hide();
+		m.width("100%");
+	}
+
+	var getCen = cumulative_rainfall_map.getCenter();
+	google.maps.event.trigger(cumulative_rainfall_map, 'resize'); 
+	cumulative_rainfall_map.setCenter(getCen);
+} 
+
+function initCrop(cropname) {
+  // Load GeoJSON.
+
+  if (typeof cropdata !== 'undefined') {
+    cropdata.setMap(null) ;
+  }
+  cropdata = new google.maps.Data();
+  cropdata.loadGeoJson(DOCUMENT_ROOT + 'database/regionvi6_2.geojson');
+  cropdata.setMap(cumulative_rainfall_map);
+  //googlemap.data.
+  var crop = search(crops, 'name', cropname, false);
+
+  // Add some style.
+  cropdata.setStyle(function(feature) {
+    //console.log(feature);
+    color =  CropAreaToColor(crop, feature.getProperty(crop['attr']));
+    return /** @type {google.maps.Data.StyleOptions} */({
+      fillColor: color,
+      strokeWeight: 1,
+      fillOpacity: 0.6
+    });
+  });
+
+  initMapLegends2('crop-legends', cropname);
+}
+
+function CropAreaToColor(crop, d) {
+	if (d <= 0 || typeof d === 'undefined') {
+	  return '#FFFEEB';
+	} else {
+	  var value = parseFloat(d);
+	  for (var i=0;i<crop['legends'].length;i++) {
+	    var legend = crop['legends'][i];
+	    var lastval;
+	    if (i==0) {
+	      lastval = legend['val'];
+	      if (value > 0 && value < legend['val']) {
+	          return legend['hex'];
+	      } 
+	    } else if (i==crop['legends'].length-1) {
+	      if (value >= lastval) {
+	        return legend['hex'];
+	      }
+	    } else {
+	      if (value >= lastval && value < legend['val']) {
+	        return legend['hex'];
+	      } else {
+	        lastval = value;
+	      }
+	    }
+	  }
+
+	}
+}
+
 </script>
 </head>
 <body>
 <div id='header'>
 	<div id="banner">
-		<img id='logo' src='images/BANTAY_PANAHON.png'/>
-        <img id='logo_right' src='images/header_1_right.png'/>
+		<img id='logo' src='images/AgriWatch.png'/>
         <div id='menu'>
 		<ul>
-			<li ><a href="#" class='currentPage'>Home</a></li>
+			<li ><a href="index.php">Home</a></li>
 			<li><a href="rainfall.php">Rainfall Monitoring</a></li>
 			<li><a href="waterlevel.php">Waterlevel Monitoring</a></li>
 			<li><a href="waterlevel2.php">Waterlevel Map</a></li>
 			<li><a href="devices.php">Devices Monitoring</a></li>
-			<li><a href="agriwatch.php" class='beta-link'>AgriWatch</a></li>
+			<li><a href="#" class='currentPage beta-link'>AgriWatch</a></li>
 		</ul>
 	</div>
 	</div>
@@ -632,7 +626,7 @@
 		</div>
 	<div id='legends'>
 	</div>
-	
+
 </div>
 <div id='footer'>
 	<div>
@@ -692,8 +686,42 @@
 </div>
 </body>
 <script type="text/javascript">
-var rainfall_devices = <?php echo json_encode(Devices::GetAllDevicesWithParameter('Rainfall'));?>;
-var waterlevel_devices = <?php echo json_encode(Devices::GetAllDevicesWithParameter('Waterlevel'));?>;
-var temperature_devices = <?php echo json_encode(Devices::GetAllDevicesWithParameter('Temperature'));?>;
+	var rainfall_devices = <?php echo json_encode(Devices::GetAllDevicesWithParameter('Rainfall'));?>;
+</script>
+
+<script type="text/javascript">
+// TODO Fetch this from server instead/ lazy-loading something
+	var crop_rice = {
+	  'name' : 'Rice',
+	  'scientific_name' : '‎Oryza sativa',
+	  'desc' : 'Usually white in color',
+	  'attr' : 'rice_area',
+	  'legends' : [
+	                {'name':'Rice producing > 0 and < 2000 hectares',
+	                  'hex' : '#CAFBCD',
+	                  'val': 2000},
+	                {'name':'Minor Rice producing >= 2000 and < 3500 hectares',
+	                 'hex' : '#2D8632',
+	                 'val' : 4000},
+	                {'name':'Major Rice producing >= 3500 hectares',
+	                 'hex' : '#003604',
+	                }
+	  ]
+	}
+
+	var crop_corn = {
+	  'name' : 'Corn',
+	  'scientific_name' : 'Maize',
+	  'desc' : 'Usually yellow in color',
+	  'attr' : 'corn_area',
+	  'legends' : [
+	                {'name':'Corny < 50 %',
+	                  'hex' : '#DEDB8B',
+	                  'val': 50},
+	                {'name':'Really Corny >= 50 %',
+	                 'hex' : '#AAA739'}
+	  ]
+	}
+	var crops = [crop_rice, crop_corn];
 </script>
 </html>

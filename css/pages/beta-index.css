@@ -1,0 +1,29 @@
+#map-canvas {
+    height: 768px;
+    min-width: 800px;
+    width: 100%;
+    display: inline-block;
+}
+
+#floating-div-1 {
+    height: 720px;
+    width: 440px;
+    margin-right: 20px;
+    padding: 20px 20px 20px 20px;
+    background-color: rgba(250, 250, 240, 0.9);
+}
+
+#rainfall-canvas table {
+    box-sizing: border-box;
+    border-collapse: collapse;
+    max-width: 530px;
+}
+
+#rainfall-canvas table th,
+#rainfall-canvas table td {
+    border-style: dotted;
+    border-spacing: 0;
+    border-width: 1px;
+    font-size: x-small;
+    table-layout: fixed;
+}

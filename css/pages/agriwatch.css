@@ -1,0 +1,98 @@
+#map-canvas {
+    height: 600px;
+    width: 70%;
+    float: left;
+    display: inline-block;
+}
+
+#rainfall-canvas {
+    height: 600px;
+    width: 30%;
+    overflow: scroll;
+
+}
+
+#rainfall-canvas table {
+    box-sizing: border-box;
+    border-collapse: collapse;
+    max-width: 530px;
+}
+
+#rainfall-canvas table th,
+#rainfall-canvas table td {
+    border-style: dotted;
+    border-spacing: 0;
+    border-width: 1px;
+    font-size: x-small;
+    table-layout: fixed;
+}
+
+.legend {
+    margin: 4px;
+    white-space: nowrap;
+    clear: both;
+}
+
+.legend img {
+    width: 24px;
+}
+
+.legendtitle {
+    clear: both;
+    font-weight: bolder;
+    text-align: center;
+}
+
+#togglelegends {
+    margin: 10px;
+    clear: both;
+}
+
+.province_tr {
+    background-color: #ececec;
+}
+
+.selected_device_tr {
+    background-color: #00FFFF !important;
+    font-weight: bold;
+}
+
+#legends {
+    background: rgba(220, 220, 255, 0.5);
+    padding: 6px;
+}
+
+#legends #togglelegends {
+    background: #2869E1;
+    color: white;
+    border: 0;
+    border-radius: 5px;
+    float: left;
+}
+
+.legend-labels {
+    color: black;
+    background-color: #FFF;
+/*     text-shadow:
+   -1px -1px 0 #000,  
+    1px -1px 0 #000,
+    -1px 1px 0 #000,
+     1px 1px 0 #000;*/
+}
+
+.legendboxes {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+}
+
+#crop-legends {
+    background: rgba(51, 204, 0, 0.5);
+    background: rgba(220, 220, 255, 0.5);
+    padding: 6px;
+}
+
+#header {
+    background-image: url(../../images/BG_repeat_AgriWatch.png) !important;
+}
+
