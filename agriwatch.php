@@ -65,7 +65,7 @@
 		initMapLegends('legends');
 		initRainfallTable("rainfall-canvas");
 		initAgriWatchControls("map-canvas", "rainfall-canvas");
-		initFetchDataMonthly();
+		initFetchDataMonthly(false);
 	});
 
 /*	$(document).ready(function() {
@@ -95,8 +95,8 @@
 		
 	}
 
-	function initFetchDataMonthly() {
-		var date = new Date(), y = date.getFullYear(), m = date.getMonth();
+	function initFetchDataMonthly(history) {
+		var date = Date.parseExact(key['sdate'], 'MM/dd/yyyy'), y = date.getFullYear(), m = date.getMonth();
 		var firstDay = new Date(y, m, 1);
 		//var lastDay = new Date(y, m + 1, 0);
 		var lastDay = date;
@@ -106,14 +106,17 @@
 		var startdate = firstDay.toString('MM/dd/yyyy');
 		var enddate = lastDay.toString('MM/dd/yyyy');
 
+		$("#duration_query").text(startdate + " - " + enddate);
+		console.log(startdate + " - " + enddate);
+
 
 		for(var i=0;i<rainfall_devices.length;i++) {
 				var cur = rainfall_devices[i]; 
 				if (history) {
-					postGetData(cur['dev_id'], startdate, enddate, 1, onRainfallDataResponseSuccess);
+					postGetData(cur['dev_id'], startdate, enddate, '4464', onRainfallDataResponseSuccess);
 				} else {
 					if (cur['status_id'] == null || cur['status_id'] == '0') {
-						postGetData(cur['dev_id'], startdate, enddate, 1, onRainfallDataResponseSuccess);
+						postGetData(cur['dev_id'], startdate, enddate, '4464', onRainfallDataResponseSuccess);
 					} // else SKIP
 				}
 				//if (i >= 20) break;
@@ -122,7 +125,8 @@
 
 	function postGetData(dev_id, sdate, edate, limit, successcallback) {
 		$.ajax({
-				url: DOCUMENT_ROOT + 'data.php',
+				//url: DOCUMENT_ROOT + 'data.php',
+				url: 'http://192.168.1.236/dost6arc/api/archive',
 				type: "POST",
 				data: {start: 0,
 		  		 limit: limit,
@@ -139,8 +143,8 @@
 
 	function onRainfallDataResponseSuccess(data) {
 		var device_id = data.device[0].dev_id;
-		console.log(device_id);
-		console.log(data);
+		//console.log(device_id);
+		//console.log(data);
 
 		$('#loadedraindevices').text(++key['loadedraindevices']);
 			onRainfallDataResponseFail(device_id);
@@ -151,6 +155,33 @@
 			data.data[0].rain_cumulative == null || data.data[0].rain_cumulative=='' // errouneous readings
 			) {
 			updateRainfallTable(device_id, '[NO DATA]', '', '', 'nodata');
+		} else if (data.count > 1) {
+			var total = 0;
+
+			for (var i = 0; i < data.data.length; ++i) {
+				var cdata = data.data[i];
+				var rv = parseFloat(cdata.rain_value);
+				total += rv;
+			}
+
+			total = total.toFixed(2);
+
+			var device = search(rainfall_devices, 'dev_id', device_id, "", "", "");
+			updateRainfallTable(device_id, "", "", total, 'dataok');
+			
+			var rc = total;
+
+			var marker_url;
+			for (var i = 0;i<key['marker'].length;i++) {
+				limit = key['marker'][i];
+				if (rc >= parseFloat(limit['min']) && rc < parseFloat(limit['max'])) {
+					marker_url = limit['src']+'.png';
+					addMarker(device['dev_id'], device['posx'], device['posy'], device['municipality_name'] + ' - ' + device['location_name'], device['type_name'], marker_url, rc);
+					var text =  "[Cumulative Rainfall] "+device['municipality_name'] + ' - ' + device['location_name'] + ' : ' + data.data[0].rain_cumulative + ' mm';
+
+					break;
+				} 
+			}
 		} else {
 			var device = search(rainfall_devices, 'dev_id', device_id);
 			//var timeread = data.data[0].dateTimeRead.substring(10).substring(0, 6);
@@ -214,7 +245,7 @@
 				position: google.maps.ControlPosition.RIGHT_CENTER
 			},
   			draggableCursor:'crosshair',
-  			mapTypeId: google.maps.MapTypeId.HYBRID
+  			mapTypeId: google.maps.MapTypeId.TERRAIN
 		};
 		
 		cumulative_rainfall_map = new google.maps.Map(document.getElementById(divcanvas), mapOptions);
@@ -349,7 +380,8 @@
 				$.xhrPool.abortAll();
 				clearMarkers();
 				clearRainfallTable();
-				initFetchData(true);
+				//initFetchData(true);
+				initFetchDataMonthly(true);
 			}/*,
 			 altField: '#datepicker_start',
 			 altFormat : 'mm/dd/yy',
@@ -363,6 +395,7 @@
 		$('<tr><th>Server DateTime</th><td id="serverdtr" colspan="3"><table><tr><td colspan="3">' + SERVER_DATE + '</td></tr> <tr><td colspan="3">' + SERVER_TIME + '</tr></td></table></td><tr>').appendTo(table);
 		$('<tr><th>Total Devices</th><td id="numraindevices" colspan="3">' + rainfall_devices.length + '</td><tr>').appendTo(table);
 		$('<tr><th>Loaded</th><td id="loadedraindevices" colspan="3">0</td><tr>').appendTo(table);
+		$('<tr><th>Duration</th><td id="duration_query" colspan="3">0</td><tr>').appendTo(table);
 		for (var i = 0; i < rainfall_devices.length; i++) {
 			var cur = rainfall_devices[i];
 
@@ -371,15 +404,15 @@
 				prevProvince = cur.province_name;
 				$('<tr/>').addClass('province_tr')
 					.append($('<th>' + prevProvince + '</th>'))
-					.append($('<th>Time</th>'))
-					.append($('<th>Rain Value (mm)</th>'))
+					//.append($('<th>Time</th>'))
+					//.append($('<th>Rain Value (mm)</th>'))
 					.append($('<th>Cumulative (mm)</th>')).appendTo(table);
 			}
 
 			$('<tr/>', {'data-dev_id': cur.dev_id})
 				.append($('<td nowrap="">' + cur.municipality_name + ' - ' + cur.location_name + '</td>'))
-				.append($('<td/>', {'data-col': 'dtr'}))
-				.append($('<td/>', {'data-col': 'rv'}))
+				//.append($('<td/>', {'data-col': 'dtr'}))
+				//.append($('<td/>', {'data-col': 'rv'}))
 				.append($('<td/>', {'data-col': 'cr'})).appendTo(table);
 
 			if (cur['status_id'] != null && cur['status_id'] != 0) {
