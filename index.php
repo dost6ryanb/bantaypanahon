@@ -107,13 +107,13 @@
 		setTimeout(function() {
 			for(var i=0;i<temperature_devices.length;i++) {
 				var cur = temperature_devices[i]; 
-				if (history) {
+				// if (history) {
 					postGetData(cur.dev_id, key['sdate'], key['sdate'], 96, onTemperatureDataResponseSuccess);
-				} else {
-					if (cur['status_id'] == null || cur['status_id'] == '0') {
-						postGetData(cur.dev_id, key['sdate'], "", "", onTemperatureDataResponseSuccess);
-					}
-				}
+				// } else {
+				// 	if (cur['status_id'] == null || cur['status_id'] == '0') {
+				// 		postGetData(cur.dev_id, key['sdate'], "", "", onTemperatureDataResponseSuccess);
+				// 	}
+				// }
 			}
 
 		}, 200);
@@ -410,6 +410,7 @@
 			datatable.addRow(row);
 			
 		}
+		
 		var d = Date.parseExact(json.data[json.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
 		var d2 = Date.parseExact(json.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
 
