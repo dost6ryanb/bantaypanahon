@@ -360,11 +360,6 @@
 
 				chartInfo = ChartInfo('chart-info');
 				chartLinks = ChartLinks('chart-links');
-				startDateOption = DateOption('sdate');
-				startDateOption.setDate(SDATE);
-				startDateOption.onDateChanged(function(d) {
-					console.log("Date Changed to " + d + " " + startDateOption.getDate());
-				});
 				deviceView = DeviceView('chart-div');
 				deviceView.Empty();
 				deviceView.SetView(DeviceView.VIEWS.TABLE);
@@ -381,6 +376,12 @@
 					if (deviceView.GetData() !== undefined) {
 						deviceView.DrawView();
 					}
+				});
+				startDateOption = DateOption('sdate');
+				startDateOption.setDate(SDATE);
+				startDateOption.onDateChanged(function(d) {
+					console.log("Date Changed to " + d + " " + startDateOption.getDate());
+					that.LoadData();
 				});
 
 				this.Initialized = true;
