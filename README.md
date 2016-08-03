@@ -3,13 +3,13 @@
 ####A project by Department of Science and Technology Regional Office No. VI
 
 
--- Php Notes
+###Php Notes
 
-PDO sqlite module must be enabled
+* PDO sqlite module must be enabled
 
--- Install notes on Mac OS X/Linux
+###Install notes on Mac OS X/Linux
 
-run the following commands
+1. run the following commands
 
 <pre><code>
     sudo chmod -R 775 /bantaypanahon
