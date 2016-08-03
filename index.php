@@ -16,8 +16,9 @@
 <link rel="stylesheet" type="text/css" href='css/style.css' />
 <link rel="stylesheet" type="text/css" href='css/screen.css' />
 <link rel="stylesheet" type="text/css" href='css/pages/index.css' />
-<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBIHIWYF28n_7UpQiud5ZNQP6C4G3LmTtU&sensor=false"></script>
-<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+<script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4yau_nw40dWy2TwW4OdUq4OJKbFs1EOc&sensor=false"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
 <script type="text/javascript">
 	setTimeout(function(){
 		window.location.reload(true);
@@ -39,8 +40,9 @@
 	var cumulative_rainfall_map_markers = [];
 	var lastValidCenter;
 
-	google.load("visualization", "1", {packages:["corechart"]});
-	google.load('visualization', '1', {packages:['table']});
+	//google.load("visualization", "1", {packages:["corechart"]});
+	google.charts.load('current', {packages: ['corechart']});
+	//google.load('visualization', '1', {packages:['table']});
 
 	$.xhrPool = [];
 	$.xhrPool.abortAll = function() {
@@ -619,7 +621,6 @@
 			<li><a href="waterlevel.php">Waterlevel Monitoring</a></li>
 			<li><a href="waterlevel2.php">Waterlevel Map</a></li>
 			<li><a href="devices.php">Devices Monitoring</a></li>
-			<li><a href="agriwatch.php" class='beta-link'>AgriWatch</a></li>
 		</ul>
 	</div>
 	</div>
