@@ -1,8 +1,6 @@
 # Bantay Panahon
-==================
-Western Visayas Philippines Weather Monitoring Tool for ASTI Devices
-------------------------
-A project by Department of Science and Technology Regional Office No. VI
+##Western Visayas Philippines Weather Monitoring Tool for ASTI Devices
+####A project by Department of Science and Technology Regional Office No. VI
 
 
 -- Php Notes
