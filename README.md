@@ -11,11 +11,12 @@ PDO sqlite module must be enabled
 -- Install notes on Mac OS X/Linux
 
 run the following commands
-    
-  sudo chmod -R 775 /bantaypanahon
-    //set dbfile owner and permission to _www
+
+<code>
+    sudo chmod -R 775 /bantaypanahon
     sudo chown _www /bantaypanahon/database/
     sudo chown _www /bantaypanahon/database/sqlite.db
     sudo chmod u+w /bantaypanahon/database/
     sudo chmod u+w /bantaypanahon/database/sqlite.db 
+</code>
   
