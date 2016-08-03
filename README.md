@@ -11,12 +11,11 @@
 
 1. run the following commands
 
-<pre><code>
-    sudo chmod -R 775 /bantaypanahon
-    sudo chown www /bantaypanahon/database/
-    sudo chown www /bantaypanahon/database/sqlite.db
-    sudo chmod u+w /bantaypanahon/database/
-    sudo chmod u+w /bantaypanahon/database/sqlite.db 
+<pre><code>sudo chmod -R 775 /bantaypanahon
+sudo chown www /bantaypanahon/database/
+sudo chown www /bantaypanahon/database/sqlite.db
+sudo chmod u+w /bantaypanahon/database/
+sudo chmod u+w /bantaypanahon/database/sqlite.db 
 </code></pre>
 
 --------------
