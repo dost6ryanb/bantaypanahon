@@ -935,4 +935,5 @@
 <script type="text/javascript">
 var devices = <?php echo json_encode(Devices::getAllDevices());?>;
 </script>
+<?php include_once("analyticstracking.php") ?>
 </html>
