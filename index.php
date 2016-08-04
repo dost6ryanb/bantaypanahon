@@ -141,8 +141,8 @@
 
 	function onRainfallDataResponseSuccess(data) {
 		var device_id = data.device[0].dev_id;
-		console.log(device_id);
-		console.log(data);
+		//console.log(device_id);
+		//console.log(data);
 
 		$('#loadedraindevices').text(++key['loadedraindevices']);
 
@@ -581,7 +581,7 @@
 
 		var heat_index = (HI.heatIndex({temperature: current_temperature, humidity: humidity})).toFixed(2);
 
-		console.log(heat_index);
+		//console.log(heat_index);
 
 		text += "[" + current_time + ']: ' + municipality + ' - Temp/Heat Index: ' + current_temperature  + '/' + heat_index + ' \u2103. Max Temp: ' + max + ' last ' + time ;
 		addTicker(text, 'ticker2list');
@@ -698,4 +698,5 @@ var rainfall_devices = <?php echo json_encode(Devices::GetAllDevicesWithParamete
 var waterlevel_devices = <?php echo json_encode(Devices::GetAllDevicesWithParameter('Waterlevel'));?>;
 var temperature_devices = <?php echo json_encode(Devices::GetAllDevicesWithParameter('Temperature'));?>;
 </script>
+<?php include_once("analyticstracking.php") ?>
 </html>

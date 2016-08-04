@@ -400,4 +400,5 @@
 <script type="text/javascript">
 var rainfall_devices = <?php echo json_encode(Devices::GetAllDevicesWithParameter('Rainfall'));?>;
 </script>
+<?php include_once("analyticstracking.php") ?>
 </html>
