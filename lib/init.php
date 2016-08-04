@@ -17,4 +17,5 @@ include_once 'lib/devices.class.php';
     var DOCUMENT_ROOT = "http://<?php echo $server_name;?>/";
     var SERVER_DATE = '<?php echo date("F d,Y");?>';
     var SERVER_TIME = '<?php echo date("g:i A");?>';
+    //try pushing to release remote
 </script>
