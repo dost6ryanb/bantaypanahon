@@ -698,5 +698,5 @@ var rainfall_devices = <?php echo json_encode(Devices::GetAllDevicesWithParamete
 var waterlevel_devices = <?php echo json_encode(Devices::GetAllDevicesWithParameter('Waterlevel'));?>;
 var temperature_devices = <?php echo json_encode(Devices::GetAllDevicesWithParameter('Temperature'));?>;
 </script>
-<?php include_once("analyticstracking.php") ?>
+<?php //include_once("analyticstracking.php") ?>
 </html>

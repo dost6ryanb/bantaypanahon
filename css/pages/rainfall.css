@@ -3,7 +3,7 @@
 	margin: 20px 10px 10px 20px;
 	padding: 10px;
 }
-.xtbl th, tr, td {
+.xtbl th, .xtbl tr, .xtbl td {
 	border-style: solid;
 	border-width: 1px;
 	border-color: black;
@@ -16,10 +16,23 @@ td.textalignright {
 } 
 
 #config label, #config input,  #config button,  #config span {
-	vertical-align: top;
+	vertical-align: middle;
+}
+
+#config #info-refresh {
+	display: block;
+	height: 30px;
+	margin: 10px;
+	padding: 5px 30px 5px;
+	font-weight: bold;
 }
 
 .rain-chart {
 	width: 700px;
 	height: 320px;
+}
+
+.form-group {
+	display: inline-block;
+	margin: 2px;
 }

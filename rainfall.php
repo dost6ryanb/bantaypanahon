@@ -2,13 +2,13 @@
 <html>
 <head>
 	<title>DOST VI - DRRMU - Rainfall Monitoring</title>
-	<script type="text/javascript" src='js/jquery-1.11.1.min.js'></script>
-	<script type="text/javascript" src='js/jquery-ui.min.js'></script>
+	<script type="text/javascript" src='vendor/jquery/jquery-1.12.4.min.js'></script>
+	<script type="text/javascript" src='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.js'></script>
 	<script type="text/javascript" src='js/date-en-US.js'></script>
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-	<link rel="stylesheet" href='css/jquery-ui.min.css'>
-	<link rel="stylesheet" href='css/jquery-ui.theme.min.css'>
-	<link rel="stylesheet" href='css/jquery-ui.structure.min.css'>
+	<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.css'>
+	<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.theme.min.css'>
+	<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.structure.min.css'>
 	<link rel="stylesheet" type="text/css" href='css/style.css' />
 	<link rel="stylesheet" type="text/css" href='css/screen.css' />
 	<link rel="stylesheet" type="text/css" href='css/superfish.css' />
@@ -42,7 +42,8 @@
 
 		initProvincesSelect('provinces');
 		initDurationSelect('durations');
-		$('select').selectmenu({ width: 120 });
+		initBaseDate('basedate');
+		$('select').selectmenu({ width: 300 });
 		initGo('goButton', 'provinces', 'durations', 'rainfalltable');
 	});
 
@@ -61,6 +62,20 @@
 		}
 	}
 
+	function initBaseDate(input) {
+		var el = document.getElementById(input);
+		var date = Date.parseExact(key['serverdate'], 'MM/dd/yyyy');
+		$(el).datepicker({
+			defaultDate: date,
+			date: 'mm/dd/yy',
+			altField: el,
+			altFormat: 'M d, yy',
+			onSelect: function(data) {
+				key['serverdate'] = data;
+			}})
+		.datepicker( "setDate", date)
+	}
+
 	function initGo(button, provinceSelect, durationSelect, div) {
 		var frmbutton= $(document.getElementById(button));
 		var frmselectProvince = $(document.getElementById(provinceSelect));
@@ -68,17 +83,18 @@
 		frmbutton.on('click', function() {
 			var prov = key['provinces'][frmselectProvince.val()];
 			var dur = key['durations'][frmselectDuration.val()].minutes;
-			initRainfalltable(div, prov, dur);
+			initRainfalltable(div, prov, dur, key['serverdate']);
 		});
 	}
 
-	function initRainfalltable(div, province, duration) {
+	function initRainfalltable(div, province, duration, basedate) {
 		var div = $(document.getElementById(div));
-
+		var thisdate = Date.parseExact(basedate, 'MM/dd/yyyy');
+		var yesterday = thisdate.clone().add({days: -1});
 		var table = $('<table/>', {'class':'xtbl', 'id':'xtbl_'+ ++xtblcounter, 'data-duration':duration}).prependTo(div);
 		//$('<tr><th>Server DateTime</th><td id="serverdtr">'+key['serverdate']+' '+ key['servertime']+'</td><tr>').appendTo(table);
 		$('<tr/>')
-		.append($('<th colspan="2" class="ui-widget-header">Cumulative Rainfall Reading of '+ province +' for the last '+ parseInt(duration/60) +' hour/s.</th>').append('<button id="cx-xtbl_'+ xtblcounter +'">close</button>'))
+		.append($('<th colspan="2" class="ui-widget-header">Cumulative Rainfall Reading of '+ province +' for the last '+ parseInt(duration/60) +' hour/s from ' + thisdate.toString("MMM dd, yyyy") +  '.</th>').append('<button id="cx-xtbl_'+ xtblcounter +'">close</button>'))
 						// .append($('<td/>@ ', {'class':'textalignright'}).text(key['serverdate']+' '+ key['servertime'])
 							// .append($('<button>close</button>')	
 					.appendTo(table);
@@ -92,7 +108,7 @@
 		// $('<tr class="ui-widget-header"><th>Municipality</th><th>Location</th><th>Cumulative (mm)</th><tr>').appendTo(table);
 		//$('<tr class="ui-widget-header"><th>Location</th><th>Cumulative (mm)</th><tr>').appendTo(table);
 		//$('<tr class="ui-widget-header"><th colspan="2">Cumulative (mm)</th><tr>').appendTo(table);
-
+						
 		for(var i=0;i<rainfall_devices.length;i++) {
 			var cur = rainfall_devices[i];
 			if (cur['province_name'] == province) {
@@ -101,7 +117,7 @@
 				// .append($('<td>'+cur['location_name']+'</td>'))
 				.append($('<td/>', {'colspan':'2','data-col':'cr'})).appendTo(table);
 				if (cur['status_id'] == null || cur['status_id'] == '0') {
-					postGetData('xtbl_'+xtblcounter, cur['dev_id'], "", "", duration);
+					postGetData('xtbl_'+xtblcounter, cur['dev_id'], yesterday.toString("MM/dd/yy"), thisdate.toString("MM/dd/yy"), "", duration);
 				} else {
 					updateRainfallTable('xtbl_'+xtblcounter, cur['dev_id'], "[DISABLED]", 'disabled') ;
 				}
@@ -109,14 +125,14 @@
 		}
 	}
 
-	function postGetData( xtbl, dev_id, sdate, limit, duration) {
+	function postGetData( xtbl, dev_id, sdate, edate, limit, duration) {
 		$.ajax({
 				url: DOCUMENT_ROOT + 'data.php',
 				type: "POST",
 				data: {start: 0,
 		  		 limit: limit,
-		  		 sdate: '',
-		  		 edate: '',
+		  		 sdate: sdate,
+		  		 edate: edate,
 		  		 pattern: dev_id
 			},
 			dataType: 'json',
@@ -337,16 +353,24 @@
 	</div>
 	<div id="content">
 		<div id="config">
-			<label for='provinces'>Please select province:</label>
-			<select id='provinces' name='province'>
-
-			</select>
-			<label for='durations'>Please select duration:</label>
-			<select id='durations' name='duration'>
-
-			</select>
+			<div class="form-group">
+			<label for='provinces'>Province: </label>
+			<select id='provinces' name='province'></select>
+			</div>
+			<div class="form-group">
+			<label for='durations'>Duration: </label>
+			<select id='durations' name='duration'></select>
+			</div>
+			<div class="form-group">
+			<label for="basedate">Base Date: </label>
+			<input type="text" id="basedate" class='ui-corner-all ui-button ui-widget'>
+			</div>
+			<div class="form-group">
 			<button id='goButton' class='.ui-widget'>Go</button>
-			<span>*Refresh page to update server date and time.</span>
+			</div>
+			<div id="info-refresh" class="ui-state-highlight">
+				<span>Refresh page to update server date and time.</span>
+			</div>
 		</div>
 		<div id='rainfalltable'>
 		
@@ -400,5 +424,5 @@
 <script type="text/javascript">
 var rainfall_devices = <?php echo json_encode(Devices::GetAllDevicesWithParameter('Rainfall'));?>;
 </script>
-<?php include_once("analyticstracking.php") ?>
+<?php //include_once("analyticstracking.php") ?>
 </html>
