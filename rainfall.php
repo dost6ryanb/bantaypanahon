@@ -67,11 +67,10 @@
 		var date = Date.parseExact(key['serverdate'], 'MM/dd/yyyy');
 		$(el).datepicker({
 			defaultDate: date,
-			date: 'mm/dd/yy',
-			altField: el,
-			altFormat: 'M d, yy',
-			onSelect: function(data) {
-				key['serverdate'] = data;
+			dateFormat: 'M dd, yy',
+			onSelect: function(data) {		
+				var predict_date = Date.parseExact(data, "MMM dd, yyyy").toString("MM/dd/yyyy");
+				key['serverdate'] = predict_date;
 			}})
 		.datepicker( "setDate", date)
 	}
