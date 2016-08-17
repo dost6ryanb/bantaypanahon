@@ -4,7 +4,7 @@
 	<title>DOST VI - DRRMU - Rainfall Monitoring</title>
 	<script type="text/javascript" src='vendor/jquery/jquery-1.12.4.min.js'></script>
 	<script type="text/javascript" src='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.js'></script>
-	<script type="text/javascript" src='js/date-en-US.js'></script>
+	<script type="text/javascript" src='vendor/datejs/date.js'></script>
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 	<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.css'>
 	<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.theme.min.css'>
