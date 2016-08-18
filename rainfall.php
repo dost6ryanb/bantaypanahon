@@ -5,6 +5,8 @@
 	<script type="text/javascript" src='vendor/jquery/jquery-1.12.4.min.js'></script>
 	<script type="text/javascript" src='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.js'></script>
 	<script type="text/javascript" src='vendor/datejs/date.js'></script>
+	<script type="text/javascript" src='vendor/underscore-1.8.3/underscore-min.js'></script>
+	<script type="text/javascript" src='vendor/mustache.js-2.2.1/mustache.min.js'></script>
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 	<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.css'>
 	<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.theme.min.css'>
@@ -35,56 +37,168 @@
 			   		]
 		  };
 
+	MyApp = {};
+
+	MyApp.SERVER_DATE = '<?php echo $sdate;?>';
+
+	MyApp.config = {
+		provinces : ['Aklan', 'Antique', 'Capiz', 'Guimaras', 'Iloilo', 'Negros Occidental'],
+		durations : [
+			{'label': '1 hr', 'minutes':'60'},
+			{'label': '3 hr', 'minutes':'180'},
+			{'label': '6 hr', 'minutes':'360'},
+			{'label': '9 hr', 'minutes':'540'},
+			{'label': '12 hr', 'minutes':'720'},
+			{'label': '24 hr', 'minutes':'1440'}
+		]
+	};
+
+	MyApp.RainfallTableGenerator = (function() {
+		var TEMPLATE_ID = 'rainfall-table_template';
+		var _templateSource = null;
+		//var _templateRendered = null;
+
+		var build_template = function() {
+			_templateSource = $(document.getElementById(TEMPLATE_ID)).html();
+			Mustache.parse(_templateSource);
+		}
+
+		return {
+			getRenderedTemplate(context) {
+				if (!_templateSource) {
+					build_template();
+				}
+
+				return Mustache.render(_templateSource, context);
+			}
+		}
+	})();
+
+	MyApp.RainfallTableCount = 0;
+
+	MyApp.RainfallTable = (function() {
+		var _p; //jq object of the container
+		var _e; //jq object of the table
+		var class_pref = "xtbl";
+		var _onClickCallBack;
+		var _id; //global counter mirror
+
+		return {
+			add : function(container, location_filter, duration, basedate) {
+				_p =  _p || $(document.getElementById(container));
+				_id = class_pref + "--" + MyApp.RainfallTableCount++;
+				var filteredDevices = _.where(rainfall_devices, {province_name : location_filter});
+				var dateText = basedate.toString("MM/dd/yyyy");
+				var timeText = (duration > 60) ? parseInt(duration/60) + ' hours' : '1 hour';
+				var options = {
+					pref : class_pref,
+					id : _id,
+					location_group : location_filter,
+					time : timeText,
+					date : dateText,
+					devices : filteredDevices,
+					cssByStatus : function() {
+						return function(text, render) {
+							if (render(text) == "1") {
+								return 'class="disabled"';
+							} else {
+								return '';
+							}
+						}
+					}
+				};
+
+				console.log(options.devices);
+
+				//var rendered = render_template(options);
+				var rendered = MyApp.RainfallTableGenerator.getRenderedTemplate(options);
+
+				_p.append(rendered);
+
+				_e = $(document.getElementById(_id));
+				var btnEl = _e.find("button." + class_pref + "__close-button");
+				btnEl.on('click', function(){
+					console.log("Click internal");
+					_onClickCallBack(_id);
+				});
+				//_e.effect('shake');
+			},
+
+			remove : function() {
+				_e.fadeOut('slow', function() {
+					$(this).remove();
+				});
+			},
+
+			onCloseButtonClick : function(fn) {
+				_onClickCallBack = fn;
+			},
+
+		};
+	});
+
 	var xtblcounter = 0;
 	google.charts.load('current', {packages: ['corechart']});
 	$(document).ready(function() {
-		$("button").button();
-
-		initProvincesSelect('provinces');
-		initDurationSelect('durations');
-		initBaseDate('basedate');
-		$('select').selectmenu({ width: 300 });
-		initGo('goButton', 'provinces', 'durations', 'rainfalltable');
+		initConfigUI('config-form', MyApp.config);
 	});
 
-	function initProvincesSelect(select) {
-		var frmselect = $(document.getElementById(select));
-		for (var i=0;i<key['provinces'].length;i++) {
-			$('<option value="'+i+'">'+key['provinces'][i]+'</option>').appendTo(frmselect);
-		}
-	}
+	//el - element(div) ID
+	function initConfigUI(el, context) {
+		var source = $(document.getElementById(el));
 
-	function initDurationSelect(select) {
-		var frmselect = $(document.getElementById(select));
-		for (var i=0;i<key['durations'].length;i++) {
-			//$('<option value="'+i+'">'+12+'</option>').appendTo(frmselect);
-			$('<option value="'+i+'">'+key['durations'][i].label+'</option>').appendTo(frmselect);
-		}
-	}
+		var template = source.html();
+		var rendered = Mustache.render(template, context);
 
-	function initBaseDate(input) {
-		var el = document.getElementById(input);
-		var date = Date.parseExact(key['serverdate'], 'MM/dd/yyyy');
-		$(el).datepicker({
-			defaultDate: date,
-			dateFormat: 'M dd, yy',
-			onSelect: function(data) {		
-				var predict_date = Date.parseExact(data, "MMM dd, yyyy").toString("MM/dd/yyyy");
-				key['serverdate'] = predict_date;
-			}})
-		.datepicker( "setDate", date)
-	}
+		source.html(rendered);
 
-	function initGo(button, provinceSelect, durationSelect, div) {
-		var frmbutton= $(document.getElementById(button));
-		var frmselectProvince = $(document.getElementById(provinceSelect));
-		var frmselectDuration = $(document.getElementById(durationSelect));
-		frmbutton.on('click', function() {
-			var prov = key['provinces'][frmselectProvince.val()];
-			var dur = key['durations'][frmselectDuration.val()].minutes;
-			initRainfalltable(div, prov, dur, key['serverdate']);
+		//JQuery Ui selectmenu
+		$('select').selectmenu({ width: 200 });
+
+		//JQuery Ui DatePicker
+		var default_date = Date.parseExact(MyApp.SERVER_DATE, 'MM/dd/yyyy');
+		initDatePicker('basedate', default_date);
+
+		//JQuery button
+		$("#go-button").button();
+		$("#go-button").on('click', function() {
+			var province = $(document.getElementById('provinces')).val();
+			var duration = $(document.getElementById('durations')).val();
+			var basedate = $(document.getElementById('basedate')).datepicker( "getDate" );
+			var rainTable = new MyApp.RainfallTable();
+			rainTable.add('tables-container', province, duration, basedate);
+			rainTable.onCloseButtonClick(function(d) {
+				console.log("Clicked " + d);
+				rainTable.remove();
+			});
+		});
+
+
+		//Some info
+		$('#info-refresh').one('click', function() {
+			console.log($(this));
+			$(this).fadeOut();
 		});
 	}
+
+	//el - element(input[text]) ID
+	//date - Date Object
+	function initDatePicker(el, date) {
+		var source = document.getElementById(el);
+		var date = date || Date.now();
+
+		$(source).datepicker({
+			defaultDate: date,
+			dateFormat: 'M dd, yy',
+			//onSelect: function(dateText) {		
+				//var predict_date = Date.parseExact(dateText, "MMM dd, yyyy").toString("MM/dd/yyyy");
+				//key['serverdate'] = predict_date;
+				//MyApp.config.querydate = predict_date;
+			//}
+		})
+		.datepicker( "setDate", date);
+	}
+
 
 	function initRainfalltable(div, province, duration, basedate) {
 		var div = $(document.getElementById(div));
@@ -93,7 +207,7 @@
 		var table = $('<table/>', {'class':'xtbl', 'id':'xtbl_'+ ++xtblcounter, 'data-duration':duration}).prependTo(div);
 		//$('<tr><th>Server DateTime</th><td id="serverdtr">'+key['serverdate']+' '+ key['servertime']+'</td><tr>').appendTo(table);
 		$('<tr/>')
-		.append($('<th colspan="2" class="ui-widget-header">Cumulative Rainfall Reading of '+ province +' for the last '+ parseInt(duration/60) +' hour/s from ' + thisdate.toString("MMM dd, yyyy") +  '.</th>').append('<button id="cx-xtbl_'+ xtblcounter +'">close</button>'))
+		.append($('<th colspan="2" class="ui-widget-header">Cumulative Rainfall Reading of '+ province +' for the last '+ parseInt(duration/60) +' hour/s from ' + thisdate.toString("MMM dd, yyyy") +  '.</th>').append('<button id="cx-xtbl_'+ xtblcounter +'" class="close-button">close</button>'))
 						// .append($('<td/>@ ', {'class':'textalignright'}).text(key['serverdate']+' '+ key['servertime'])
 							// .append($('<button>close</button>')	
 					.appendTo(table);
@@ -112,7 +226,7 @@
 			var cur = rainfall_devices[i];
 			if (cur['province_name'] == province) {
 				$('<tr/>', {'data-dev_id':cur['dev_id']})
-				.append($('<td style="width:80px">'+cur['municipality_name']+ " - " + cur['location_name'] + '</td>'))
+				.append($('<td>'+cur['municipality_name']+ " - " + cur['location_name'] + '</td>'))
 				// .append($('<td>'+cur['location_name']+'</td>'))
 				.append($('<td/>', {'colspan':'2','data-col':'cr'})).appendTo(table);
 				if (cur['status_id'] == null || cur['status_id'] == '0') {
@@ -323,7 +437,6 @@
 			rel_cr += parseFloat(t.data[i].rain_value);
 			t.data[i].rain_cumulative = rel_cr.toFixed(2);
 		}
-		//console.log(t);
 
 		
 		drawChartRain(xtbl, device_id, t);
@@ -351,28 +464,49 @@
 		</div>
 	</div>
 	<div id="content">
-		<div id="config">
+		<div id="config-form">
 			<div class="form-group">
 			<label for='provinces'>Province: </label>
-			<select id='provinces' name='province'></select>
+			<select id='provinces' name='province'>
+			{{#provinces}}
+				<option value="{{.}}">{{.}}</option>
+			{{/provinces}}
+			</select>
 			</div>
 			<div class="form-group">
 			<label for='durations'>Duration: </label>
-			<select id='durations' name='duration'></select>
+			<select id='durations' name='duration'>
+			{{#durations}}
+				<option value="{{minutes}}">{{label}}</option>
+			{{/durations}}
+			</select>
 			</div>
 			<div class="form-group">
 			<label for="basedate">Base Date: </label>
 			<input type="text" id="basedate" class='ui-corner-all ui-button ui-widget'>
 			</div>
 			<div class="form-group">
-			<button id='goButton' class='.ui-widget'>Go</button>
+			<button id='go-button' class='ui-widget'>Go</button>
 			</div>
 			<div id="info-refresh" class="ui-state-highlight">
 				<span>Refresh page to update server date and time.</span>
+				<span class="ui-icon ui-icon-closethick"></span>
 			</div>
 		</div>
-		<div id='rainfalltable'>
-		
+		<div id='tables-container'>
+		<script id="rainfall-table_template" type="text/html">
+			<table class="{{pref}}" id="{{id}}">
+				<tr>
+					<th colspan="2" class="ui-widget-header">Cumumative Rainfall Reading of {{location_group}} for the last {{time}} from {{date}}. <button class="{{pref}}__close-button"></button></th>
+				</tr>
+				{{#devices}}
+				<tr data-dev_id="{{dev_id}}">
+					<td>{{municipality_name}} - {{location_name}}</td>
+					<td data-col="result"{{#cssByStatus}}{{status_id}}{{/cssByStatus}}></td>
+				</tr>
+				{{/devices}}
+			</table>
+		</script>
 		</div>
 	</div>
 	<div id="footer">

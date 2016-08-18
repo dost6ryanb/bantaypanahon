@@ -1,25 +1,14 @@
-#config, .xtbl {
+#config-form, .xtbl {
 	border-collapse: collapse;
 	margin: 20px 10px 10px 20px;
 	padding: 10px;
 }
-.xtbl th, .xtbl tr, .xtbl td {
-	border-style: solid;
-	border-width: 1px;
-	border-color: black;
-	padding: 3px;
-	font-size: smaller;
-}
 
-td.textalignright {
-	text-align: right;
-} 
-
-#config label, #config input,  #config button,  #config span {
+#config-form label, #config-form input,  #config-form button,  #config-form span {
 	vertical-align: middle;
 }
 
-#config #info-refresh {
+#config-form #info-refresh {
 	display: block;
 	height: 30px;
 	margin: 10px;
@@ -27,12 +16,45 @@ td.textalignright {
 	font-weight: bold;
 }
 
-.rain-chart {
-	width: 700px;
-	height: 320px;
-}
-
-.form-group {
+#config-form .form-group {
 	display: inline-block;
 	margin: 2px;
 }
+
+#config-form #info-refresh span:last-child {
+	position: absolute;
+	right: 34;
+}
+
+.xtbl th, .xtbl tr, .xtbl td {
+	border-style: solid;
+	border-width: 1px;
+	border-color: black;
+	padding: 7px;
+	font-size: smaller;
+}
+
+.xtbl td:first-child {
+	width: 200px;
+    text-align: left;
+}
+
+.xtbl .rain-chart {
+	width: 900px;
+	height: 320px;
+}
+
+.xtbl .xtbl__close-button {
+	margin-left: 10px;
+	width: 60px;
+	height: 30px;
+}
+
+.xtbl td {
+	text-align: right;
+} 
+
+.xtbl td.data__disabled {
+
+}
+
