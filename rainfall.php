@@ -6,6 +6,7 @@
 	<script type="text/javascript" src='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.js'></script>
 	<script type="text/javascript" src='vendor/datejs/date.js'></script>
 	<script type="text/javascript" src='vendor/underscore-1.8.3/underscore-min.js'></script>
+	<script type="text/javascript" src='vendor/sprintf.js-1.0.3/dist/sprintf.min.js'></script>
 	<script type="text/javascript" src='vendor/mustache.js-2.2.1/mustache.min.js'></script>
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 	<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.css'>
@@ -77,26 +78,85 @@
 	MyApp.RainfallTableCount = 0;
 
 	MyApp.RainfallTable = (function() {
-		var _p; //jq object of the container
-		var _e; //jq object of the table
-		var class_pref = "xtbl";
-		var _onClickCallBack;
-		var _id; //global counter mirror
+		var $parent; //jq object of the container
+		var $el; //jq object of the table
+		var htmlID; //html ID of $el
+		var cssClass = "xtbl";
+		var fnOnClickCallBack;
+		var baseDate;
+		var duration;
+		var that = this;
+		var xhrPool = [];
+		var xhrPoolAbortAll = function() {
+			_.each(xhrPool, function(me) {
+	   			console.log("cancel ");
+	   			console.log(me);
+			});
+			xhrPool.length = 0
+		};
+
+		var fetchData = function(dev_id, sdate, edate, limit) {
+			$.ajax({
+				url: DOCUMENT_ROOT + 'data.php',
+				type: "POST",
+				data: {
+					start: 0,
+		  		 	limit: limit,
+		  		 	sdate: sdate,
+		  		 	edate: edate,
+		  		 	pattern: dev_id
+				},
+				dataType: 'json',
+				beforeSend: function(jqXHR) {
+			        xhrPool.push(jqXHR);
+			    },
+			    complete: function(jqXHR) {
+			        var index = xhrPool.indexOf(jqXHR);
+			        if (index > -1) {
+			            xhrPool.splice(index, 1);
+			        }
+			    }
+			})
+			.fail(function(f, n){
+				putRetryOnTD(dev_id);
+			})
+			.done(function(d){
+				putRetryOnTD(dev_id);
+			});
+		};
+
+		var onDataArrive = function(data) {
+
+		};
+
+		var putRetryOnTD = function(dev_id) {
+			updateDeviceDataTD(dev_id, "RETRY ka " + dev_id);
+		};
+
+		var updateDeviceDataTD = function(dev_id, html) {
+			var selector = sprintf("tr[data-dev_id='%s'] td[data-col='result']", dev_id);
+			$el.find(selector).html(html);
+		};
+
 
 		return {
 			add : function(container, location_filter, duration, basedate) {
-				_p =  _p || $(document.getElementById(container));
-				_id = class_pref + "--" + MyApp.RainfallTableCount++;
-				var filteredDevices = _.where(rainfall_devices, {province_name : location_filter});
-				var dateText = basedate.toString("MM/dd/yyyy");
+				$parent = $parent || $(document.getElementById(container));
+				htmlID = cssClass + "--" + MyApp.RainfallTableCount++;
+				
+				var selectedDevices = _.where(rainfall_devices, {province_name : location_filter});
+				var baseDate = basedate.clone();
+				var baseDateText = baseDate.toString("MM/dd/yyyy");
+				var yesterdayDate = baseDate.clone().add({days:-1});
+				var yesterdayDateText = yesterdayDate.toString("MM/dd/yyyy");
 				var timeText = (duration > 60) ? parseInt(duration/60) + ' hours' : '1 hour';
 				var options = {
-					pref : class_pref,
-					id : _id,
+					cssClass : cssClass,
+					id : htmlID,
 					location_group : location_filter,
 					time : timeText,
-					date : dateText,
-					devices : filteredDevices,
+					date : baseDateText,
+					devices : selectedDevices,
 					cssByStatus : function() {
 						return function(text, render) {
 							if (render(text) == "1") {
@@ -108,36 +168,41 @@
 					}
 				};
 
-				console.log(options.devices);
-
-				//var rendered = render_template(options);
 				var rendered = MyApp.RainfallTableGenerator.getRenderedTemplate(options);
 
-				_p.append(rendered);
+				$parent.prepend(rendered);
 
-				_e = $(document.getElementById(_id));
-				var btnEl = _e.find("button." + class_pref + "__close-button");
-				btnEl.on('click', function(){
-					console.log("Click internal");
-					_onClickCallBack(_id);
+				$el = $(document.getElementById(htmlID));
+				var btnSelector = sprintf("button.%s__close-button", cssClass);
+				console.log(btnSelector);
+				var btnEl = $el.find(btnSelector);
+				btnEl.button({
+					icons: { primary: "ui-icon-closethick"},
+					text: false
 				});
-				//_e.effect('shake');
+				btnEl.on('click', function(){
+					fnOnClickCallBack(htmlID);
+				});
+
+				_.each(selectedDevices, function(c) {
+					if (c['status_id'] == "0") { //fetch only enabled device
+						fetchData(c['dev_id'], yesterdayDateText, baseDateText, "", duration);
+					}
+				});
 			},
 
 			remove : function() {
-				_e.fadeOut('slow', function() {
-					$(this).remove();
-				});
+				$el.remove();
+				xhrPoolAbortAll();
 			},
 
 			onCloseButtonClick : function(fn) {
-				_onClickCallBack = fn;
+				fnOnClickCallBack = fn;
 			},
 
 		};
 	});
 
-	var xtblcounter = 0;
 	google.charts.load('current', {packages: ['corechart']});
 	$(document).ready(function() {
 		initConfigUI('config-form', MyApp.config);
@@ -176,8 +241,7 @@
 
 		//Some info
 		$('#info-refresh').one('click', function() {
-			console.log($(this));
-			$(this).fadeOut();
+			$(this).fadeOut("fast");
 		});
 	}
 
@@ -197,62 +261,6 @@
 			//}
 		})
 		.datepicker( "setDate", date);
-	}
-
-
-	function initRainfalltable(div, province, duration, basedate) {
-		var div = $(document.getElementById(div));
-		var thisdate = Date.parseExact(basedate, 'MM/dd/yyyy');
-		var yesterday = thisdate.clone().add({days: -1});
-		var table = $('<table/>', {'class':'xtbl', 'id':'xtbl_'+ ++xtblcounter, 'data-duration':duration}).prependTo(div);
-		//$('<tr><th>Server DateTime</th><td id="serverdtr">'+key['serverdate']+' '+ key['servertime']+'</td><tr>').appendTo(table);
-		$('<tr/>')
-		.append($('<th colspan="2" class="ui-widget-header">Cumulative Rainfall Reading of '+ province +' for the last '+ parseInt(duration/60) +' hour/s from ' + thisdate.toString("MMM dd, yyyy") +  '.</th>').append('<button id="cx-xtbl_'+ xtblcounter +'" class="close-button">close</button>'))
-						// .append($('<td/>@ ', {'class':'textalignright'}).text(key['serverdate']+' '+ key['servertime'])
-							// .append($('<button>close</button>')	
-					.appendTo(table);
-		
-		$("#cx-xtbl_"+ xtblcounter).on('click', function() {table.remove();})
-								.button({
-							      icons: {
-							        primary: "ui-icon-cancel"
-							      },
-							      text: true});
-		// $('<tr class="ui-widget-header"><th>Municipality</th><th>Location</th><th>Cumulative (mm)</th><tr>').appendTo(table);
-		//$('<tr class="ui-widget-header"><th>Location</th><th>Cumulative (mm)</th><tr>').appendTo(table);
-		//$('<tr class="ui-widget-header"><th colspan="2">Cumulative (mm)</th><tr>').appendTo(table);
-						
-		for(var i=0;i<rainfall_devices.length;i++) {
-			var cur = rainfall_devices[i];
-			if (cur['province_name'] == province) {
-				$('<tr/>', {'data-dev_id':cur['dev_id']})
-				.append($('<td>'+cur['municipality_name']+ " - " + cur['location_name'] + '</td>'))
-				// .append($('<td>'+cur['location_name']+'</td>'))
-				.append($('<td/>', {'colspan':'2','data-col':'cr'})).appendTo(table);
-				if (cur['status_id'] == null || cur['status_id'] == '0') {
-					postGetData('xtbl_'+xtblcounter, cur['dev_id'], yesterday.toString("MM/dd/yy"), thisdate.toString("MM/dd/yy"), "", duration);
-				} else {
-					updateRainfallTable('xtbl_'+xtblcounter, cur['dev_id'], "[DISABLED]", 'disabled') ;
-				}
-			}
-		}
-	}
-
-	function postGetData( xtbl, dev_id, sdate, edate, limit, duration) {
-		$.ajax({
-				url: DOCUMENT_ROOT + 'data.php',
-				type: "POST",
-				data: {start: 0,
-		  		 limit: limit,
-		  		 sdate: sdate,
-		  		 edate: edate,
-		  		 pattern: dev_id
-			},
-			dataType: 'json',
-			tryCount: 0,
-			retry:20})
-		.done(function(d){onRainfallDataResponseSuccess(d, xtbl, duration);})
-		.fail(function(f, n){onRainfallDataResponseFail(xtbl, dev_id, duration);});
 	}
 
 	function onRainfallDataResponseSuccess(data, xtbl, duration) {
@@ -282,36 +290,6 @@
     function retryFetchRain(xtbl, dev_id, duration) {
 		postGetData(xtbl, dev_id, "", "", duration );
 		updateRainfallTable(xtbl, dev_id, '', '', '');
-	}
-
-	function updateRainfallTable(xtbl, device_id, raincumulative, dataclass) {
-		var table = $(document.getElementById(xtbl));
-		var dtr = table.find('tr[data-dev_id=\''+device_id+'\']  td[data-col=\'dtr\']');
-		var cr = table.find('tr[data-dev_id=\''+device_id+'\'] td[data-col=\'cr\']');
-
-		//if (dateTimeRead != null) dtr.text(dateTimeRead); else dtr.text('');
-		//if (rainvalue != null ) rv.text(rainvalue); else rv.text('');
-		if (raincumulative != null ) {
-			cr.html(raincumulative); 
-			for (var i = 0;i<key['limits'].length;i++) {
-				limit = key['limits'][i];
-				if (raincumulative >= parseFloat(limit['min']) && raincumulative < parseFloat(limit['max'])) {
-					cr.addClass(key['limits'][i].style);
-					break;
-				} 
-			}
-
-			
-
-		} else {
-			cr.text("");
-		}
-
-		if (dataclass != 'undefined') {
-			//dtr.removeClass().addClass(dataclass);
-			//rv.removeClass().addClass(dataclass);
-			cr.addClass(dataclass);
-		}
 	}
 
 	function drawChartRain(xtbl, dev_id, json) {
@@ -495,9 +473,9 @@
 		</div>
 		<div id='tables-container'>
 		<script id="rainfall-table_template" type="text/html">
-			<table class="{{pref}}" id="{{id}}">
+			<table class="{{cssClass}}" id="{{id}}">
 				<tr>
-					<th colspan="2" class="ui-widget-header">Cumumative Rainfall Reading of {{location_group}} for the last {{time}} from {{date}}. <button class="{{pref}}__close-button"></button></th>
+					<th colspan="2" class="ui-widget-header">Cumumative Rainfall Reading of {{location_group}} for the last {{time}} from {{date}}. <button class="{{cssClass}}__close-button"></button></th>
 				</tr>
 				{{#devices}}
 				<tr data-dev_id="{{dev_id}}">

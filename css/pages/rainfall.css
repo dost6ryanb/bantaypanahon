@@ -2,6 +2,7 @@
 	border-collapse: collapse;
 	margin: 20px 10px 10px 20px;
 	padding: 10px;
+	position: relative;
 }
 
 #config-form label, #config-form input,  #config-form button,  #config-form span {
@@ -12,8 +13,9 @@
 	display: block;
 	height: 30px;
 	margin: 10px;
-	padding: 5px 30px 5px;
+	padding: 5px 5px 5px;
 	font-weight: bold;
+	position: relative;
 }
 
 #config-form .form-group {
@@ -21,9 +23,10 @@
 	margin: 2px;
 }
 
+
 #config-form #info-refresh span:last-child {
 	position: absolute;
-	right: 34;
+	right: 5px;
 }
 
 .xtbl th, .xtbl tr, .xtbl td {
