@@ -68,8 +68,8 @@
       	initMap("map-canvas");
 		initMapLegends('legends');
 		initRainfallTable("rainfall-canvas");
-		initTicker('ticker1');
-		initTicker('ticker2');
+		initTicker('ticker--1');
+		initTicker('ticker--2');
 		initChartDivs('charts_div_container');
 		initFetchData();
 
@@ -180,7 +180,7 @@
 					}
 					addMarker(device['dev_id'], device['posx'], device['posy'], device['municipality_name'] + ' - ' + device['location_name'], device['type_name'], marker_url);
 					var text =  "[Cumulative Rainfall] "+device['municipality_name'] + ' - ' + device['location_name'] + ' : ' + data.data[0].rain_cumulative + ' mm';
-					addTicker(text, 'ticker1list');
+					addTicker(text, 'ticker--1__list');
 
 					break;
 				} 
@@ -584,7 +584,7 @@
 		//console.log(heat_index);
 
 		text += "[" + current_time + ']: ' + municipality + ' - Temp/Heat Index: ' + current_temperature  + '/' + heat_index + ' \u2103. Max Temp: ' + max + ' last ' + time ;
-		addTicker(text, 'ticker2list');
+		addTicker(text, 'ticker--2__list');
 	}
 
 	function addTicker(text, tickerlist) {
@@ -634,21 +634,20 @@
 		</div>
 	<div id='legends'>
 	</div>
-	
-</div>
-<div id='footer'>
-	<div>
-		<div id="ticker1">
-				<ul id='ticker1list'>
+	<div id="ticker-container">
+		<div class="ticker" id="ticker--1">
+				<ul id='ticker--1__list'>
 				</ul>	   
 		</div>
-		<div id="ticker2">
-				<ul id='ticker2list'>
+		<div class="ticker" id="ticker--2">
+				<ul id='ticker--2__list'>
 				</ul>	   
 		</div>
 	</div>
 	<div id="charts_div_container">
-	</div>
+	</div>	
+</div>
+<div id='footer'>
     <div id='contactus'>
             <div class='contact'>
                 <p class='contactname' >Department of Science and Technology Regional Office No. VI</p>
