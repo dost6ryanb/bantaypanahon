@@ -67,8 +67,7 @@
 		var xhrPool = [];
 		var xhrPoolAbortAll = function() {
 			_.each(xhrPool, function(me) {
-	   			console.log("cancel ");
-	   			console.log(me);
+	   			me.abort();
 			});
 			xhrPool.length = 0
 		};
@@ -263,7 +262,6 @@
 			var rainTable = new MyApp.RainfallTable();
 			rainTable.add('tables-container', province, duration, basedate);
 			rainTable.onCloseButtonClick(function(d) {
-				console.log("Clicked " + d);
 				rainTable.remove();
 			});
 		});
