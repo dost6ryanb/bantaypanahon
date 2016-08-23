@@ -210,7 +210,7 @@
 					icons: { primary: "ui-icon-closethick"},
 					text: false
 				});
-				btnEl.on('click', function(){
+				btnEl.one('click', function(){
 					fnOnClickCallBack(htmlID);
 				});
 
@@ -283,17 +283,12 @@
 
 		$(source).datepicker({
 			defaultDate: date,
-			dateFormat: 'M dd, yy',
-			//onSelect: function(dateText) {		
-				//var predict_date = Date.parseExact(dateText, "MMM dd, yyyy").toString("MM/dd/yyyy");
-				//key['serverdate'] = predict_date;
-				//MyApp.config.querydate = predict_date;
-			//}
+			dateFormat: 'M dd, yy'
 		})
 		.datepicker( "setDate", date);
 	}
 
-		function drawChartRain(container, dev_id, json) {
+	function drawChartRain(container, dev_id, json) {
 	  	var datatable = new google.visualization.DataTable();
 		datatable.addColumn('datetime', 'DateTimeRead');
 		datatable.addColumn('number', 'Cumulative Rain');
@@ -351,12 +346,12 @@
 				maxValue: '200',
 		  	}
 		  },
-		  pointsize: 3,
 		  seriesType: "line",
           series: {
           	0 : {
           		type: "line",
-          		targetAxisIndex : 1
+          		targetAxisIndex : 1,
+          		pointSize: 3,
           	},
           	1: {
           		type: "bars",
