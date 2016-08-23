@@ -4,7 +4,10 @@
 	<title>DOST VI - DRRMU - Rainfall Monitoring</title>
 	<script type="text/javascript" src='vendor/jquery/jquery-1.12.4.min.js'></script>
 	<script type="text/javascript" src='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.js'></script>
-	<script type="text/javascript" src='js/date-en-US.js'></script>
+	<script type="text/javascript" src='vendor/datejs/date.js'></script>
+	<script type="text/javascript" src='vendor/underscore-1.8.3/underscore-min.js'></script>
+	<script type="text/javascript" src='vendor/sprintf.js-1.0.3/dist/sprintf.min.js'></script>
+	<script type="text/javascript" src='vendor/mustache.js-2.2.1/mustache.min.js'></script>
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 	<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.css'>
 	<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.theme.min.css'>
@@ -15,218 +18,297 @@
 	<link rel="stylesheet" type="text/css" href='css/pages/rainfall.css' />
 </head>
 <script type="text/javascript">
-	var key = {'serverdate':'<?php echo $sdate;?>', 'servertime':'<?php echo date("H:i");?>',
-				'provinces' : ['Aklan', 'Antique', 'Capiz', 'Guimaras', 'Iloilo', 'Negros Occidental'],
-				'durations' : [{'label': '1 hr', 'minutes':'60'},
-								{'label': '2 hr', 'minutes':'120'},
-								{'label': '3 hr', 'minutes':'180'},
-								{'label': '6 hr', 'minutes':'360'},
-								{'label': '9 hr', 'minutes':'540'},
-								{'label': '12 hr', 'minutes':'720'},
-								{'label': '24 hr', 'minutes':'1440'}
-							 ],
-				'limits' : [
-			   		{'min':0.01, 'max':5, 'name':'lighter', 'style':'rainlighter'},
-			   		{'min':5, 'max':25, 'name':'light', 'style':'rainlight'}, 
-			   		{'min':25, 'max':50, 'name':'moderate' , 'style':'rainmoderate'}, 
-			   		{'min':50, 'max':75, 'name':'heavy', 'style':'rainheavy'}, 
-			   		{'min':75, 'max':100, 'name':'intense', 'style':'rainintense'}, 
-			   		{'min':100, 'max':999, 'name':'torrential', 'style':'raintorrential'}
-			   		]
-		  };
+	MyApp = {};
 
-	var xtblcounter = 0;
-	google.charts.load('current', {packages: ['corechart']});
-	$(document).ready(function() {
-		$("button").button();
+	MyApp.SERVER_DATE = '<?php echo $sdate;?>';
+	MyApp.SERVER_TIME = '<?php echo date("H:i");?>';
 
-		initProvincesSelect('provinces');
-		initDurationSelect('durations');
-		initBaseDate('basedate');
-		$('select').selectmenu({ width: 300 });
-		initGo('goButton', 'provinces', 'durations', 'rainfalltable');
+	MyApp.config = {
+		provinces : ['Aklan', 'Antique', 'Capiz', 'Guimaras', 'Iloilo', 'Negros Occidental'],
+		durations : [
+			{'label': '1 hr', 'minutes':'60'},
+			{'label': '3 hr', 'minutes':'180'},
+			{'label': '6 hr', 'minutes':'360'},
+			{'label': '9 hr', 'minutes':'540'},
+			{'label': '12 hr', 'minutes':'720'},
+			{'label': '24 hr', 'minutes':'1440'}
+		]
+	};
+
+	MyApp.RainfallTableGenerator = (function() {
+		var TEMPLATE_ID = 'rainfall-table_template';
+		var _templateSource = null;
+
+		var build_template = function() {
+			_templateSource = $(document.getElementById(TEMPLATE_ID)).html();
+			Mustache.parse(_templateSource);
+		}
+
+		return {
+			getRenderedTemplate(context) {
+				if (!_templateSource) {
+					build_template();
+				}
+
+				return Mustache.render(_templateSource, context);
+			}
+		}
+	})();
+
+	MyApp.RainfallTableCount = 0;
+
+	MyApp.RainfallTable = (function() {
+		var $parent; //jq object of the container
+		var $el; //jq object of the table
+		var htmlID; //html ID of $el
+		var cssClass = "xtbl";
+		var fnOnClickCallBack;
+		var that = this;
+		var xhrPool = [];
+		var xhrPoolAbortAll = function() {
+			_.each(xhrPool, function(me) {
+	   			console.log("cancel ");
+	   			console.log(me);
+			});
+			xhrPool.length = 0
+		};
+
+		var requestParam = {
+			baseDate: "",
+			duration: ""
+		};
+
+		var fetchData = function(dev_id, sdate, edate, limit) {
+			$.ajax({
+				url: DOCUMENT_ROOT + 'data.php',
+				type: "POST",
+				data: {
+					start: 0,
+		  		 	limit: limit,
+		  		 	sdate: sdate,
+		  		 	edate: edate,
+		  		 	pattern: dev_id
+				},
+				dataType: 'json',
+				beforeSend: function(jqXHR) {
+			        xhrPool.push(jqXHR);
+			    },
+			    complete: function(jqXHR) {
+			        var index = xhrPool.indexOf(jqXHR);
+			        if (index > -1) {
+			            xhrPool.splice(index, 1);
+			        }
+			    }
+			})
+			.fail(function(f, n){
+				putRetryOnTD(dev_id);
+			})
+			.done(function(d){
+				onDataArrive(d, dev_id);
+			});
+		};
+
+		var onDataArrive = function(data, dev_id) {
+			if (data.count == -1) {// cannot reach predict
+				updateDeviceDataTD(dev_id, "Site cannot be reached. Try again later.");
+			} else if (data.count ==  0 ||// sensor no reading according to fmon.predict
+				data.data.length == 0  || // predict reports that it has reading but actually doesnt have
+				data.data[0].rain_cumulative == null || data.data[0].rain_cumulative=='' // errouneous readings
+			) {
+				updateDeviceDataTD(dev_id, "Sorry. No Data available for this date.");
+			} else {			
+				drawChartDualRain(data, dev_id);
+			}
+		};
+
+		var drawChartDualRain = function(data, dev_id) {
+			var chartDiv =  htmlID + "__rain-chart--" + dev_id;
+			updateDeviceDataTD(dev_id, '<div id="' + chartDiv +'" class="rain-chart"></div>')
+			var trimmedData = trimAndRecalculateRain(data);
+			drawChartRain(chartDiv, dev_id, trimmedData);
+		};
+
+		var putRetryOnTD = function(dev_id) {
+			updateDeviceDataTD(dev_id, "Site cannot be reached. Try again later.");
+		};
+
+		var updateDeviceDataTD = function(dev_id, html) {
+			var selector = sprintf("tr[data-dev_id='%s'] td[data-col='result']", dev_id);
+			$el.find(selector).html(html);
+		};
+
+		var trimAndRecalculateRain = function(data) {
+			var startDtr = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+			var endDtr = startDtr.clone().addMinutes(-parseInt(requestParam.duration));
+			var cumulativeRain = null;
+
+			var i=0;
+			for(i=0;i<data.data.length;i++) {
+				var deviceDtr = Date.parseExact(data.data[i].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+
+				if (deviceDtr.between(endDtr, startDtr)) {
+					//
+				} else {
+					break;
+				}
+
+			}
+
+			data.data.splice(i);
+			data.count = i;
+
+			var rel_cr = 0.00;
+
+			for (var n=data.data.length-1;n>=0;n--) {
+				data.data[n].rain_cumulative = 0.00;
+				rel_cr += parseFloat(data.data[n].rain_value);
+				data.data[n].rain_cumulative = rel_cr.toFixed(2);
+			}
+
+			return data;
+		}
+
+		return {
+			add : function(container, location_filter, duration, basedate) {
+				$parent = $parent || $(document.getElementById(container));
+				htmlID = cssClass + "--" + MyApp.RainfallTableCount++;
+				requestParam.baseDate = basedate;
+				requestParam.duration = duration;
+				
+				var selectedDevices = _.where(rainfall_devices, {province_name : location_filter});
+				var baseDate = basedate.clone();
+				var baseDateText = baseDate.toString("MM/dd/yyyy");
+				var yesterdayDate = baseDate.clone().add({days:-1});
+				var yesterdayDateText = yesterdayDate.toString("MM/dd/yyyy");
+				var timeText = (duration > 60) ? parseInt(duration/60) + ' hours' : '1 hour';
+				var options = {
+					cssClass : cssClass,
+					id : htmlID,
+					location_group : location_filter,
+					time : timeText,
+					date : baseDateText,
+					devices : selectedDevices,
+					cssByStatus : function() {
+						return function(text, render) {
+							if (render(text) == "1") {
+								return 'class="disabled"';
+							} else {
+								return '';
+							}
+						}
+					}
+				};
+
+				var rendered = MyApp.RainfallTableGenerator.getRenderedTemplate(options);
+
+				$parent.prepend(rendered);
+
+				$el = $(document.getElementById(htmlID));
+				var btnSelector = sprintf("button.%s__close-button", cssClass);
+				var btnEl = $el.find(btnSelector);
+				btnEl.button({
+					icons: { primary: "ui-icon-closethick"},
+					text: false
+				});
+				btnEl.one('click', function(){
+					fnOnClickCallBack(htmlID);
+				});
+
+				_.each(selectedDevices, function(c) {
+					if (c['status_id'] == "0") { //fetch only enabled device
+						fetchData(c['dev_id'], yesterdayDateText, baseDateText, "", duration);
+					}
+				});
+			},
+
+			remove : function() {
+				$el.remove();
+				xhrPoolAbortAll();
+			},
+
+			onCloseButtonClick : function(fn) {
+				fnOnClickCallBack = fn;
+			},
+
+		};
 	});
 
-	function initProvincesSelect(select) {
-		var frmselect = $(document.getElementById(select));
-		for (var i=0;i<key['provinces'].length;i++) {
-			$('<option value="'+i+'">'+key['provinces'][i]+'</option>').appendTo(frmselect);
-		}
-	}
+	google.charts.load('current', {packages: ['corechart']});
+	$(document).ready(function() {
+		initConfigUI('config-form', MyApp.config);
+	});
 
-	function initDurationSelect(select) {
-		var frmselect = $(document.getElementById(select));
-		for (var i=0;i<key['durations'].length;i++) {
-			//$('<option value="'+i+'">'+12+'</option>').appendTo(frmselect);
-			$('<option value="'+i+'">'+key['durations'][i].label+'</option>').appendTo(frmselect);
-		}
-	}
+	//el - element(div) ID
+	function initConfigUI(el, context) {
+		var source = $(document.getElementById(el));
 
-	function initBaseDate(input) {
-		var el = document.getElementById(input);
-		var date = Date.parseExact(key['serverdate'], 'MM/dd/yyyy');
-		$(el).datepicker({
-			defaultDate: date,
-			dateFormat: 'M dd, yy',
-			onSelect: function(data) {		
-				var predict_date = Date.parseExact(data, "MMM dd, yyyy").toString("MM/dd/yyyy");
-				key['serverdate'] = predict_date;
-			}})
-		.datepicker( "setDate", date)
-	}
+		var template = source.html();
+		var rendered = Mustache.render(template, context);
 
-	function initGo(button, provinceSelect, durationSelect, div) {
-		var frmbutton= $(document.getElementById(button));
-		var frmselectProvince = $(document.getElementById(provinceSelect));
-		var frmselectDuration = $(document.getElementById(durationSelect));
-		frmbutton.on('click', function() {
-			var prov = key['provinces'][frmselectProvince.val()];
-			var dur = key['durations'][frmselectDuration.val()].minutes;
-			initRainfalltable(div, prov, dur, key['serverdate']);
+		source.html(rendered);
+
+		//JQuery Ui selectmenu
+		$('select').selectmenu({ width: 200 });
+
+		//JQuery Ui DatePicker
+		var default_date = Date.parseExact(MyApp.SERVER_DATE, 'MM/dd/yyyy');
+		initDatePicker('basedate', default_date);
+
+		//JQuery button
+		$("#go-button").button();
+		$("#go-button").on('click', function() {
+			var province = $(document.getElementById('provinces')).val();
+			var duration = $(document.getElementById('durations')).val();
+			var basedate = $(document.getElementById('basedate')).datepicker( "getDate" );
+			var rainTable = new MyApp.RainfallTable();
+			rainTable.add('tables-container', province, duration, basedate);
+			rainTable.onCloseButtonClick(function(d) {
+				console.log("Clicked " + d);
+				rainTable.remove();
+			});
+		});
+
+
+		//Some info
+		$('#info-refresh').one('click', function() {
+			$(this).fadeOut("fast");
 		});
 	}
 
-	function initRainfalltable(div, province, duration, basedate) {
-		var div = $(document.getElementById(div));
-		var thisdate = Date.parseExact(basedate, 'MM/dd/yyyy');
-		var yesterday = thisdate.clone().add({days: -1});
-		var table = $('<table/>', {'class':'xtbl', 'id':'xtbl_'+ ++xtblcounter, 'data-duration':duration}).prependTo(div);
-		//$('<tr><th>Server DateTime</th><td id="serverdtr">'+key['serverdate']+' '+ key['servertime']+'</td><tr>').appendTo(table);
-		$('<tr/>')
-		.append($('<th colspan="2" class="ui-widget-header">Cumulative Rainfall Reading of '+ province +' for the last '+ parseInt(duration/60) +' hour/s from ' + thisdate.toString("MMM dd, yyyy") +  '.</th>').append('<button id="cx-xtbl_'+ xtblcounter +'">close</button>'))
-						// .append($('<td/>@ ', {'class':'textalignright'}).text(key['serverdate']+' '+ key['servertime'])
-							// .append($('<button>close</button>')	
-					.appendTo(table);
-		
-		$("#cx-xtbl_"+ xtblcounter).on('click', function() {table.remove();})
-								.button({
-							      icons: {
-							        primary: "ui-icon-cancel"
-							      },
-							      text: true});
-		// $('<tr class="ui-widget-header"><th>Municipality</th><th>Location</th><th>Cumulative (mm)</th><tr>').appendTo(table);
-		//$('<tr class="ui-widget-header"><th>Location</th><th>Cumulative (mm)</th><tr>').appendTo(table);
-		//$('<tr class="ui-widget-header"><th colspan="2">Cumulative (mm)</th><tr>').appendTo(table);
-						
-		for(var i=0;i<rainfall_devices.length;i++) {
-			var cur = rainfall_devices[i];
-			if (cur['province_name'] == province) {
-				$('<tr/>', {'data-dev_id':cur['dev_id']})
-				.append($('<td style="width:80px">'+cur['municipality_name']+ " - " + cur['location_name'] + '</td>'))
-				// .append($('<td>'+cur['location_name']+'</td>'))
-				.append($('<td/>', {'colspan':'2','data-col':'cr'})).appendTo(table);
-				if (cur['status_id'] == null || cur['status_id'] == '0') {
-					postGetData('xtbl_'+xtblcounter, cur['dev_id'], yesterday.toString("MM/dd/yy"), thisdate.toString("MM/dd/yy"), "", duration);
-				} else {
-					updateRainfallTable('xtbl_'+xtblcounter, cur['dev_id'], "[DISABLED]", 'disabled') ;
-				}
-			}
-		}
+	//el - element(input[text]) ID
+	//date - Date Object
+	function initDatePicker(el, date) {
+		var source = document.getElementById(el);
+		var date = date || Date.now();
+
+		$(source).datepicker({
+			defaultDate: date,
+			dateFormat: 'M dd, yy'
+		})
+		.datepicker( "setDate", date);
 	}
 
-	function postGetData( xtbl, dev_id, sdate, edate, limit, duration) {
-		$.ajax({
-				url: DOCUMENT_ROOT + 'data.php',
-				type: "POST",
-				data: {start: 0,
-		  		 limit: limit,
-		  		 sdate: sdate,
-		  		 edate: edate,
-		  		 pattern: dev_id
-			},
-			dataType: 'json',
-			tryCount: 0,
-			retry:20})
-		.done(function(d){onRainfallDataResponseSuccess(d, xtbl, duration);})
-		.fail(function(f, n){onRainfallDataResponseFail(xtbl, dev_id, duration);});
-	}
-
-	function onRainfallDataResponseSuccess(data, xtbl, duration) {
-		var device_id = data.device[0].dev_id;
-
-		$('#loadedraindevices').text(++key['loadedraindevices']);
-
-		if (data.count == -1) {// cannot reach predict
-			onRainfallDataResponseFail(xtbl, device_id, duration);
-		} else if (data.count ==  0 ||// sensor no reading according to fmon.predict
-			data.data.length == 0  || // predict reports that it has reading but actually doesnt have
-			data.data[0].rain_cumulative == null || data.data[0].rain_cumulative=='' // errouneous readings
-			) {
-			updateRainfallTable(xtbl, device_id, '[NO DATA]', 'nodata') ;
-		} else {			
-			var rain_cumulative = solveforcumulative(data, duration, xtbl, device_id);
-			//updateRainfallTable(xtbl, device_id, rain_cumulative) ;
-
-		}
-	}
-
-	function onRainfallDataResponseFail(xtbl, dev_id, duration) {
-		var retryhtml = "<a href=javascript:retryFetchRain('"+xtbl+"'," + dev_id + "," + duration + ")>Retry</a>";
-		updateRainfallTable(xtbl, dev_id, retryhtml, null, null);
-	}
-    
-    function retryFetchRain(xtbl, dev_id, duration) {
-		postGetData(xtbl, dev_id, "", "", duration );
-		updateRainfallTable(xtbl, dev_id, '', '', '');
-	}
-
-	function updateRainfallTable(xtbl, device_id, raincumulative, dataclass) {
-		var table = $(document.getElementById(xtbl));
-		var dtr = table.find('tr[data-dev_id=\''+device_id+'\']  td[data-col=\'dtr\']');
-		var cr = table.find('tr[data-dev_id=\''+device_id+'\'] td[data-col=\'cr\']');
-
-		//if (dateTimeRead != null) dtr.text(dateTimeRead); else dtr.text('');
-		//if (rainvalue != null ) rv.text(rainvalue); else rv.text('');
-		if (raincumulative != null ) {
-			cr.html(raincumulative); 
-			for (var i = 0;i<key['limits'].length;i++) {
-				limit = key['limits'][i];
-				if (raincumulative >= parseFloat(limit['min']) && raincumulative < parseFloat(limit['max'])) {
-					cr.addClass(key['limits'][i].style);
-					break;
-				} 
-			}
-
-			
-
-		} else {
-			cr.text("");
-		}
-
-		if (dataclass != 'undefined') {
-			//dtr.removeClass().addClass(dataclass);
-			//rv.removeClass().addClass(dataclass);
-			cr.addClass(dataclass);
-		}
-	}
-
-	function drawChartRain(xtbl, dev_id, json) {
-		var table = $(document.getElementById(xtbl));
-		var cr = table.find("tr[data-dev_id='" + dev_id + "'] td[data-col='cr']");
-		var div_id = xtbl + '-' + dev_id;
-		var c = $('<div id="'+ div_id + '"" class="rain-chart"></div>');
-		cr.append(c);
-		//console.log(c);
-		var chartdiv = xtbl + '-' + dev_id;
+	function drawChartRain(container, dev_id, json) {
 	  	var datatable = new google.visualization.DataTable();
 		datatable.addColumn('datetime', 'DateTimeRead');
 		datatable.addColumn('number', 'Cumulative Rain');
 		datatable.addColumn('number', 'Rain Value');
 		
-		//j - index of data
-		// i - index of column
 		for(var j=0;j<json.data.length;j++) {
+			var rainValue = parseFloat(json.data[j].rain_value);
+			var rainCumulative = parseFloat(json.data[j].rain_cumulative);
+
 			var row = Array(3);
-			//console.log(json.data[j].dateTimeRead);
+
 			row[0] = Date.parseExact(json.data[j].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
 			row[1] = {
-					v:parseFloat(json.data[j].rain_cumulative), //cumulative rain
-					f:json.data[j].rain_cumulative + ' mm'
-				}
+					v: rainCumulative, //cumulative rain
+					f: rainCumulative + ' mm'
+				};
 			row[2] = {
-					v:parseFloat(json.data[j].rain_value), //rain value
-					f:json.data[j].rain_value + ' mm'
-				}
+					v: rainValue, //rain value
+					f: rainValue + ' mm'
+				};
 			
 			datatable.addRow(row);
 			
@@ -264,12 +346,12 @@
 				maxValue: '200',
 		  	}
 		  },
-		  pointsize: 3,
 		  seriesType: "line",
           series: {
           	0 : {
           		type: "line",
-          		targetAxisIndex : 1
+          		targetAxisIndex : 1,
+          		pointSize: 3,
           	},
           	1: {
           		type: "bars",
@@ -278,59 +360,9 @@
           },
 		  crosshair : {trigger: 'both'}
         };
-		var chart =  new google.visualization.ComboChart(document.getElementById(chartdiv));
+		var chart =  new google.visualization.ComboChart(document.getElementById(container));
         chart.draw(datatable, options);
 	  }
-
-	function solveforcumulative(data, duration, xtbl, device_id) {
-		var serverdtr = Date.parseExact(key['serverdate']+ ' '+ key['servertime']+':00', 'MM/dd/yyyy HH:mm:ss');
-		var str = '';
-		var cr = null;
-		var enddtr = serverdtr.clone().addMinutes(-parseInt(duration));
-
-		var i=0;
-		for(i=0;i<data.data.length;i++) {
-			var devicedtr = Date.parseExact(data.data[i].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-
-			if (devicedtr.between(enddtr, serverdtr)) {
-				if (cr == null) cr = 0;
-				cr += parseFloat(data.data[i].rain_value);
-				data.data[i].rain_cumulative = cr;
-			} else {
-				if (i==0) {
-					cr += parseFloat(data.data[i].rain_value);
-					serverdtr = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-					enddtr = serverdtr.clone().addMinutes(-parseInt(duration));
-					str = ' <a class="ui-state-error" href="#" title="Out of Sync. Result from ' + serverdtr.toString('MMMM d yyyy h:mm:ss tt') + '">[!]</a>';
-				} else {
-					
-					break;
-				}
-				
-			}
-		}
-
-		var t = data;
-		t.data.splice(i);
-		t.count = i;
-
-		var rel_cr = 0.00;
-
-
-		for (i=t.data.length-1;i>=0;i--) {
-			//console.log(t.data[i].dateTimeRead + " - " + t.data[i].rain_value + " - " + rel_cr);
-			var devicedtr = Date.parseExact(t.data[i].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-			rel_cr += parseFloat(t.data[i].rain_value);
-			t.data[i].rain_cumulative = rel_cr.toFixed(2);
-		}
-		//console.log(t);
-
-		
-		drawChartRain(xtbl, device_id, t);
-		
-		return cr.toFixed(2) + str;
-
-	}
 
 </script>
 <body>
@@ -351,28 +383,49 @@
 		</div>
 	</div>
 	<div id="content">
-		<div id="config">
+		<div id="config-form">
 			<div class="form-group">
 			<label for='provinces'>Province: </label>
-			<select id='provinces' name='province'></select>
+			<select id='provinces' name='province'>
+			{{#provinces}}
+				<option value="{{.}}">{{.}}</option>
+			{{/provinces}}
+			</select>
 			</div>
 			<div class="form-group">
 			<label for='durations'>Duration: </label>
-			<select id='durations' name='duration'></select>
+			<select id='durations' name='duration'>
+			{{#durations}}
+				<option value="{{minutes}}">{{label}}</option>
+			{{/durations}}
+			</select>
 			</div>
 			<div class="form-group">
 			<label for="basedate">Base Date: </label>
 			<input type="text" id="basedate" class='ui-corner-all ui-button ui-widget'>
 			</div>
 			<div class="form-group">
-			<button id='goButton' class='.ui-widget'>Go</button>
+			<button id='go-button' class='ui-widget'>Go</button>
 			</div>
 			<div id="info-refresh" class="ui-state-highlight">
 				<span>Refresh page to update server date and time.</span>
+				<span class="ui-icon ui-icon-closethick"></span>
 			</div>
 		</div>
-		<div id='rainfalltable'>
-		
+		<div id='tables-container'>
+		<script id="rainfall-table_template" type="text/html">
+			<table class="{{cssClass}}" id="{{id}}">
+				<tr>
+					<th colspan="2" class="ui-widget-header">Cumumative Rainfall Reading of {{location_group}} for the last {{time}} from {{date}}. <button class="{{cssClass}}__close-button"></button></th>
+				</tr>
+				{{#devices}}
+				<tr data-dev_id="{{dev_id}}">
+					<td>{{municipality_name}} - {{location_name}}</td>
+					<td data-col="result"{{#cssByStatus}}{{status_id}}{{/cssByStatus}}></td>
+				</tr>
+				{{/devices}}
+			</table>
+		</script>
 		</div>
 	</div>
 	<div id="footer">

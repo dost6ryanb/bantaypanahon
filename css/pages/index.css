@@ -9,7 +9,6 @@
     height: 520px;
     width: 30%;
     overflow: scroll;
-
 }
 
 #rainfall-canvas table {
@@ -48,12 +47,18 @@
     clear: both;
 }
 
-#ticker1 {
+#ticker-container {
+    position: relative;
+    margin:0;
+}
+
+#ticker-container .ticker {
     display: none;
     background-color: #181B61;
     color: white;
-
 }
+
+
 
 .province_tr {
     background-color: #ececec;
@@ -80,12 +85,14 @@
 
 .overlay {
     color: white;
-    height: 6px;
+    height: 20px;
     z-index: 1;
     left: 60px;
     top: 60px;
     font-size: 8pt;
     background: #2869E1;
+    margin: 0px;
+    padding: 2px;
 }
 
 .divrowwrapper {

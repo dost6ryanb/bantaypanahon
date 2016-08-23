@@ -348,13 +348,13 @@
 					height:'auto',
 					width:'auto',
 					autoOpen: false,
+					draggable: false,
 					open: function(ev, ui) {
 						that.CenterMe();
 
 					},
 					resize: function(ev, ui) {
 						that.CenterMe();
-
 					}
 				});
 

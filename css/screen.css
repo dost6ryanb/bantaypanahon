@@ -98,6 +98,7 @@ img {
 
 #content {
 	min-width:1024px;
+	position: relative;
 }
 
 /* 'widths' sub menu */
@@ -152,11 +153,12 @@ img {
 /* Footer styles */
 #footer {
 	clear:both;
-	float:left;
+	/*float:left;*/
 	width:100%;
 	min-width:1024px;
 	border-top:1px solid #000;
     background: #57B8E8;
+    position: relative;
 }
 #footer p {
 	padding:10px;
