@@ -9,9 +9,9 @@
 	<script type="text/javascript" src='vendor/mustache.js-2.2.1/mustache.min.js'></script>
 	<script type="text/javascript" src='vendor/sprintf.js-1.0.3/dist/sprintf.min.js'></script>
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-	<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.css'>
-	<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.theme.min.css'>
-	<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.structure.min.css'>
+	<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.css'/>
+	<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.theme.min.css'/>
+	<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.structure.min.css'/>
 	<link rel="stylesheet" type="text/css" href='css/style.css' />
 	<link rel="stylesheet" type="text/css" href='css/screen.css' />
 	<link rel="stylesheet" type="text/css" href='css/superfish.css' />
