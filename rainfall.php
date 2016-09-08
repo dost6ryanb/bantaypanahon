@@ -206,7 +206,7 @@
 				var btnSelector = sprintf("button.%s__close-button", cssClass);
 				var btnEl = $el.find(btnSelector);
 				btnEl.button({
-					icons: { primary: "ui-icon-closethick"},
+					icon : "ui-icon-closethick"
 					text: false
 				});
 				btnEl.one('click', function(){

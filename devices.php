@@ -313,32 +313,35 @@
 
 	var ChartLinks = (function(e) {
 		var chartLinks = $(document.getElementById(e));
-		var table = chartLinks.children('#table');
-		var rain = chartLinks.children('#rain');
-		var temp = chartLinks.children('#temperature');
-		var wtrlevel = chartLinks.children('#waterlevel');
+		var table = chartLinks.find('#table');
+		var rain = chartLinks.find('#rain');
+		var temp = chartLinks.find('#temperature');
+		var wtrlevel = chartLinks.find('#waterlevel');
 		var tblLinkHandler;
 		var rnLinkHandler;
 
 		return {
 			setDeviceType : function(t) {
-				chartLinks.children("input[name='chart-type']").prop("disabled", true);
+				console.log("fn>setDeviceType " + t);
+				
+				chartLinks.find("input[name='chart-type']").checkboxradio();
+				chartLinks.find("input[name='chart-type']").checkboxradio( "disable" );
 
-				table.prop("disabled", false);
+				table.checkboxradio( "enable" );
 				
 				if ($.inArray(t, ['VAISALA', 'Rain1', 'Rain2', 'Waterlevel & Rain 2', 'UAAWS', 'BSWM_Lufft']) != -1) {
-					rain.prop("disabled", false);
+					rain.checkboxradio( "enable" );
 				}
 
 				if ($.inArray(t, ['VAISALA', 'UAAWS', 'BSWM_Lufft']) != -1) {
-					temp.prop("disabled", false);
+					temp.checkboxradio( "enable" );
 				}
 
 				if ($.inArray(t, ['Waterlevel', 'Waterlevel & Rain 2']) != -1) {
-					wtrlevel.prop("disabled", false);
+					wtrlevel.checkboxradio( "enable" );
 				}
 
-				chartLinks.buttonset();
+				
 
 				table.on('click', tblLinkHandler);
 				rain.on('click', rnLinkHandler);
@@ -941,10 +944,13 @@
 			<h5 id="title1"></h5>
 		</div>
 		<div id="chart-links">
+		<fieldset>
+			<legend>Select View Mode: </legend>
 			<input type="radio" id="table" name="chart-type" checked="checked"><label for="table">Table</label>
 			<input type="radio" id="rain" name="chart-type"><label for="rain">Rain</label>
     		<input type="radio" id="waterlevel" name="chart-type"><label for="waterlevel">Water Level</label>
     		<input type="radio" id="temperature" name="chart-type"><label for="temperature">Temperature</label>
+		</fieldset>
 		</div>
 		<div id="date-options">
 		<label for="sdate">Start Date:</label>
