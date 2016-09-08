@@ -4,13 +4,15 @@
 <head>
 <meta charset="utf-8">
 <title>DOST VI DRRMU - Devices</title>
-<script type="text/javascript" src='js/jquery-1.11.1.min.js'></script>
-<script type="text/javascript" src='js/jquery-ui.min.js'></script>
-<script type="text/javascript" src='js/jquery.scrollTo.min.js'></script>
-<script type="text/javascript" src='js/date-en-US.js'></script>
-<link rel="stylesheet" href='css/jquery-ui.min.css'>
-<link rel="stylesheet" href='css/jquery-ui.theme.min.css'>
-<link rel="stylesheet" href='css/jquery-ui.structure.min.css'>
+<script type="text/javascript" src='vendor/jquery/jquery-1.12.4.min.js'></script>
+<script type="text/javascript" src='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.js'></script>
+<script type="text/javascript" src='vendor/datejs/date.js'></script>
+<script type="text/javascript" src='vendor/underscore-1.8.3/underscore-min.js'></script>
+<script type="text/javascript" src='vendor/mustache.js-2.2.1/mustache.min.js'></script>
+<script type="text/javascript" src='vendor/sprintf.js-1.0.3/dist/sprintf.min.js'></script>
+<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.css'/>
+<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.theme.min.css'/>
+<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.structure.min.css'/>
 <link rel="stylesheet" type="text/css" href='css/style.css' />
 <link rel="stylesheet" type="text/css" href='css/screen.css' />
 <link rel="stylesheet" type="text/css" href='css/pages/devices.css' />
@@ -18,17 +20,6 @@
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
-
-	const MARKERS = [
-		{'name':'Rain1', 'src':'images/rain1'},
-		{'name':'Rain2', 'src':'images/rain2'}, 
-		{'name':'Waterlevel' , 'src':'images/waterlevel'}, 
-		{'name':'Waterlevel & Rain 2', 'src':'images/waterlevel2'}, 
-		{'name':'VAISALA', 'src':'images/vaisala'},
-		{'name':'BSWM_Lufft', 'src':'images/vaisala'},
-		{'name':'UAAWS', 'src':'images/vaisala'},
-		{'name':'UPAWS', 'src':'images/vaisala'}
-	];
 
 	const MAP_MODES = {
 		VIEW_DATA : '0',
@@ -112,6 +103,7 @@
 		}
 
 		function DrawTable() {
+			c.attr("class", "dialog--table");
 			console.log("drawing table");
 
 			var datatable = new google.visualization.DataTable();
@@ -172,6 +164,85 @@
 	         chart.draw(datatable, options);
 		}
 
+	function DrawChartRain() {
+		console.log("drawing chart rain");
+		c.attr("class", "dialog--rain");
+
+	  	var datatable = new google.visualization.DataTable();
+		datatable.addColumn('datetime', 'DateTimeRead');
+		datatable.addColumn('number', 'Cumulative Rain');
+		datatable.addColumn('number', 'Rain Value');
+		
+		for(var j=0;j<data.data.length;j++) {
+			var rainValue = parseFloat(data.data[j].rain_value);
+			var rainCumulative = parseFloat(data.data[j].rain_cumulative);
+
+			var row = Array(3);
+
+			row[0] = Date.parseExact(data.data[j].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+			row[1] = {
+					v: rainCumulative, //cumulative rain
+					f: rainCumulative + ' mm'
+				};
+			row[2] = {
+					v: rainValue, //rain value
+					f: rainValue + ' mm'
+				};
+			
+			datatable.addRow(row);
+			
+		}
+		var maxdate;
+		var mindate;
+
+		var d =  Date.parseExact(data.data[data.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+		var d2 =  Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+
+		//var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); //from last data
+		var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); // from 8:00 AM
+		var title_enddatetime = d2.toString('MMMM d yyyy h:mm:ss tt');
+
+		var options = {
+		  title: 'Rainfall Reading from ' + title_startdatetime + ' to ' + title_enddatetime,
+		  hAxis: {
+		    title: 'Rainfall Cumulative: ' + data.data[0].rain_cumulative + " mm", 
+			format : 'LLL d h:mm:ss a',
+			viewWindow : {min : d, max : d2},
+			textStyle : {fontSize: 10}
+		  },
+		  vAxes : {
+		  	0 : {
+		  		title: 'Rain Value (mm)',
+				format: '# mm',
+				minValue: '0',
+				maxValue: '50'
+		  	},
+		  	1 : {
+		  		title: 'Cumulative (mm)',
+		  		direction: -1,
+		  		format: '# mm',
+		  		minValue: '0',
+				maxValue: '200',
+		  	}
+		  },
+		  seriesType: "line",
+          series: {
+          	0 : {
+          		type: "line",
+          		targetAxisIndex : 1,
+          		pointSize: 3,
+          	},
+          	1: {
+          		type: "bars",
+          		targetAxisIndex : 0
+          		}
+          },
+		  crosshair : {trigger: 'both'}
+        };
+		var chart =  new google.visualization.ComboChart(c[0]);
+        chart.draw(datatable, options);
+	  }
+
 		return {
 			Empty : function() {
 				c.empty();
@@ -212,6 +283,9 @@
 						break;
 					case (DeviceView.VIEWS.TABLE):
 						DrawTable();
+						break;
+					case (DeviceView.VIEWS.RAIN):
+						DrawChartRain();
 						break;
 					default:
 						DrawDummy();
@@ -348,7 +422,7 @@
 					height:'auto',
 					width:'auto',
 					autoOpen: false,
-					draggable: false,
+					draggable: true,
 					open: function(ev, ui) {
 						that.CenterMe();
 
@@ -388,20 +462,20 @@
 			},
 
 			SetDevID : function(dev_id) {
-				device = search(devices, 'dev_id', dev_id);
+				device = _.findWhere(devices, {dev_id: dev_id});
 				var title1;
 				var title2;
 
 				if (device != null) {
-					title1 = device['location_name'];
-					title2 = device['municipality_name'] + " - " + device['province_name'];
+					title1 = device['location'];
+					title2 = device['municipality'] + " - " + device['province'];
 				} else {
 					title1 = "Unknown";
 					title2 = "Unknown";
 				}
 
 				chartInfo.setTitle(title1, title2);
-				chartLinks.setDeviceType(device['type_name']);
+				chartLinks.setDeviceType(device['type']);
 			},
 
 			Show : function() {
@@ -541,25 +615,7 @@
 
 	function initMapLegends(container) {
 		legendscontainer = $(document.getElementById(container));
-		devices_map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById(container));
-		
-		$('<button id="togglelegends">Hide Legend</button>')
-			.on('click', function() {
-				$('.legend').toggle();
-                if ($(this).text() == "Show Legend") {
-                    $(this).text('Hide Legend');
-                } else {
-                    $(this).text('Show Legend');
-                }
-			})
-			.appendTo(legendscontainer);
-        $('<div class="legendtitle">Devices in Western Visayas</div class="legend">').appendTo(legendscontainer);
-		$('<div class="legend"><img src="'+MARKERS[0].src+'.png" > Automatic Rain Gauge</div class="legend">').appendTo(legendscontainer);
-		$('<div class="legend"><img src="'+MARKERS[1].src+'.png" > Automatic Rain Gauge w/ Air Pressure</div class="legend">').appendTo(legendscontainer);
-		$('<div class="legend"><img src="'+MARKERS[2].src+'.png" > Waterlevel</div class="legend">').appendTo(legendscontainer);
-		$('<div class="legend"><img src="'+MARKERS[3].src+'.png" > Waterlevel w/ Automatic Rain Gauge</div class="legend">').appendTo(legendscontainer);
-		$('<div class="legend"><img src="'+MARKERS[4].src+'.png" > VAISALA, UAAWS, or BSWM_Lufft</div class="legend">').appendTo(legendscontainer);
-		$('<div class="legend"><img src="images/overlay_notok.png" > Status Not Ok</div>').appendTo(legendscontainer);
+		devices_map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById(container));	
 	}
 
 	function initControls(container) {
@@ -595,7 +651,6 @@
 				if (OpenUnlockSwitchStatusDialog(this)) {
 					//VALID INPUT LET AJAX CALLBACK DECIDE
 				} else {
-					console.log("FALSE");
 					$(this).val(MAP_MODES.VIEW_DATA);
 					CURRENT_MODE = MAP_MODES.VIEW_DATA;
 				}
@@ -646,11 +701,11 @@
 		var device_id = device['dev_id'];
 		var posx = device['posx'];
 		var posy = device['posy'];
-		var type = device['type_name'];
-		var status_id = device['status_id'];
-		var title = device['municipality_name'] + ' - ' + device['location_name'];
+		var type = device['type'];
+		var status = device['status'];
+		var title = device['municipality'] + ' - ' + device['location'];
 
-		var image = createIcon(type, status_id);
+		var image = createIcon(type, status);
 		var pos = new google.maps.LatLng( posx, posy);
 		
 		var marker = new google.maps.Marker({
@@ -661,31 +716,42 @@
    			type: type}
 		);
 
-		console.log(title);
-		attachMarkerClickEvent(marker, device_id, status_id);
+		attachMarkerClickEvent(marker, device_id, status);
 
 		return marker;
 	}
 
-	function createIcon(type, status_id) {
-		var marker_url = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
-
-		var obj = search(MARKERS, 'name', type);
-		if (obj != null) {
-			if (status_id == null || status_id == '0') {
-				marker_url =  obj['src'] +'.png';
-			} else if (status_id == '1') {
-				marker_url = obj['src'] +'-notok.png';
-			} 
+	function createIcon(type, status) {
+		//values based on css spritesheet
+		var iconorigin;		
+		if (type == "Rain1" && status == "0") {
+			iconorigin = new google.maps.Point(0 , 111);
+		} else if (type == "Rain1" && status == "1"){
+			iconorigin = new google.maps.Point(0 , 74);
+		} else if (type == "Rain2" && status == "0"){
+			iconorigin = new google.maps.Point(0 , 185);
+		} else if (type == "Rain2" && status == "1"){
+			iconorigin = new google.maps.Point(0 , 148);
+		} else if (type == "Waterlevel" && status == "0"){
+			iconorigin = new google.maps.Point(0 , 296);
+		} else if (type == "Waterlevel" && status == "1"){
+			iconorigin = new google.maps.Point(0 , 333);
+		} else if (type == "Waterlevel & Rain 2" && status == "0"){
+			iconorigin = new google.maps.Point(0 , 407);
+		} else if (type == "Waterlevel & Rain 2" && status == "1"){
+			iconorigin = new google.maps.Point(0 , 370);
+		} else if (type == "VAISALA" || type == "BSWM_Lufft" || type == "UAAWS"  || type == "UPAWS" && status == "0"){
+			iconorigin = new google.maps.Point(0 , 259);
+		} else if (type == "VAISALA" || type == "BSWM_Lufft" || type == "UAAWS"  || type == "UPAWS" && status == "1"){
+			iconorigin = new google.maps.Point(0 , 222);
 		} else {
-			console.log('no icon for ' + type);
+			iconorigin = new google.maps.Point(0 , 37);
 		}
 
-		//console.log(marker_url);
 		var image = {
-   			url: marker_url,
+   			url: 'images/Devices_LegendUI.png',
    			size: new google.maps.Size(32, 37),
-   			origin: new google.maps.Point(0,0),
+   			origin: iconorigin,
    			anchor: new google.maps.Point(16, 37)
    		};
    		return image;
@@ -696,20 +762,20 @@
 		devices_map_markers.push(marker);
 	}
 
-	function attachMarkerClickEvent(marker, dev_id, status_id) {
+	function attachMarkerClickEvent(marker, dev_id, status) {
 		google.maps.event.addListener(marker, 'click', function() {
 			if (CURRENT_MODE === MAP_MODES.SWITCH_STATUS) {
 				console.log('Switching Status');
-				var newstatus_id;
-				if (status_id == null || status_id == '0') {
-					newstatus_id = '1';
-				} else if(status_id == '1') {
-					newstatus_id = '0';
+				var newstatus;
+				if (status == null || status == '0') {
+					newstatus = '1';
+				} else if(status == '1') {
+					newstatus = '0';
 				} else {
-					newstatus_id = null;
+					newstatus = null;
 				}
 
-				postUpdateDeviceStatus(dev_id, newstatus_id);
+				postUpdateDeviceStatus(dev_id, newstatus);
 			} else if (CURRENT_MODE === MAP_MODES.VIEW_DATA){
 				console.log('Viewing Data');
 				if (!ViewStateDialog.Initialized)  {
@@ -723,28 +789,28 @@
 		});
 	}
 
-	function showMarkerWithStatusId(option) {
+	function showMarkerWithStatus(option) {
 		for (var i=0;i<devices_map_markers.length;i++) {
 			if (option == 'all') {
 				devices_map_markers[i].setMap(devices_map);
 			} else {
 				device_marker =  devices_map_markers[i];
 				device_id = device_marker['dev_id'];
-				device = search(devices, 'dev_id', device_id);
-				device_status_id = null;
+				device = _.findWhere(devices, {dev_id: device_id});
+				device_status = null;
 
 				if (device != null) {
-					device_status_id = device['status_id'];
+					device_status = device['status'];
 					switch (option) {
 						case 'ok':
-							if (device_status_id == null || device_status_id == 0) {
+							if (device_status == null || device_status == 0) {
 								device_marker.setMap(devices_map);
 							} else {
 								device_marker.setMap(null);
 							}
 							break;
 						case 'notok':
-							if (device_status_id == 1) {
+							if (device_status == 1) {
 								device_marker.setMap(devices_map);
 							} else {
 								device_marker.setMap(null);
@@ -761,12 +827,12 @@
 
 
 
-	function postUpdateDeviceStatus(dev_id, status_id) {
+	function postUpdateDeviceStatus(dev_id, status) {
 		$.ajax({
 			url: DOCUMENT_ROOT + 'update.php',
 			type: "POST",
 			data: {dev_id: dev_id,
-		  		status_id: status_id,
+		  		status: status,
 				tryauth: TRYAUTH
 		  	},
 			dataType: 'json',
@@ -777,21 +843,23 @@
 
 	function onSuccessPostUpdate(data) {
 		var device_id = data['dev_id'];
-		var status_id = data['status_id'];
+		var status = data['status'];
 
-		var device_marker = search(devices_map_markers, 'dev_id', device_id);
+		var device_marker = _.findWhere(devices_map_markers, {dev_id: device_id});
 		if (device_marker != null) {
 			var type = device_marker['type'];
 
-			var image = createIcon(type, status_id);
+			var image = createIcon(type, status);
 			device_marker.setIcon(image);
 			google.maps.event.clearListeners(device_marker, 'click');
-			attachMarkerClickEvent(device_marker, device_id, status_id);
+			attachMarkerClickEvent(device_marker, device_id, status);
 		}
 
-		var device = search(devices, 'dev_id', device_id);
+		var device = _.findWhere(devices, {dev_id: device_id});
+		console.log(data['dev_id']);
+		console.log(device);
 		if (device != null) {
-			device['status_id'] = status_id;
+			device['status'] = status;
 		}
 
 
@@ -800,15 +868,6 @@
 	function onFailPostUpdate(data) {
 		console.log('POST fail');
 	}
-
-	function search(o, key, val) {
-		for (var i=0; i<o.length;i++) {
-			if (o[i][key] == val) {
-				return o[i];
-			}
-		}
-		return null;
-	}	
 
 	function drawRain(data, chartdiv) {
 		console.log("drawing table");
@@ -858,6 +917,13 @@
 	<div id='map-canvas'>
 	</div>
 	<div id='legends'>
+		<div class="legendtitle">Devices in Western Visayas</div>
+		<div class="legend"><div class="legendicon sprite rain1"></div><div class="legendtext"> Automatic Rain Gauge</div></div>
+		<div class="legend"><div class="legendicon sprite rain2"></div><div class="legendtext"> Automatic Rain Gauge w/ Air Pressure</div></div>
+		<div class="legend"><div class="legendicon sprite waterlevel"></div><div class="legendtext"> Waterlevel</div></div>
+		<div class="legend"><div class="legendicon sprite waterlevel2"></div><div class="legendtext"> Waterlevel w/ Automatic Rain Gauge</div></div>
+		<div class="legend"><div class="legendicon sprite vaisala"></div><div class="legendtext"> VAISALA, UAAWS, or BSWM_Lufft</div></div>
+		<div class="legend"><div class="legendicon sprite notok"></div><div class="legendtext"> Status Not Ok</div></div>
 	</div>
 	<div id='controls'>
 	</div>
@@ -933,7 +999,7 @@
 </div>
 </body>
 <script type="text/javascript">
-var devices = <?php echo json_encode(Devices::getAllDevices());?>;
+var devices = <?php echo json_encode(Devices::GetDevicesAll());?>;
 </script>
 <?php include_once("analyticstracking.php") ?>
 </html>

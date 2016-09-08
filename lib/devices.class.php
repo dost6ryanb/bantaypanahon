@@ -4,7 +4,18 @@
 class Devices {
 	
 
-	public static function getAllDevices() {
+	public static function GetDevicesAll() {
+		//$strDatabaseFile = str_replace("\\", "/", $_ENV["S2G_DB_PATH"]);
+
+		$connection = new PDO("sqlite:database/sqlite.db");
+
+		$query = 'SELECT * from v_devices';
+
+		return $connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
+		
+	}
+
+		public static function getAllDevices() {
 		//$strDatabaseFile = str_replace("\\", "/", $_ENV["S2G_DB_PATH"]);
 
 		$connection = new PDO("sqlite:database/sqlite.db");
