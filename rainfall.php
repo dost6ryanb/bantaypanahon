@@ -6,8 +6,8 @@
 	<script type="text/javascript" src='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.js'></script>
 	<script type="text/javascript" src='vendor/datejs/date.js'></script>
 	<script type="text/javascript" src='vendor/underscore-1.8.3/underscore-min.js'></script>
-	<script type="text/javascript" src='vendor/sprintf.js-1.0.3/dist/sprintf.min.js'></script>
 	<script type="text/javascript" src='vendor/mustache.js-2.2.1/mustache.min.js'></script>
+	<script type="text/javascript" src='vendor/sprintf.js-1.0.3/dist/sprintf.min.js'></script>
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 	<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.css'>
 	<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.theme.min.css'>
