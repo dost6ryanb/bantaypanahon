@@ -10,9 +10,9 @@
 <script type="text/javascript" src='vendor/underscore-1.8.3/underscore-min.js'></script>
 <script type="text/javascript" src='vendor/mustache.js-2.2.1/mustache.min.js'></script>
 <script type="text/javascript" src='vendor/sprintf.js-1.0.3/dist/sprintf.min.js'></script>
-<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.css'>
-<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.theme.min.css'>
-<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.structure.min.css'>
+<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.css'/>
+<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.theme.min.css'/>
+<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.structure.min.css'/>
 <link rel="stylesheet" type="text/css" href='css/style.css' />
 <link rel="stylesheet" type="text/css" href='css/screen.css' />
 <link rel="stylesheet" type="text/css" href='css/pages/devices.css' />
@@ -20,17 +20,6 @@
 <script type="text/javascript" src="https://www.google.com/jsapi"></script>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="text/javascript">
-
-	const MARKERS = [
-		{'name':'Rain1', 'src':'images/rain1'},
-		{'name':'Rain2', 'src':'images/rain2'}, 
-		{'name':'Waterlevel' , 'src':'images/waterlevel'}, 
-		{'name':'Waterlevel & Rain 2', 'src':'images/waterlevel2'}, 
-		{'name':'VAISALA', 'src':'images/vaisala'},
-		{'name':'BSWM_Lufft', 'src':'images/vaisala'},
-		{'name':'UAAWS', 'src':'images/vaisala'},
-		{'name':'UPAWS', 'src':'images/vaisala'}
-	];
 
 	const MAP_MODES = {
 		VIEW_DATA : '0',
@@ -350,7 +339,7 @@
 					height:'auto',
 					width:'auto',
 					autoOpen: false,
-					draggable: false,
+					draggable: true,
 					open: function(ev, ui) {
 						that.CenterMe();
 
@@ -579,7 +568,6 @@
 				if (OpenUnlockSwitchStatusDialog(this)) {
 					//VALID INPUT LET AJAX CALLBACK DECIDE
 				} else {
-					console.log("FALSE");
 					$(this).val(MAP_MODES.VIEW_DATA);
 					CURRENT_MODE = MAP_MODES.VIEW_DATA;
 				}
@@ -645,31 +633,42 @@
    			type: type}
 		);
 
-		console.log(title);
 		attachMarkerClickEvent(marker, device_id, status);
 
 		return marker;
 	}
 
 	function createIcon(type, status) {
-		var marker_url = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
-
-		var obj = _.findWhere(MARKERS, {name: type});
-		if (obj != null) {
-			if (status == null || status == '0') {
-				marker_url =  obj['src'] +'.png';
-			} else if (status == '1') {
-				marker_url = obj['src'] +'-notok.png';
-			} 
+		//values based on css spritesheet
+		var iconorigin;		
+		if (type == "Rain1" && status == "0") {
+			iconorigin = new google.maps.Point(0 , 111);
+		} else if (type == "Rain1" && status == "1"){
+			iconorigin = new google.maps.Point(0 , 74);
+		} else if (type == "Rain2" && status == "0"){
+			iconorigin = new google.maps.Point(0 , 185);
+		} else if (type == "Rain2" && status == "1"){
+			iconorigin = new google.maps.Point(0 , 148);
+		} else if (type == "Waterlevel" && status == "0"){
+			iconorigin = new google.maps.Point(0 , 296);
+		} else if (type == "Waterlevel" && status == "1"){
+			iconorigin = new google.maps.Point(0 , 333);
+		} else if (type == "Waterlevel & Rain 2" && status == "0"){
+			iconorigin = new google.maps.Point(0 , 407);
+		} else if (type == "Waterlevel & Rain 2" && status == "1"){
+			iconorigin = new google.maps.Point(0 , 370);
+		} else if (type == "VAISALA" || type == "BSWM_Lufft" || type == "UAAWS"  || type == "UPAWS" && status == "0"){
+			iconorigin = new google.maps.Point(0 , 259);
+		} else if (type == "VAISALA" || type == "BSWM_Lufft" || type == "UAAWS"  || type == "UPAWS" && status == "1"){
+			iconorigin = new google.maps.Point(0 , 222);
 		} else {
-			console.log('no icon for ' + type);
+			iconorigin = new google.maps.Point(0 , 37);
 		}
 
-		//console.log(marker_url);
 		var image = {
-   			url: marker_url,
+   			url: 'images/Devices_LegendUI.png',
    			size: new google.maps.Size(32, 37),
-   			origin: new google.maps.Point(0,0),
+   			origin: iconorigin,
    			anchor: new google.maps.Point(16, 37)
    		};
    		return image;
