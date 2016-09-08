@@ -22,14 +22,7 @@ border:0;
 border-radius:5px;
 float:left;
 }
-#view-data-dialog #chart-div {
-max-width: 960px;
-max-height:420px;
-min-height: 180px;
-width: 100%;
-background-repeat:no-repeat;
-background-position: center center;
-}
+
 .sprite { background-image: url('../../images/Devices_LegendUI.png'); background-color: transparent; background-repeat: no-repeat; }
 .notok { width: 32px; height: 37px; background-position: 0px 0px; }
 .rain-unknown { width: 32px; height: 37px; background-position: 0px -37px; }
@@ -64,4 +57,23 @@ margin-right: 4px;
 .legendtext {
 display: inline-block;
 vertical-align: middle;
+}
+
+#view-data-dialog #chart-div {
+max-width: 960px;
+max-height:420px;
+min-height: 180px;
+width: 100%;
+background-repeat:no-repeat;
+background-position: center center;
+}
+
+#view-data-dialog #chart-div.dialog--table{
+	max-width: 960px;
+	max-height:420px;
+}
+
+#view-data-dialog #chart-div.dialog--rain {
+	width: 1000px;
+	height: 400px;
 }

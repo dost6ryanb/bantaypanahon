@@ -103,6 +103,7 @@
 		}
 
 		function DrawTable() {
+			c.attr("class", "dialog--table");
 			console.log("drawing table");
 
 			var datatable = new google.visualization.DataTable();
@@ -163,6 +164,85 @@
 	         chart.draw(datatable, options);
 		}
 
+	function DrawChartRain() {
+		console.log("drawing chart rain");
+		c.attr("class", "dialog--rain");
+
+	  	var datatable = new google.visualization.DataTable();
+		datatable.addColumn('datetime', 'DateTimeRead');
+		datatable.addColumn('number', 'Cumulative Rain');
+		datatable.addColumn('number', 'Rain Value');
+		
+		for(var j=0;j<data.data.length;j++) {
+			var rainValue = parseFloat(data.data[j].rain_value);
+			var rainCumulative = parseFloat(data.data[j].rain_cumulative);
+
+			var row = Array(3);
+
+			row[0] = Date.parseExact(data.data[j].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+			row[1] = {
+					v: rainCumulative, //cumulative rain
+					f: rainCumulative + ' mm'
+				};
+			row[2] = {
+					v: rainValue, //rain value
+					f: rainValue + ' mm'
+				};
+			
+			datatable.addRow(row);
+			
+		}
+		var maxdate;
+		var mindate;
+
+		var d =  Date.parseExact(data.data[data.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+		var d2 =  Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+
+		//var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); //from last data
+		var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); // from 8:00 AM
+		var title_enddatetime = d2.toString('MMMM d yyyy h:mm:ss tt');
+
+		var options = {
+		  title: 'Rainfall Reading from ' + title_startdatetime + ' to ' + title_enddatetime,
+		  hAxis: {
+		    title: 'Rainfall Cumulative: ' + data.data[0].rain_cumulative + " mm", 
+			format : 'LLL d h:mm:ss a',
+			viewWindow : {min : d, max : d2},
+			textStyle : {fontSize: 10}
+		  },
+		  vAxes : {
+		  	0 : {
+		  		title: 'Rain Value (mm)',
+				format: '# mm',
+				minValue: '0',
+				maxValue: '50'
+		  	},
+		  	1 : {
+		  		title: 'Cumulative (mm)',
+		  		direction: -1,
+		  		format: '# mm',
+		  		minValue: '0',
+				maxValue: '200',
+		  	}
+		  },
+		  seriesType: "line",
+          series: {
+          	0 : {
+          		type: "line",
+          		targetAxisIndex : 1,
+          		pointSize: 3,
+          	},
+          	1: {
+          		type: "bars",
+          		targetAxisIndex : 0
+          		}
+          },
+		  crosshair : {trigger: 'both'}
+        };
+		var chart =  new google.visualization.ComboChart(c[0]);
+        chart.draw(datatable, options);
+	  }
+
 		return {
 			Empty : function() {
 				c.empty();
@@ -203,6 +283,9 @@
 						break;
 					case (DeviceView.VIEWS.TABLE):
 						DrawTable();
+						break;
+					case (DeviceView.VIEWS.RAIN):
+						DrawChartRain();
 						break;
 					default:
 						DrawDummy();
