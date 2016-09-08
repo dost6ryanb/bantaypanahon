@@ -353,7 +353,7 @@
 				rnLinkHandler = fn;
 			},
 			triggerSelected : function() {
-				var checkedEl = chartLinks.children(":checked");
+				var checkedEl = chartLinks.find(":checked");
 				if (checkedEl != null) {
 					var elID = checkedEl.attr('id');
 					var elDisbaled = checkedEl.prop('disabled');
@@ -370,6 +370,7 @@
 						}
 					} else {
 						console.log("Not available");
+						tblLinkHandler();
 					}
 
 					
