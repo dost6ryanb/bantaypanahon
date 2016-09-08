@@ -15,7 +15,7 @@ class Devices {
 		
 	}
 
-		public static function getAllDevices() {
+	public static function getAllDevices() {
 		//$strDatabaseFile = str_replace("\\", "/", $_ENV["S2G_DB_PATH"]);
 
 		$connection = new PDO("sqlite:database/sqlite.db");
