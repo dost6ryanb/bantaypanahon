@@ -4,13 +4,15 @@
 <head>
 <meta charset="utf-8">
 <title>DOST VI DRRMU - Devices</title>
-<script type="text/javascript" src='js/jquery-1.11.1.min.js'></script>
-<script type="text/javascript" src='js/jquery-ui.min.js'></script>
-<script type="text/javascript" src='js/jquery.scrollTo.min.js'></script>
-<script type="text/javascript" src='js/date-en-US.js'></script>
-<link rel="stylesheet" href='css/jquery-ui.min.css'>
-<link rel="stylesheet" href='css/jquery-ui.theme.min.css'>
-<link rel="stylesheet" href='css/jquery-ui.structure.min.css'>
+<script type="text/javascript" src='vendor/jquery/jquery-1.12.4.min.js'></script>
+<script type="text/javascript" src='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.js'></script>
+<script type="text/javascript" src='vendor/datejs/date.js'></script>
+<script type="text/javascript" src='vendor/underscore-1.8.3/underscore-min.js'></script>
+<script type="text/javascript" src='vendor/mustache.js-2.2.1/mustache.min.js'></script>
+<script type="text/javascript" src='vendor/sprintf.js-1.0.3/dist/sprintf.min.js'></script>
+<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.css'>
+<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.theme.min.css'>
+<link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.structure.min.css'>
 <link rel="stylesheet" type="text/css" href='css/style.css' />
 <link rel="stylesheet" type="text/css" href='css/screen.css' />
 <link rel="stylesheet" type="text/css" href='css/pages/devices.css' />
@@ -388,20 +390,20 @@
 			},
 
 			SetDevID : function(dev_id) {
-				device = search(devices, 'dev_id', dev_id);
+				device = _.findWhere(devices, {dev_id: dev_id});
 				var title1;
 				var title2;
 
 				if (device != null) {
-					title1 = device['location_name'];
-					title2 = device['municipality_name'] + " - " + device['province_name'];
+					title1 = device['location'];
+					title2 = device['municipality'] + " - " + device['province'];
 				} else {
 					title1 = "Unknown";
 					title2 = "Unknown";
 				}
 
 				chartInfo.setTitle(title1, title2);
-				chartLinks.setDeviceType(device['type_name']);
+				chartLinks.setDeviceType(device['type']);
 			},
 
 			Show : function() {
@@ -646,11 +648,11 @@
 		var device_id = device['dev_id'];
 		var posx = device['posx'];
 		var posy = device['posy'];
-		var type = device['type_name'];
-		var status_id = device['status_id'];
-		var title = device['municipality_name'] + ' - ' + device['location_name'];
+		var type = device['type'];
+		var status = device['status'];
+		var title = device['municipality'] + ' - ' + device['location'];
 
-		var image = createIcon(type, status_id);
+		var image = createIcon(type, status);
 		var pos = new google.maps.LatLng( posx, posy);
 		
 		var marker = new google.maps.Marker({
@@ -662,19 +664,19 @@
 		);
 
 		console.log(title);
-		attachMarkerClickEvent(marker, device_id, status_id);
+		attachMarkerClickEvent(marker, device_id, status);
 
 		return marker;
 	}
 
-	function createIcon(type, status_id) {
+	function createIcon(type, status) {
 		var marker_url = 'http://maps.google.com/mapfiles/ms/icons/red-dot.png';
 
-		var obj = search(MARKERS, 'name', type);
+		var obj = _.findWhere(MARKERS, {name: type});
 		if (obj != null) {
-			if (status_id == null || status_id == '0') {
+			if (status == null || status == '0') {
 				marker_url =  obj['src'] +'.png';
-			} else if (status_id == '1') {
+			} else if (status == '1') {
 				marker_url = obj['src'] +'-notok.png';
 			} 
 		} else {
@@ -696,20 +698,20 @@
 		devices_map_markers.push(marker);
 	}
 
-	function attachMarkerClickEvent(marker, dev_id, status_id) {
+	function attachMarkerClickEvent(marker, dev_id, status) {
 		google.maps.event.addListener(marker, 'click', function() {
 			if (CURRENT_MODE === MAP_MODES.SWITCH_STATUS) {
 				console.log('Switching Status');
-				var newstatus_id;
-				if (status_id == null || status_id == '0') {
-					newstatus_id = '1';
-				} else if(status_id == '1') {
-					newstatus_id = '0';
+				var newstatus;
+				if (status == null || status == '0') {
+					newstatus = '1';
+				} else if(status == '1') {
+					newstatus = '0';
 				} else {
-					newstatus_id = null;
+					newstatus = null;
 				}
 
-				postUpdateDeviceStatus(dev_id, newstatus_id);
+				postUpdateDeviceStatus(dev_id, newstatus);
 			} else if (CURRENT_MODE === MAP_MODES.VIEW_DATA){
 				console.log('Viewing Data');
 				if (!ViewStateDialog.Initialized)  {
@@ -723,28 +725,28 @@
 		});
 	}
 
-	function showMarkerWithStatusId(option) {
+	function showMarkerWithStatus(option) {
 		for (var i=0;i<devices_map_markers.length;i++) {
 			if (option == 'all') {
 				devices_map_markers[i].setMap(devices_map);
 			} else {
 				device_marker =  devices_map_markers[i];
 				device_id = device_marker['dev_id'];
-				device = search(devices, 'dev_id', device_id);
-				device_status_id = null;
+				device = _.findWhere(devices, {dev_id: device_id});
+				device_status = null;
 
 				if (device != null) {
-					device_status_id = device['status_id'];
+					device_status = device['status'];
 					switch (option) {
 						case 'ok':
-							if (device_status_id == null || device_status_id == 0) {
+							if (device_status == null || device_status == 0) {
 								device_marker.setMap(devices_map);
 							} else {
 								device_marker.setMap(null);
 							}
 							break;
 						case 'notok':
-							if (device_status_id == 1) {
+							if (device_status == 1) {
 								device_marker.setMap(devices_map);
 							} else {
 								device_marker.setMap(null);
@@ -761,12 +763,12 @@
 
 
 
-	function postUpdateDeviceStatus(dev_id, status_id) {
+	function postUpdateDeviceStatus(dev_id, status) {
 		$.ajax({
 			url: DOCUMENT_ROOT + 'update.php',
 			type: "POST",
 			data: {dev_id: dev_id,
-		  		status_id: status_id,
+		  		status: status,
 				tryauth: TRYAUTH
 		  	},
 			dataType: 'json',
@@ -777,21 +779,23 @@
 
 	function onSuccessPostUpdate(data) {
 		var device_id = data['dev_id'];
-		var status_id = data['status_id'];
+		var status = data['status'];
 
-		var device_marker = search(devices_map_markers, 'dev_id', device_id);
+		var device_marker = _.findWhere(devices_map_markers, {dev_id: device_id});
 		if (device_marker != null) {
 			var type = device_marker['type'];
 
-			var image = createIcon(type, status_id);
+			var image = createIcon(type, status);
 			device_marker.setIcon(image);
 			google.maps.event.clearListeners(device_marker, 'click');
-			attachMarkerClickEvent(device_marker, device_id, status_id);
+			attachMarkerClickEvent(device_marker, device_id, status);
 		}
 
-		var device = search(devices, 'dev_id', device_id);
+		var device = _.findWhere(devices, {dev_id: device_id});
+		console.log(data['dev_id']);
+		console.log(device);
 		if (device != null) {
-			device['status_id'] = status_id;
+			device['status'] = status;
 		}
 
 
@@ -800,15 +804,6 @@
 	function onFailPostUpdate(data) {
 		console.log('POST fail');
 	}
-
-	function search(o, key, val) {
-		for (var i=0; i<o.length;i++) {
-			if (o[i][key] == val) {
-				return o[i];
-			}
-		}
-		return null;
-	}	
 
 	function drawRain(data, chartdiv) {
 		console.log("drawing table");
@@ -933,7 +928,7 @@
 </div>
 </body>
 <script type="text/javascript">
-var devices = <?php echo json_encode(Devices::getAllDevices());?>;
+var devices = <?php echo json_encode(Devices::GetDevicesAll());?>;
 </script>
 <?php //include_once("analyticstracking.php") ?>
 </html>
