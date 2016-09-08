@@ -8,19 +8,7 @@ margin:0px;
 /*float:left;*/
 display: inline-block;
 }
-.legend {
-margin: 4px;
-white-space: nowrap;
-clear: both
-}
-.legend img {
-width: 24px;
-}
-.legendtitle {
-clear: both;
-font-weight: bolder;
-text-align: center;
-}
+
 #togglelegends {
 margin: 10px;
 clear: both;
@@ -44,4 +32,41 @@ min-height: 180px;
 width: 100%;
 background-repeat:no-repeat;
 background-position: center center;;
+}
+
+.sprite { background-image: url('../../images/Devices_LegendUI.png'); background-color: transparent; background-repeat: no-repeat; }
+.notok { width: 32px; height: 37px; background-position: 0px 0px; }
+.rain1-notok { width: 32px; height: 37px; background-position: -32px 0px; }
+.rain1 { width: 32px; height: 37px; background-position: -64px 0px; }
+.rain2-notok { width: 32px; height: 37px; background-position: -96px 0px; }
+.rain2 { width: 32px; height: 37px; background-position: -128px 0px; }
+.vaisala-notok { width: 32px; height: 37px; background-position: -160px 0px; }
+.vaisala { width: 32px; height: 37px; background-position: -192px 0px; }
+.waterlevel-notok { width: 32px; height: 37px; background-position: -224px 0px; }
+.waterlevel { width: 32px; height: 37px; background-position: -256px 0px; }
+.waterlevel2-notok { width: 32px; height: 37px; background-position: -288px 0px; }
+.waterlevel2 { width: 32px; height: 37px; background-position: -320px 0px; }
+
+.legend {
+	margin: 0 auto;
+	white-space: nowrap;
+	clear: both;
+ 	vertical-align:middle; 
+}
+
+.legendtitle {
+	clear: both;
+	font-weight: bolder;
+	text-align: center;
+	padding-top: 10px;
+	padding-bottom: 6px;
+}
+.legendicon {
+	display: inline-block;
+	vertical-align: middle;
+	margin-right: 4px;
+}
+.legendtext {
+	display: inline-block;
+	vertical-align: middle;
 }

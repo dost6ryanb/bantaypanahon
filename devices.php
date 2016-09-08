@@ -543,25 +543,7 @@
 
 	function initMapLegends(container) {
 		legendscontainer = $(document.getElementById(container));
-		devices_map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById(container));
-		
-		$('<button id="togglelegends">Hide Legend</button>')
-			.on('click', function() {
-				$('.legend').toggle();
-                if ($(this).text() == "Show Legend") {
-                    $(this).text('Hide Legend');
-                } else {
-                    $(this).text('Show Legend');
-                }
-			})
-			.appendTo(legendscontainer);
-        $('<div class="legendtitle">Devices in Western Visayas</div class="legend">').appendTo(legendscontainer);
-		$('<div class="legend"><img src="'+MARKERS[0].src+'.png" > Automatic Rain Gauge</div class="legend">').appendTo(legendscontainer);
-		$('<div class="legend"><img src="'+MARKERS[1].src+'.png" > Automatic Rain Gauge w/ Air Pressure</div class="legend">').appendTo(legendscontainer);
-		$('<div class="legend"><img src="'+MARKERS[2].src+'.png" > Waterlevel</div class="legend">').appendTo(legendscontainer);
-		$('<div class="legend"><img src="'+MARKERS[3].src+'.png" > Waterlevel w/ Automatic Rain Gauge</div class="legend">').appendTo(legendscontainer);
-		$('<div class="legend"><img src="'+MARKERS[4].src+'.png" > VAISALA, UAAWS, or BSWM_Lufft</div class="legend">').appendTo(legendscontainer);
-		$('<div class="legend"><img src="images/overlay_notok.png" > Status Not Ok</div>').appendTo(legendscontainer);
+		devices_map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById(container));	
 	}
 
 	function initControls(container) {
@@ -853,6 +835,13 @@
 	<div id='map-canvas'>
 	</div>
 	<div id='legends'>
+		<div class="legendtitle">Devices in Western Visayas</div>
+		<div class="legend"><div class="legendicon sprite rain1"></div><div class="legendtext"> Automatic Rain Gauge</div></div>
+		<div class="legend"><div class="legendicon sprite rain2"></div><div class="legendtext"> Automatic Rain Gauge w/ Air Pressure</div></div>
+		<div class="legend"><div class="legendicon sprite waterlevel"></div><div class="legendtext"> Waterlevel</div></div>
+		<div class="legend"><div class="legendicon sprite waterlevel2"></div><div class="legendtext"> Waterlevel w/ Automatic Rain Gauge</div></div>
+		<div class="legend"><div class="legendicon sprite vaisala"></div><div class="legendtext"> VAISALA, UAAWS, or BSWM_Lufft</div></div>
+		<div class="legend"><div class="legendicon sprite notok"></div><div class="legendtext"> Status Not Ok</div></div>
 	</div>
 	<div id='controls'>
 	</div>
