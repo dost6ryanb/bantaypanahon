@@ -73,7 +73,8 @@ background-position: center center;
 	max-height:420px;
 }
 
-#view-data-dialog #chart-div.dialog--rain {
+#view-data-dialog #chart-div.dialog--rain,
+#view-data-dialog #chart-div.dialog--waterlevel {
 	width: 1000px;
 	height: 400px;
 }
