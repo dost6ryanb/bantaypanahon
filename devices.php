@@ -1030,27 +1030,27 @@
             <div class="legendtitle">Devices in Western Visayas</div>
             <div class="legend">
                 <div class="legendicon sprite rain1"></div>
-                <div class="legendtext"> Automatic Rain Gauge</div>
+                <div class="legendtext">Automatic Rain Gauge</div>
             </div>
             <div class="legend">
                 <div class="legendicon sprite rain2"></div>
-                <div class="legendtext"> Automatic Rain Gauge w/ Air Pressure</div>
+                <div class="legendtext">Automatic Rain Gauge w/ Air Pressure</div>
             </div>
             <div class="legend">
                 <div class="legendicon sprite waterlevel"></div>
-                <div class="legendtext"> Waterlevel</div>
+                <div class="legendtext">Waterlevel</div>
             </div>
             <div class="legend">
                 <div class="legendicon sprite waterlevel2"></div>
-                <div class="legendtext"> Waterlevel w/ Automatic Rain Gauge</div>
+                <div class="legendtext">Waterlevel w/ Automatic Rain Gauge</div>
             </div>
             <div class="legend">
                 <div class="legendicon sprite vaisala"></div>
-                <div class="legendtext"> VAISALA, UAAWS, or BSWM_Lufft</div>
+                <div class="legendtext">VAISALA, UAAWS, or BSWM_Lufft</div>
             </div>
             <div class="legend">
                 <div class="legendicon sprite notok"></div>
-                <div class="legendtext"> Status Not Ok</div>
+                <div class="legendtext">Status Not Ok</div>
             </div>
         </div>
         <div id='controls'>
