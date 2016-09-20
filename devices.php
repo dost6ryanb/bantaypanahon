@@ -26,6 +26,12 @@
         SWITCH_STATUS: '1'
     };
 
+    const STATUS = {
+        OK: '0',
+        DISABLED: '1',
+        ALL: '99'
+    }
+
     var CURRENT_MODE = MAP_MODES.VIEW_DATA;
     var SDATE = '<?php echo $sdate;?>';
 
@@ -226,11 +232,13 @@
                     textStyle: {
                         fontSize: 10
                     },
-                    gridlines : {
-                    	count: -1,
-                    	units: {
-                    		minutes : {format: ["h:mm a"]}  		
-                    	}
+                    gridlines: {
+                        count: -1,
+                        units: {
+                            minutes: {
+                                format: ["h:mm a"]
+                            }
+                        }
                     }
                 },
                 vAxes: {
@@ -312,13 +320,17 @@
                         fontSize: 10
                     },
                     textPosition: 'none',
-                    gridlines : {
-                    	count: -1,
-                    	units: {
-                    		minutes : {format: ["h:mm a"]}  		
-                    	}
+                    gridlines: {
+                        count: -1,
+                        units: {
+                            minutes: {
+                                format: ["h:mm a"]
+                            }
+                        }
                     },
-                    minorGridlines: {count: 4},
+                    minorGridlines: {
+                        count: 4
+                    },
                 },
                 vAxes: {
                     0: {
@@ -423,11 +435,11 @@
         var wtrLinkHandler;
 
         return {
-        	InitHandlers: function() {
-        		table.on('click', tblLinkHandler);
+            InitHandlers: function() {
+                table.on('click', tblLinkHandler);
                 rain.on('click', rnLinkHandler);
                 wtrlevel.on('click', wtrLinkHandler);
-        	},
+            },
             setDeviceType: function(t) {
                 console.log("fn>setDeviceType " + t);
 
@@ -448,7 +460,7 @@
                     wtrlevel.checkboxradio("enable");
                 }
 
-                
+
             },
             onTableLinkClicked: function(fn) {
                 tblLinkHandler = fn;
@@ -657,7 +669,6 @@
             initMapLegends('legends');
             initMarkers();
             initControls('controls');
-            initControls2('controls2');
         });
     });
 
@@ -753,30 +764,15 @@
 
     function initControls(container) {
         controlscontainer = $(document.getElementById(container));
-        devices_map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(document.getElementById(container));
-        $('<button id="showall">Show All</button>')
-            .on('click', function() {
-                showMarkerWithStatusId('all');
-            })
-            .appendTo(controlscontainer);
-        $('<button id="showall">Show only OK</button>')
-            .on('click', function() {
-                showMarkerWithStatusId('ok');
-            })
-            .appendTo(controlscontainer);
-        $('<button id="showall">Show only NOT OK</button>')
-            .on('click', function() {
-                showMarkerWithStatusId('notok');
-            })
-            .appendTo(controlscontainer);
-    }
-
-    function initControls2(container) {
-        controlscontainer = $(document.getElementById(container));
         devices_map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(document.getElementById(container));
 
-        var MapMode = controlscontainer.children("#map-mode");
+        var ShowStatusMode = controlscontainer.children("#status-filter");
+        ShowStatusMode.on("change", function(data) {
+            var opt = $(this).val();
+            showMarkerWithStatus(opt);
+        });
 
+        var MapMode = controlscontainer.children("#map-mode");
         MapMode.on("change", function(data) {
             var opt = $(this).val();
 
@@ -924,27 +920,27 @@
 
     function showMarkerWithStatus(option) {
         for (var i = 0; i < devices_map_markers.length; i++) {
-            if (option == 'all') {
+            if (option == STATUS.ALL) {
                 devices_map_markers[i].setMap(devices_map);
             } else {
-                device_marker = devices_map_markers[i];
-                device_id = device_marker['dev_id'];
-                device = _.findWhere(devices, {
+                var device_marker = devices_map_markers[i];
+                var device_id = device_marker['dev_id'];
+                var device = _.findWhere(devices, {
                     dev_id: device_id
                 });
-                device_status = null;
+                var device_status = null;
 
                 if (device != null) {
                     device_status = device['status'];
                     switch (option) {
-                        case 'ok':
+                        case STATUS.OK:
                             if (device_status == null || device_status == 0) {
                                 device_marker.setMap(devices_map);
                             } else {
                                 device_marker.setMap(null);
                             }
                             break;
-                        case 'notok':
+                        case STATUS.DISABLED:
                             if (device_status == 1) {
                                 device_marker.setMap(devices_map);
                             } else {
@@ -1008,7 +1004,6 @@
     function onFailPostUpdate(data) {
         console.log('POST fail');
     }
-
     </script>
 </head>
 
@@ -1059,13 +1054,19 @@
             </div>
         </div>
         <div id='controls'>
-        </div>
-        <div id='controls2'>
+            <label for="status-filter">Show</label>
+            <select name="status-filter" id="status-filter">
+                <option value="99" selected="selected">ALL</option>
+                <option value="0">Only OK</option>
+                <option value="1">Only DISABLED</option>
+            </select>
             <label for="map-mode">Map Mode</label>
             <select name="map-mode" id="map-mode">
                 <option value="0" selected="selected">View Data</option>
                 <option value="1">Switch Status</option>
             </select>
+        </div>
+        <div id='controls2'>
         </div>
         <div id="view-data-dialog" style="display:none">
             <input type="hidden" autofocus="autofocus" />
