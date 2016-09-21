@@ -13,7 +13,7 @@ clear: both;
 }
 #legends {
 background: rgba(220, 220, 255, 0.5);
-padding: 6px;
+padding: 12px;
 }
 #legends #togglelegends {
 background:#2869E1;
@@ -57,6 +57,7 @@ margin-right: 4px;
 .legendtext {
 display: inline-block;
 vertical-align: middle;
+margin-left: 3px;
 }
 
 #view-data-dialog #chart-div {
@@ -77,4 +78,14 @@ background-position: center center;
 #view-data-dialog #chart-div.dialog--waterlevel {
 	width: 1000px;
 	height: 400px;
+}
+
+#controls {
+	background-color: rgba(220, 220, 255, 0.5);
+	padding: 5px;
+	margin: 2px;
+}
+
+#controls select {
+	height: 28px;
 }
