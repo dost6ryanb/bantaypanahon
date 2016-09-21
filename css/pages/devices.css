@@ -85,3 +85,7 @@ background-position: center center;
 	padding: 5px;
 	margin: 2px;
 }
+
+#controls select {
+	height: 28px;
+}
