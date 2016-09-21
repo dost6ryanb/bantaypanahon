@@ -98,24 +98,28 @@
         var currentView;
 
         function DrawNoData() {
+            c.innerHTML = '';
             c.css({
                 'background-image': 'url(images/nodata.png)'
             });
         }
 
         function DrawDummy() {
+            c.innerHTML = '';
             c.css({
                 'background-image': 'url(images/bp-logo.png)'
             });
         }
 
         function DrawRetry() {
+            c.innerHTML = '';
             c.css({
                 'background-image': 'url(images/retry.png)'
             });
         }
 
         function DrawTable() {
+            c.innerHTML = '';
             c.attr("class", "dialog--table");
             console.log("drawing table");
 
@@ -365,6 +369,7 @@
                 c.css('height', DEFAULT_HEIGHT);
             },
             SetOnLoadAnim: function() {
+                c.innerHTML = '';
                 c.css({
                     'background-image': 'url(images/rain-loader.gif)'
                 });
