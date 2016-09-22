@@ -793,7 +793,6 @@
                 CURRENT_MODE = opt;
             }
 
-            console.log(CURRENT_MODE);
 
         });
     }
@@ -858,25 +857,25 @@
     function createIcon(type, status) {
         //values based on css spritesheet
         var iconorigin;
-        if (type == "Rain1" && status == "0") {
+        if (type == "Rain1" && status == 0) {
             iconorigin = new google.maps.Point(0, 111);
-        } else if (type == "Rain1" && status == "1") {
+        } else if (type == "Rain1" && status == 1) {
             iconorigin = new google.maps.Point(0, 74);
-        } else if (type == "Rain2" && status == "0") {
+        } else if (type == "Rain2" && status == 0) {
             iconorigin = new google.maps.Point(0, 185);
-        } else if (type == "Rain2" && status == "1") {
+        } else if (type == "Rain2" && status == 1) {
             iconorigin = new google.maps.Point(0, 148);
-        } else if (type == "Waterlevel" && status == "0") {
-            iconorigin = new google.maps.Point(0, 296);
-        } else if (type == "Waterlevel" && status == "1") {
+        } else if (type == "Waterlevel" && status == 0) {
             iconorigin = new google.maps.Point(0, 333);
-        } else if (type == "Waterlevel & Rain 2" && status == "0") {
+        } else if (type == "Waterlevel" && status == 1) {
+            iconorigin = new google.maps.Point(0, 296);
+        } else if (type == "Waterlevel & Rain 2" && status == 0) {
             iconorigin = new google.maps.Point(0, 407);
-        } else if (type == "Waterlevel & Rain 2" && status == "1") {
+        } else if (type == "Waterlevel & Rain 2" && status == 1) {
             iconorigin = new google.maps.Point(0, 370);
-        } else if (type == "VAISALA" || type == "BSWM_Lufft" || type == "UAAWS" || type == "UPAWS" && status == "0") {
+        } else if ((type == "VAISALA" || type == "BSWM_Lufft" || type == "UAAWS" || type == "UPAWS") && status == 0) {
             iconorigin = new google.maps.Point(0, 259);
-        } else if (type == "VAISALA" || type == "BSWM_Lufft" || type == "UAAWS" || type == "UPAWS" && status == "1") {
+        } else if ((type == "VAISALA" || type == "BSWM_Lufft" || type == "UAAWS" || type == "UPAWS") && status == 1) {
             iconorigin = new google.maps.Point(0, 222);
         } else {
             iconorigin = new google.maps.Point(0, 37);
