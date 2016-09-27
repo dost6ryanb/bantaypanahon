@@ -793,7 +793,6 @@
                 CURRENT_MODE = opt;
             }
 
-            console.log(CURRENT_MODE);
 
         });
     }
