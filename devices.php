@@ -793,7 +793,6 @@
                 CURRENT_MODE = opt;
             }
 
-            console.log(CURRENT_MODE);
 
         });
     }
@@ -867,9 +866,9 @@
         } else if (type == "Rain2" && status == "1") {
             iconorigin = new google.maps.Point(0, 148);
         } else if (type == "Waterlevel" && status == "0") {
-            iconorigin = new google.maps.Point(0, 296);
-        } else if (type == "Waterlevel" && status == "1") {
             iconorigin = new google.maps.Point(0, 333);
+        } else if (type == "Waterlevel" && status == "1") {
+            iconorigin = new google.maps.Point(0, 296);
         } else if (type == "Waterlevel & Rain 2" && status == "0") {
             iconorigin = new google.maps.Point(0, 407);
         } else if (type == "Waterlevel & Rain 2" && status == "1") {
