@@ -395,22 +395,23 @@
 	}
 
 	function drawChartWaterlevel(chartdiv, json) {
+		//console.log(json.device[0].dev_id + " " + json.device[0].location);
 		var datatable = new google.visualization.DataTable();
 		datatable.addColumn('datetime', 'DateTimeRead');
 		datatable.addColumn('number', 'Waterlevel'); //add column from index i
 		
-		//j - index of data
-		// i - index of column
 		for(var j=0;j<json.data.length;j++) {
 			var row = Array(2);
-			row[0] = Date.parseExact(json.data[j][json.column[0]], 'yyyy-MM-dd HH:mm:ss');
-			row[1] = {
+			row[0] = Date.parseExact(json.data[j].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+				
+			if (json.data[j].waterlevel != null) {
+				row[1] = {
 					v:parseFloat(json.data[j].waterlevel / 100), 
 					f:(json.data[j].waterlevel / 100) + ' m'
 				};
-			
+			}
 			datatable.addRow(row);
-			
+			//console.log(json.data[j].waterlevel + " " + typeof json.data[j].waterlevel);
 		}
 		
 		var d = Date.parseExact(json.data[json.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');

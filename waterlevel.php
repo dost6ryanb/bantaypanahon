@@ -5,7 +5,6 @@
 	<script type="text/javascript" src='js/jquery-1.11.1.min.js'></script>
 	<script type="text/javascript" src='js/jquery-ui.min.js'></script>
 	<script type="text/javascript" src='js/date.js'></script>
-	<script type="text/javascript" src="https://www.google.com/jsapi"></script>
 	<link rel="stylesheet" href='css/jquery-ui.min.css'>
 	<link rel="stylesheet" href='css/jquery-ui.theme.min.css'>
 	<link rel="stylesheet" href='css/jquery-ui.structure.min.css'>
@@ -13,19 +12,16 @@
 	<link rel="stylesheet" type="text/css" href='css/screen.css' />
 	<link rel="stylesheet" type="text/css" href='css/superfish.css' />
 	<link rel="stylesheet" type="text/css" href='css/pages/waterlevel.css' />
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 	<script type="text/javascript">
 		var key = {'sdate':'<?php echo $sdate;?>'};
-		google.load("visualization", "1", {packages:["corechart"]});
-	    //google.load('visualization', '1', {packages:['table']});
+		google.charts.load('current', {packages: ['corechart']});
 	  
-	  	google.setOnLoadCallback(function() {
-		 	$( document ).ready(function() {
-		 		//key['sdate'] = Date.today().toString('MM/dd/yyyy');
-	  	 		initializeChartDivs('charts_div_container');
-	  	 		initializeDateTimePicker('datetimepicker_container');
-	  	 		initFetchData();
-	  		});
-		});
+		$( document ).ready(function() {
+	  	 	initializeChartDivs('charts_div_container');
+	  	 	initializeDateTimePicker('datetimepicker_container');
+	  	 	initFetchData();
+	  	});
 
 		$.xhrPool = [];
 		$.xhrPool.abortAll = function() {
@@ -171,17 +167,12 @@
 			datatable.addColumn('number', 'Waterlevel Possible Overflow'); //add column from index i
 
 			device = search(waterlevel_devices, "dev_id", json.device[0]['dev_id']);
-			console.log(device);
+			//console.log(device);
 
-
-			//j - index of data
-			// i - index of column
 			for(var j=0;j<json.data.length;j++) {
 				var row = Array(5);
-				var value = json.data[j].waterlevel / 100;
-				var formattedvalue = value + ' m';
-
-				row[0] = Date.parseExact(json.data[j][json.column[0]], 'yyyy-MM-dd HH:mm:ss');
+				
+				row[0] = Date.parseExact(json.data[j].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
 
 				//if (value > 1) {
 					/*row[2] = {
@@ -189,10 +180,14 @@
 						f:formattedvalue
 					};*/
 				//} else {
+				if (json.data[j].waterlevel != null) {
+					var value = json.data[j].waterlevel / 100;
+					var formattedvalue = value + ' m';
 					row[1] = {
 						v:parseFloat(value), 
 						f:formattedvalue
 					};
+				}
 				//}
 				if (j == 0 || j == json.data.length - 1) {
 					
@@ -205,8 +200,6 @@
 						row[2] = 12.0;
 					} 
 					
-				} else {
-
 				}
 				
 				datatable.addRow(row);
@@ -257,7 +250,7 @@
 			  seriesType: 'area',
 			  crosshair : {trigger: 'both'},
 			  allowHtml: true,
-			  interpolateNulls: true,
+			  //interpolateNulls: true,
 			  lineWidth: 0,
 			  areaOpacity: 0.5,
 			  series: {
