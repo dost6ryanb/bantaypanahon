@@ -285,15 +285,16 @@
             datatable.addColumn('number', 'Waterlevel');
 
             for (var j = 0; j < data.data.length; j++) {
-                var waterlevel = parseFloat(data.data[j].waterlevel) / 100;
                 var row = Array(2);
 
                 row[0] = Date.parseExact(data.data[j].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-
-                row[1] = {
-                    v: waterlevel,
-                    f: waterlevel + ' m'
-                };
+                if (data.data[j].waterlevel != null) {
+                    var waterlevel = parseFloat(data.data[j].waterlevel) / 100;
+                    row[1] = {
+                        v: waterlevel,
+                        f: waterlevel + ' m'
+                    };
+                }
 
                 datatable.addRow(row);
             }
