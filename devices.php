@@ -121,7 +121,6 @@
         function DrawTable() {
             c.innerHTML = '';
             c.attr("class", "dialog--table");
-            console.log("drawing table");
 
             var datatable = new google.visualization.DataTable();
             datatable.addColumn('datetime', 'dateTimeRead');
@@ -188,7 +187,6 @@
         }
 
         function DrawChartRain() {
-            console.log("drawing chart rain");
             c.attr("class", "dialog--rain");
 
             var datatable = new google.visualization.DataTable();
@@ -281,7 +279,6 @@
         }
 
         function DrawChartWaterlevel() {
-            console.log("drawing chart waterlevel");
             c.attr("class", "dialog--waterlevel");
 
             var datatable = new google.visualization.DataTable();
@@ -384,12 +381,7 @@
                 currentView = v;
             },
             DrawView: function() {
-                console.log("drawing " + currentView);
-                console.log(data);
                 if (data.count == -1 || data.count == 0 || data.data.length == 0) {
-                    console.log(data.count);
-                    console.log(data.data.length);
-
                     currentView = DeviceView.VIEWS.NODATA;
                 }
 
@@ -446,8 +438,6 @@
                 wtrlevel.on('click', wtrLinkHandler);
             },
             setDeviceType: function(t) {
-                console.log("fn>setDeviceType " + t);
-
                 chartLinks.find("input[name='chart-type']").checkboxradio();
                 chartLinks.find("input[name='chart-type']").checkboxradio("disable");
 
@@ -481,7 +471,6 @@
                 if (checkedEl != null) {
                     var elID = checkedEl.attr('id');
                     var elDisbaled = checkedEl.prop('disabled');
-                    console.log(elID + " " + elDisbaled);
 
                     if (elDisbaled == false) {
                         switch (elID) {
@@ -570,21 +559,18 @@
                 deviceView.SetView(DeviceView.VIEWS.TABLE);
                 chartLinks.InitHandlers();
                 chartLinks.onTableLinkClicked(function() {
-                    console.log("Table link clicked");
                     deviceView.SetView(DeviceView.VIEWS.TABLE);
                     if (deviceView.GetData() !== undefined) {
                         deviceView.DrawView();
                     }
                 });
                 chartLinks.onRainLinkClicked(function() {
-                    console.log("Rain link clicked");
                     deviceView.SetView(DeviceView.VIEWS.RAIN);
                     if (deviceView.GetData() !== undefined) {
                         deviceView.DrawView();
                     }
                 });
                 chartLinks.onWaterlevelLinkClicked(function() {
-                    console.log("Waterlevel link clicked");
                     deviceView.SetView(DeviceView.VIEWS.WATERLEVEL);
                     if (deviceView.GetData() !== undefined) {
                         deviceView.DrawView();
@@ -593,7 +579,6 @@
                 startDateOption = DateOption('sdate');
                 startDateOption.setDate(SDATE);
                 startDateOption.onDateChanged(function(d) {
-                    console.log("Date Changed to " + d + " " + startDateOption.getDate());
                     that.LoadData();
                 });
 
@@ -633,28 +618,22 @@
             },
 
             LoadData: function() {
-                console.log(startDateOption.getDate());
                 deviceView.ResetData();
                 chartLinks.triggerSelected();
                 var that = this;
-                console.log(deviceView.GetData());
                 dataLoader = DataLoader(device['dev_id'], startDateOption.getDate(),
                     function(data) {
-                        console.log('success');
-                        console.log(data);
                         deviceView.SetData(data);
                         deviceView.DrawView();
                         that.CenterMe();
                     },
                     function() {
-                        console.log('fail');
                         deviceView.OnFail(function() {
                             console.log("Retrying");
                             that.LoadData();
                         });
                     },
                     function() {
-                        console.log('before send');
                         deviceView.Empty();
                         deviceView.SetOnLoadAnim();
                         that.CenterMe();
@@ -996,8 +975,6 @@
         var device = _.findWhere(devices, {
             dev_id: device_id
         });
-        console.log(data['dev_id']);
-        console.log(device);
         if (device != null) {
             device['status'] = status;
         }
