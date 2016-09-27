@@ -121,7 +121,6 @@
         function DrawTable() {
             c.innerHTML = '';
             c.attr("class", "dialog--table");
-
             var datatable = new google.visualization.DataTable();
             datatable.addColumn('datetime', 'dateTimeRead');
             datatable.addColumn('datetime', 'dateTimeReceived');
@@ -629,7 +628,6 @@
                     },
                     function() {
                         deviceView.OnFail(function() {
-                            console.log("Retrying");
                             that.LoadData();
                         });
                     },
@@ -877,7 +875,6 @@
     function attachMarkerClickEvent(marker, dev_id, status) {
         google.maps.event.addListener(marker, 'click', function() {
             if (CURRENT_MODE === MAP_MODES.SWITCH_STATUS) {
-                console.log('Switching Status');
                 var newstatus;
                 if (status == null || status == '0') {
                     newstatus = '1';
@@ -889,7 +886,6 @@
 
                 postUpdateDeviceStatus(dev_id, newstatus);
             } else if (CURRENT_MODE === MAP_MODES.VIEW_DATA) {
-                console.log('Viewing Data');
                 if (!ViewStateDialog.Initialized) {
                     ViewStateDialog.Init('view-data-dialog');
                 }
