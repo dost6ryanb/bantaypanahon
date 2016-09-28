@@ -97,31 +97,37 @@
 
         var currentView;
 
+        function __ResetView() {
+            c.html('');
+            c.css({
+                'background-image': ''
+            });
+        }
+
         function DrawNoData() {
-            c.innerHTML = '';
+            __ResetView();
             c.css({
                 'background-image': 'url(images/nodata.png)'
             });
         }
 
         function DrawDummy() {
-            c.innerHTML = '';
+            __ResetView();
             c.css({
                 'background-image': 'url(images/bp-logo.png)'
             });
         }
 
         function DrawRetry() {
-            c.innerHTML = '';
+            __ResetView();
             c.css({
                 'background-image': 'url(images/retry.png)'
             });
         }
 
         function DrawTable() {
-            c.innerHTML = '';
+            __ResetView();
             c.attr("class", "dialog--table");
-            console.log("drawing table");
 
             var datatable = new google.visualization.DataTable();
             datatable.addColumn('datetime', 'dateTimeRead');
@@ -188,7 +194,7 @@
         }
 
         function DrawChartRain() {
-            console.log("drawing chart rain");
+            __ResetView();
             c.attr("class", "dialog--rain");
 
             var datatable = new google.visualization.DataTable();
@@ -281,7 +287,7 @@
         }
 
         function DrawChartWaterlevel() {
-            console.log("drawing chart waterlevel");
+            __ResetView();
             c.attr("class", "dialog--waterlevel");
 
             var datatable = new google.visualization.DataTable();
@@ -385,8 +391,6 @@
                 currentView = v;
             },
             DrawView: function() {
-                console.log("drawing " + currentView);
-                console.log(data);
                 if (data.count == -1 || data.count == 0 || data.data.length == 0) {
                     console.log(data.count);
                     console.log(data.data.length);
@@ -571,21 +575,18 @@
                 deviceView.SetView(DeviceView.VIEWS.TABLE);
                 chartLinks.InitHandlers();
                 chartLinks.onTableLinkClicked(function() {
-                    console.log("Table link clicked");
                     deviceView.SetView(DeviceView.VIEWS.TABLE);
                     if (deviceView.GetData() !== undefined) {
                         deviceView.DrawView();
                     }
                 });
                 chartLinks.onRainLinkClicked(function() {
-                    console.log("Rain link clicked");
                     deviceView.SetView(DeviceView.VIEWS.RAIN);
                     if (deviceView.GetData() !== undefined) {
                         deviceView.DrawView();
                     }
                 });
                 chartLinks.onWaterlevelLinkClicked(function() {
-                    console.log("Waterlevel link clicked");
                     deviceView.SetView(DeviceView.VIEWS.WATERLEVEL);
                     if (deviceView.GetData() !== undefined) {
                         deviceView.DrawView();
@@ -594,7 +595,6 @@
                 startDateOption = DateOption('sdate');
                 startDateOption.setDate(SDATE);
                 startDateOption.onDateChanged(function(d) {
-                    console.log("Date Changed to " + d + " " + startDateOption.getDate());
                     that.LoadData();
                 });
 
@@ -874,9 +874,9 @@
             iconorigin = new google.maps.Point(0, 407);
         } else if (type == "Waterlevel & Rain 2" && status == "1") {
             iconorigin = new google.maps.Point(0, 370);
-        } else if ((type == "VAISALA" || type == "BSWM_Lufft" || type == "UAAWS" || type == "UPAWS" ) && status == "0") {
+        } else if ((type == "VAISALA" || type == "BSWM_Lufft" || type == "UAAWS" || type == "UPAWS") && status == "0") {
             iconorigin = new google.maps.Point(0, 259);
-        } else if ((type == "VAISALA" || type == "BSWM_Lufft" || type == "UAAWS" || type == "UPAWS" ) && status == "1") {
+        } else if ((type == "VAISALA" || type == "BSWM_Lufft" || type == "UAAWS" || type == "UPAWS") && status == "1") {
             iconorigin = new google.maps.Point(0, 222);
         } else {
             iconorigin = new google.maps.Point(0, 37);
