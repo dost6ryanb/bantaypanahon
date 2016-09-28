@@ -851,9 +851,9 @@
             iconorigin = new google.maps.Point(0, 407);
         } else if (type == "Waterlevel & Rain 2" && status == "1") {
             iconorigin = new google.maps.Point(0, 370);
-        } else if (type == "VAISALA" || type == "BSWM_Lufft" || type == "UAAWS" || type == "UPAWS" && status == "0") {
+        } else if ((type == "VAISALA" || type == "BSWM_Lufft" || type == "UAAWS" || type == "UPAWS" ) && status == "0") {
             iconorigin = new google.maps.Point(0, 259);
-        } else if (type == "VAISALA" || type == "BSWM_Lufft" || type == "UAAWS" || type == "UPAWS" && status == "1") {
+        } else if ((type == "VAISALA" || type == "BSWM_Lufft" || type == "UAAWS" || type == "UPAWS" ) && status == "1") {
             iconorigin = new google.maps.Point(0, 222);
         } else {
             iconorigin = new google.maps.Point(0, 37);
