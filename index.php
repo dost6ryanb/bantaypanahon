@@ -6,6 +6,7 @@
 <title>DOST VI DRRMU - Home</title>
 <script type="text/javascript" src='js/jquery-1.11.1.min.js'></script>
 <script type="text/javascript" src='js/jquery-ui.min.js'></script>
+<script type="text/javascript" src="vendor/materialize-0.9.7/js/materialize.min.js"></script>
 <script type="text/javascript" src='js/date-en-US.js'></script>
 <script type="text/javascript" src='js/jquery.scrollTo.min.js'></script>
 <script type="text/javascript" src='js/jquery.easy-ticker.min.js'></script>
@@ -16,13 +17,14 @@
 <link rel="stylesheet" type="text/css" href='css/style.css' />
 <link rel="stylesheet" type="text/css" href='css/screen.css' />
 <link rel="stylesheet" type="text/css" href='css/pages/index.css' />
+<link type="text/css" rel="stylesheet" href="vendor/materialize-0.9.7/css/materialize.min.css"  media="screen,projection"/>
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4yau_nw40dWy2TwW4OdUq4OJKbFs1EOc&sensor=false"></script>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
 <script type="text/javascript">
 	setTimeout(function(){
 		window.location.reload(true);
-	},900000); // refresh 10 minutes
+	},900000); // refresh 15 minutes
 	var key = {'sdate':'<?php echo $sdate;?>', 'numraindevices':0, 'loadedraindevices':0,
 			   'serverdate':'<?php echo date("m/d/Y");?>', 'servertime':'<?php echo date("H:i");?>',
 			   'marker' : [
@@ -141,8 +143,6 @@
 
 	function onRainfallDataResponseSuccess(data) {
 		var device_id = data.device[0].dev_id;
-		//console.log(device_id);
-		//console.log(data);
 
 		$('#loadedraindevices').text(++key['loadedraindevices']);
 
