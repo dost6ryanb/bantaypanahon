@@ -138,16 +138,30 @@
 
 		var trimAndRecalculateRain = function(data) {
 			var startDtr = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+			//<#-- ASTI BSWM_Lufft not ISO STANDARD dateTimeRead FIX -_-
+			if (!startDtr) {
+				console.log("BSWM_Lufft Fix") ;
+				var datefixed = data.data[0].dateTimeRead.substring(0, 19);
+				console.log("trimmed date " + datefixed);
+				startDtr = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
+			}//--#>
+
 			var endDtr = startDtr.clone().addMinutes(-parseInt(requestParam.duration));
 			var cumulativeRain = null;
 
 			var i=0;
 			for(i=0;i<data.data.length;i++) {
 				var deviceDtr = Date.parseExact(data.data[i].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+				//<#-- ASTI BSWM_Lufft not ISO STANDARD dateTimeRead FIX -_-
+				if (!deviceDtr) {
+					console.log("BSWM_Lufft Fix") ;
+					var datefixed = data.data[i].dateTimeRead.substring(0, 19);
+					console.log("trimmed date " + datefixed);
+					deviceDtr = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
+				}//--#>
 
-				if (deviceDtr.between(endDtr, startDtr)) {
-					//
-				} else {
+				//if datetimeread is outside time gap, then break
+				if (!deviceDtr.between(endDtr, startDtr)) {
 					break;
 				}
 
@@ -299,6 +313,13 @@
 			var row = Array(3);
 
 			row[0] = Date.parseExact(json.data[j].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+			//<#-- ASTI BSWM_Lufft not ISO STANDARD dateTimeRead FIX -_-
+			if (!row[0]) {
+				console.log("BSWM_Lufft Fix") ;
+				var datefixed = json.data[j].dateTimeRead.substring(0, 19);
+				console.log("trimmed date " + datefixed);
+				row[0] = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
+			}//--#>
 			row[1] = {
 					v: rainCumulative, //cumulative rain
 					f: rainCumulative + ' mm'
@@ -315,7 +336,20 @@
 		var mindate;
 
 		var d =  Date.parseExact(json.data[json.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+		//<#-- ASTI BSWM_Lufft not ISO STANDARD dateTimeRead FIX -_-
+		if (!d) {
+			console.log("BSWM_Lufft Fix") ;
+			var datefixed = json.data[json.data.length - 1].dateTimeRead.substring(0, 19);
+			console.log("trimmed date " + datefixed);
+			d = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
+		}//--#>
 		var d2 =  Date.parseExact(json.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+		if (!d2) {
+			console.log("BSWM_Lufft Fix") ;
+			var datefixed = json.data[0].dateTimeRead.substring(0, 19);
+			console.log("trimmed date " + datefixed);
+			d2 = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
+		}//--#>
 
 		//var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); //from last data
 		var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); // from 8:00 AM
