@@ -6,7 +6,6 @@
 <title>DOST VI DRRMU - Home</title>
 <script type="text/javascript" src='js/jquery-1.11.1.min.js'></script>
 <script type="text/javascript" src='js/jquery-ui.min.js'></script>
-<script type="text/javascript" src="vendor/materialize-0.9.7/js/materialize.min.js"></script>
 <script type="text/javascript" src='js/date-en-US.js'></script>
 <script type="text/javascript" src='js/jquery.scrollTo.min.js'></script>
 <script type="text/javascript" src='js/jquery.easy-ticker.min.js'></script>
@@ -17,7 +16,6 @@
 <link rel="stylesheet" type="text/css" href='css/style.css' />
 <link rel="stylesheet" type="text/css" href='css/screen.css' />
 <link rel="stylesheet" type="text/css" href='css/pages/index.css' />
-<link type="text/css" rel="stylesheet" href="vendor/materialize-0.9.7/css/materialize.min.css"  media="screen,projection"/>
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4yau_nw40dWy2TwW4OdUq4OJKbFs1EOc&sensor=false"></script>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
@@ -157,10 +155,15 @@
 			var device = search(rainfall_devices, 'dev_id', device_id);
 			//var timeread = data.data[0].dateTimeRead.substring(10).substring(0, 6);
 			var devicedtr = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+			//<#-- ASTI BSWM_Lufft not ISO STANDARD dateTimeRead FIX -_-
+			if (!devicedtr) { 
+				var datefixed = data.data[0].dateTimeRead.substring(0, 19);
+				console.log(datefixed);
+				devicedtr = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
+			}//--#>
 			var serverdtr = Date.parseExact(key['serverdate']+ ' '+ key['servertime']+':00', 'MM/dd/yyyy HH:mm:ss');
-
 			var hour12time = devicedtr.toString("h:mm tt");
-
+			
 			if (key['sdate'] == key['serverdate'] && devicedtr.add({minutes:15}).compareTo(serverdtr) == -1) { //late
 				updateRainfallTable(device_id, hour12time, data.data[0].rain_value, data.data[0].rain_cumulative, 'latedata');
 			} else {
