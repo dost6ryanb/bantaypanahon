@@ -145,6 +145,12 @@
             for (var j = 0; j < data.data.length; j++) {
                 var datum = data.data[j];
                 var dtrd = Date.parseExact(datum.dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+                //<#-- ASTI BSWM_Lufft not ISO STANDARD dateTimeRead FIX -_-
+                if (!dtrd) { 
+				    var datefixed = datum.dateTimeRead.substring(0, 19);
+				    console.log(datefixed);
+				    dtrd = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
+			    }//--#>
                 var dtrc = Date.parseExact(datum.dateTimeReceived, 'yyyy-MM-dd HH:mm:ss');
 
                 var row = [];
@@ -173,7 +179,17 @@
             var mindate;
 
             var d = Date.parseExact(data.data[data.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+            if (!d) { 
+			    var datefixed = data.data[data.data.length - 1].dateTimeRead.substring(0, 19);
+			    console.log(datefixed);
+			    d = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
+			}//--#>
             var d2 = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+            if (!d2) { 
+			    var datefixed = data.data[0].dateTimeRead.substring(0, 19);
+			    console.log(datefixed);
+			    d2 = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
+			}//--#>
 
             //var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); //from last data
             var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); // from 8:00 AM
@@ -209,6 +225,11 @@
                 var row = Array(3);
 
                 row[0] = Date.parseExact(data.data[j].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+                if (!row[0]) {
+    				var datefixed = data.data[j].dateTimeRead.substring(0, 19);
+	    			console.log("trimmed date " + datefixed);
+				    row[0] = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
+			    }//--#>
                 row[1] = {
                     v: rainCumulative, //cumulative rain
                     f: rainCumulative + ' mm'
@@ -225,7 +246,17 @@
             var mindate;
 
             var d = Date.parseExact(data.data[data.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+            if (!d) { 
+			    var datefixed = data.data[data.data.length - 1].dateTimeRead.substring(0, 19);
+			    console.log(datefixed);
+			    d = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
+			}//--#>
             var d2 = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+            if (!d2) { 
+			    var datefixed = data.data[0].dateTimeRead.substring(0, 19);
+			    console.log(datefixed);
+			    d2 = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
+			}//--#>
 
             //var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); //from last data
             var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); // from 8:00 AM

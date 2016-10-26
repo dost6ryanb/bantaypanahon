@@ -569,12 +569,25 @@
 
 		if (time != null) {
 			var d = Date.parseExact(time['dateTimeRead'], 'yyyy-MM-dd HH:mm:ss');
+			//<#-- ASTI BSWM_Lufft not ISO STANDARD dateTimeRead FIX -_-
+			if (!d) { 
+				var datefixed = time.dateTimeRead.substring(0, 19);
+				console.log(datefixed);
+				d = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
+			}//--#>
 			time = d.toString('h:mm tt'); 
 		} else {
 			time = 'unknown';
 		}
 
-		var current_time = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss').toString('h:mm tt');
+		var current_time_date = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+		//<#-- ASTI BSWM_Lufft not ISO STANDARD dateTimeRead FIX -_-
+		if (!current_time_date) { 
+			var datefixed = data.data[0].dateTimeRead.substring(0, 19);
+			console.log(datefixed);
+			current_time_date = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
+		}//--#>
+		var current_time = current_time_date.toString('h:mm tt');
 		var current_temperature = parseFloat(data.data[0].air_temperature);
 		var humidity = parseFloat(data.data[0].air_humidity);
 
