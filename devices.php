@@ -69,7 +69,7 @@
             beforeSend: fnBeforeSend,
             data: {
                 start: 0,
-                limit: "",
+                limit: "200",
                 sdate: s,
                 edate: s,
                 pattern: d
