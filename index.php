@@ -543,8 +543,8 @@
 		var div = 'line-chart-marker_'+ device_id;
 		if (data.count == -1 || // fmon.predict 404
 			data.count == 0 || // sensor no reading according to fmon.predict
-			data.data.length == 0 || // predict reports that it has reading but actually doesnt have
-			data.data[0].waterlevel == null || data.data[0].waterlevel == '' // errouneous readings
+			data.data.length == 0 /*|| // predict reports that it has reading but actually doesnt have
+			 data.data[0].waterlevel == null || data.data[0].waterlevel == '' // errouneous readings*/
 		) {
 			$(document.getElementById(div)).css({'background': 'url(images/nodata.png)'});
 		} else {
