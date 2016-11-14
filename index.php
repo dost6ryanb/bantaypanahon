@@ -40,9 +40,7 @@
 	var cumulative_rainfall_map_markers = [];
 	var lastValidCenter;
 
-	//google.load("visualization", "1", {packages:["corechart"]});
 	google.charts.load('current', {packages: ['corechart']});
-	//google.load('visualization', '1', {packages:['table']});
 
 	$.xhrPool = [];
 	$.xhrPool.abortAll = function() {
@@ -448,6 +446,7 @@
 		  crosshair : {trigger: 'both'},
 		  allowHtml: true
         };
+		
 		var chart =  new google.visualization.ComboChart(document.getElementById(chartdiv));
         chart.draw(datatable, options);
 		//$('<div/>').text('Waterlevel: '+json.data[0].waterlevel+ ' cm').css({'height':'20px'}).appendTo('#'+chartdiv);
