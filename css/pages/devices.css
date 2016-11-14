@@ -76,7 +76,8 @@ background-position: center center;
 }
 
 #view-data-dialog #chart-div.dialog--rain,
-#view-data-dialog #chart-div.dialog--waterlevel {
+#view-data-dialog #chart-div.dialog--waterlevel,
+#view-data-dialog #chart-div.dialog--temperature {
 	width: 1000px;
 	height: 400px;
 }
