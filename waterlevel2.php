@@ -121,7 +121,7 @@
           /*|| // predict reports that it has reading but actually doesnt have
             data.data[0].waterlevel == null || data.data[0].waterlevel=='' // errouneous readings*/
         ) {
-          updateWaterlevelTable(device_id, '[NO DATA]', '', 'nodata');
+          updateWaterlevelTable(device_id, '[NO DATA]', '', '', 'nodata');
         } else {
           var device = search(waterlevel_devices, 'dev_id', device_id);
           var timeread = data.data[0].dateTimeRead.substring(10).substring(0, 6);
@@ -129,13 +129,13 @@
           var serverdtr = Date.parseExact(key['serverdate'] + ' ' + key['servertime'] + ':00', 'MM/dd/yyyy HH:mm:ss');
 
           var hour12time = devicedtr.toString("h:mm tt");
-
+          var deviation = data.data[0].waterlevel - data.data[1].waterlevel;
           if (key['sdate'] == key['serverdate'] && devicedtr.add({
               minutes: 15
             }).compareTo(serverdtr) == -1) { //late
-            updateWaterlevelTable(device_id, hour12time, data.data[0].waterlevel / 100, 'latedata');
+            updateWaterlevelTable(device_id, hour12time, data.data[0].waterlevel / 100, deviation / 100 , 'latedata');
           } else {
-            updateWaterlevelTable(device_id, hour12time, data.data[0].waterlevel / 100, 'dataok');
+            updateWaterlevelTable(device_id, hour12time, data.data[0].waterlevel / 100, deviation / 100 , 'dataok');
           }
 
 
@@ -160,12 +160,12 @@
 
       function onWaterlevelDataResponseFail(dev_id) {
         var retryhtml = '<a href=javascript:retryFetchWaterlevel(' + dev_id + ')>Retry</a>';
-        updateWaterlevelTable(dev_id, retryhtml, null, null);
+        updateWaterlevelTable(dev_id, retryhtml, null, null, null);
       }
 
       function retryFetchWaterlevel(dev_id) {
         postGetData(dev_id, key['sdate'], key['sdate'], 1, onWaterlevelDataResponseSuccess);
-        updateWaterlevelTable(dev_id, '', '', '');
+        updateWaterlevelTable(dev_id, '', '', '', '');
       }
 
       // function onWaterlevelDataResponseSuccess(data) {
@@ -283,7 +283,7 @@
         var prevProvince = '';
         var maindiv = document.getElementById(div);
         var table = $('<table/>').appendTo(maindiv);
-        var sdate = $('<td><a title="Click to change" href="#" id="sdate">' + key['sdate'] + '</a></td>');
+        var sdate = $('<td colspan="3"><a title="Click to change" href="#" id="sdate">' + key['sdate'] + '</a></td>');
         var datepicker = $('<input type="text" style="height: 0px; width:0px; border: 0px;" id="dtpicker2"/>');
         datepicker.appendTo(sdate);
 
@@ -313,9 +313,9 @@
         });
 
 
-        $('<tr><th>Server DateTime</th><td id="serverdtr">' + key['serverdate'] + ' ' + key['servertime'] + '</td><tr>').appendTo(table);
-        $('<tr><th>Total Devices</th><td id="numwaterleveldevices">' + waterlevel_devices.length + '</td><tr>').appendTo(table);
-        $('<tr><th>Loaded</th><td id="loadedwaterleveldevices">0</td><tr>').appendTo(table);
+        $('<tr><th>Server DateTime</th><td id="serverdtr" colspan="3">' + key['serverdate'] + ' ' + key['servertime'] + '</td><tr>').appendTo(table);
+        $('<tr><th>Total Devices</th><td id="numwaterleveldevices" colspan="3">' + waterlevel_devices.length + '</td><tr>').appendTo(table);
+        $('<tr><th>Loaded</th><td id="loadedwaterleveldevices" colspan="3">0</td><tr>').appendTo(table);
         for (var i = 0; i < waterlevel_devices.length; i++) {
           var cur = waterlevel_devices[i];
 
@@ -325,7 +325,8 @@
             $('<tr/>').addClass('province_tr')
               .append($('<th>' + prevProvince + '</th>'))
               .append($('<th>Time (HH:MM)</th>'))
-              .append($('<th>Waterlevel (m)</th>')).appendTo(table);
+              .append($('<th>Waterlevel (m)</th>'))
+              .append($('<th>Last Reading Deviation (m)</th>')).appendTo(table);
           }
 
           $('<tr/>', {
@@ -337,10 +338,13 @@
             }))
             .append($('<td/>', {
               'data-col': 'wl'
+            }))
+            .append($('<td/>', {
+              'data-col': 'wld'
             })).appendTo(table);
 
           if (cur['status_id'] != null && cur['status_id'] != 0) {
-            updateWaterlevelTable(cur['dev_id'], '[DISABLED]', "", 'disabled');
+            updateWaterlevelTable(cur['dev_id'], '[DISABLED]', "", "", 'disabled');
           }
 
         }
@@ -435,26 +439,30 @@
 		//$('<div/>').text('Waterlevel: '+json.data[0].waterlevel+ ' cm').css({'height':'20px'}).appendTo('#'+chartdiv);
 	  }
 
-      function updateWaterlevelTable(device_id, dateTimeRead, waterlevel, dataclass) {
+      function updateWaterlevelTable(device_id, dateTimeRead, waterlevel, waterleveldeviation, dataclass) {
         var tr = $('tr[data-dev_id=\'' + device_id + '\']');
         var dtr = $('tr[data-dev_id=\'' + device_id + '\'] td[data-col=\'dtr\']');
         var wl = $('tr[data-dev_id=\'' + device_id + '\'] td[data-col=\'wl\']');
+        var wld = $('tr[data-dev_id=\'' + device_id + '\'] td[data-col=\'wld\']');
 
         if (dateTimeRead != null) dtr.html(dateTimeRead);
         else dtr.text('');
         if (waterlevel != null) wl.text(waterlevel);
         else wl.text('');
+        if (waterleveldeviation != null) wld.text(waterleveldeviation);
+        else wld.text('');
 
         if (dataclass != 'undefined') {
           dtr.removeClass().addClass(dataclass);
           wl.removeClass().addClass(dataclass);
+          wld.removeClass().addClass(dataclass);
         }
 
       }
 
       function clearWaterlevelTable() {
         for (var i = 0; i < waterlevel_devices.length; i++) {
-          updateWaterlevelTable(waterlevel_devices[i]['dev_id'], null, null, null)
+          updateWaterlevelTable(waterlevel_devices[i]['dev_id'], null, null, null, null)
         }
 
       }
