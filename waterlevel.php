@@ -265,8 +265,7 @@
               count: 13
             },
             viewWindow: {
-              min: 0,
-              max: 12
+              min: 0
             }
 
           },

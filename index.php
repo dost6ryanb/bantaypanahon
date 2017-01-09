@@ -436,7 +436,8 @@
 				format: '# m',
 				minValue: '0',
 				maxValue: '12',
-				gridlines : {count : 13}
+				gridlines : {count : 13},
+				viewWindow : { min: 0 },
 			  },
 		  legend : {
 		  	position : 'none'
