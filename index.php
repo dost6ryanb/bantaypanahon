@@ -179,8 +179,8 @@
 					} else {
 						marker_url = limit['src']+'.png';
 					}
-					addMarker(device['dev_id'], device['posx'], device['posy'], device['municipality_name'] + ' - ' + device['location_name'], device['type_name'], marker_url);
-					var text =  "[Cumulative Rainfall] "+device['municipality_name'] + ' - ' + device['location_name'] + ' : ' + data.data[0].rain_cumulative + ' mm';
+					addMarker(device['dev_id'], device['posx'], device['posy'], device['municipality'] + ' - ' + device['location'], device['type'], marker_url);
+					var text =  "[Cumulative Rainfall] "+device['municipality'] + ' - ' + device['location'] + ' : ' + data.data[0].rain_cumulative + ' mm';
 					addTicker(text, 'ticker--1__list');
 
 					break;
@@ -353,8 +353,8 @@
 			var cur = rainfall_devices[i];
 
 
-			if (cur['province_name'] != prevProvince) {
-				prevProvince = cur.province_name;
+			if (cur['province'] != prevProvince) {
+				prevProvince = cur.province;
 				$('<tr/>').addClass('province_tr')
 					.append($('<th>' + prevProvince + '</th>'))
 					.append($('<th>Time</th>'))
@@ -363,7 +363,7 @@
 			}
 
 			$('<tr/>', {'data-dev_id': cur.dev_id})
-				.append($('<td nowrap="">' + cur.municipality_name + ' - ' + cur.location_name + '</td>'))
+				.append($('<td nowrap="">' + cur.municipality + ' - ' + cur.location + '</td>'))
 				.append($('<td/>', {'data-col': 'dtr'}))
 				.append($('<td/>', {'data-col': 'rv'}))
 				.append($('<td/>', {'data-col': 'cr'})).appendTo(table);
@@ -382,7 +382,7 @@
 		for(var i=0;i<waterlevel_devices.length;i++) {
 			var device = waterlevel_devices[i];
 			$('<div/>').attr({'id':'chart_div_'+device['dev_id'], 'class':'chartWithOverlay list divrowwrapper'})
-				.append($('<p/>').addClass('overlay').text(device['municipality_name'] + ' - '+ device['location_name']))
+				.append($('<p/>').addClass('overlay').text(device['municipality'] + ' - '+ device['location']))
 				.append($('<div/>', {'id':"line-chart-marker_"+device['dev_id']}).addClass('chart'))
 				.appendTo(chart_wrapper);
 
@@ -559,8 +559,8 @@
 		var device_id = data.device[0].dev_id;
 		var device = search(temperature_devices, 'dev_id', device_id);
 		
-		var municipality = device['municipality_name'];
-		var location = device['location_name'];
+		var municipality = device['municipality'];
+		var location = device['location'];
 		var max = data.device[0].minmax['max'];
 
 		var time = search(data.data, 'air_temperature', max, true);
@@ -708,9 +708,9 @@
 </div>
 </body>
 <script type="text/javascript">
-var rainfall_devices = <?php echo json_encode(Devices::GetAllDevicesWithParameter('Rainfall'));?>;
-var waterlevel_devices = <?php echo json_encode(Devices::GetAllDevicesWithParameter('Waterlevel'));?>;
-var temperature_devices = <?php echo json_encode(Devices::GetAllDevicesWithParameter('Temperature'));?>;
+var rainfall_devices = <?php echo json_encode(Devices::GetDevicesByParam('Rainfall'));?>;
+var waterlevel_devices = <?php echo json_encode(Devices::GetDevicesByParam('Waterlevel'));?>;
+var temperature_devices = <?php echo json_encode(Devices::GetDevicesByParam('Temperature'));?>;
 </script>
 <?php include_once("analyticstracking.php") ?>
 </html>

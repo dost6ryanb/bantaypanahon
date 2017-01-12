@@ -188,7 +188,7 @@
 				requestParam.baseDate = basedate;
 				requestParam.duration = duration;
 				
-				var selectedDevices = _.where(rainfall_devices, {province_name : location_filter});
+				var selectedDevices = _.where(rainfall_devices, {province : location_filter});
 				var baseDate = basedate.clone();
 				var baseDateText = baseDate.toString("MM/dd/yyyy");
 				var yesterdayDate = baseDate.clone().add({days:-1});
@@ -452,7 +452,7 @@
 				</tr>
 				{{#devices}}
 				<tr data-dev_id="{{dev_id}}">
-					<td>{{municipality_name}} - {{location_name}}</td>
+					<td>{{municipality}} - {{location}}</td>
 					<td data-col="result"{{#cssByStatus}}{{status_id}}{{/cssByStatus}}></td>
 				</tr>
 				{{/devices}}
@@ -506,7 +506,7 @@
 	</div>
 </body>
 <script type="text/javascript">
-var rainfall_devices = <?php echo json_encode(Devices::GetAllDevicesWithParameter('Rainfall'));?>;
+var rainfall_devices = <?php echo json_encode(Devices::GetDevicesByParam('Rainfall'));?>;
 </script>
 <?php include_once("analyticstracking.php") ?>
 </html>
