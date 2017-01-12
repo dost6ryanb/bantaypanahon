@@ -86,11 +86,11 @@
 
         for (var i = 0; i < waterlevel_devices.length; i++) {
           var cur = waterlevel_devices[i];
-          if (cur['province_name'] != prevProvince) {
-            prevProvince = cur['province_name'];
+          if (cur['province'] != prevProvince) {
+            prevProvince = cur['province'];
             $('<br/><h3 class="provincelabel">' + prevProvince + '</h3>').appendTo(charts_container);
           }
-          var chart_title = cur['municipality_name'] + ' - ' + cur['location_name'];
+          var chart_title = cur['municipality'] + ' - ' + cur['location'];
           var chart_div = $('<div></div>')
             .attr({
               'id': 'chart_div_' + cur['dev_id'],
@@ -396,7 +396,7 @@
     </div>
   </body>
   <script type="text/javascript">
-    var waterlevel_devices = <?php echo json_encode(Devices::GetAllDevicesWithParameter('Waterlevel'));?>;
+    var waterlevel_devices = <?php echo json_encode(Devices::GetDevicesByParam('Waterlevel'));?>;
   </script>
   <?php //include_once("analyticstracking.php") ?>
 
