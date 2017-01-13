@@ -15,6 +15,8 @@
     box-sizing: border-box;
     border-collapse: collapse;
     max-width: 530px;
+    table-layout: fixed;
+    font-size: x-small;
 }
 
 #rainfall-canvas table th,
@@ -22,8 +24,6 @@
     border-style: dotted;
     border-spacing: 0;
     border-width: 1px;
-    font-size: x-small;
-    table-layout: fixed;
 }
 
 .legend {

@@ -81,7 +81,7 @@
 				if (history) {
 					postGetData(cur['dev_id'], key['sdate'], key['sdate'], 1, onRainfallDataResponseSuccess);
 				} else {
-					if (cur['status_id'] == null || cur['status_id'] == '0') {
+					if (cur['status'] == null || cur['status'] == '0') {
 						postGetData(cur['dev_id'], key['sdate'], "", 1, onRainfallDataResponseSuccess);
 					} // else SKIP
 				}
@@ -97,7 +97,7 @@
 					if (history) {
 						postGetData(cur['dev_id'], key['sdate'], key['sdate'], "144", onWaterlevelDataResponseSuccess);
 					} else {
-						if (cur['status_id'] == null || cur['status_id'] == '0') {
+						if (cur['status'] == null || cur['status'] == '0') {
 							postGetData(cur['dev_id'], key['sdate'], "", "", onWaterlevelDataResponseSuccess);
 						}
 					}	
@@ -110,7 +110,7 @@
 				// if (history) {
 					postGetData(cur.dev_id, key['sdate'], key['sdate'], 96, onTemperatureDataResponseSuccess);
 				// } else {
-				// 	if (cur['status_id'] == null || cur['status_id'] == '0') {
+				// 	if (cur['status'] == null || cur['status'] == '0') {
 				// 		postGetData(cur.dev_id, key['sdate'], "", "", onTemperatureDataResponseSuccess);
 				// 	}
 				// }
@@ -358,17 +358,17 @@
 				$('<tr/>').addClass('province_tr')
 					.append($('<th>' + prevProvince + '</th>'))
 					.append($('<th>Time</th>'))
-					.append($('<th>Rain Value (mm)</th>'))
+					.append($('<th>Rain (mm)</th>'))
 					.append($('<th>Cumulative (mm)</th>')).appendTo(table);
 			}
 
 			$('<tr/>', {'data-dev_id': cur.dev_id})
-				.append($('<td nowrap="">' + cur.municipality + ' - ' + cur.location + '</td>'))
+				.append($('<td>' + cur.municipality + ' - ' + cur.location + '</td>'))
 				.append($('<td/>', {'data-col': 'dtr'}))
 				.append($('<td/>', {'data-col': 'rv'}))
 				.append($('<td/>', {'data-col': 'cr'})).appendTo(table);
 
-			if (cur['status_id'] != null && cur['status_id'] != 0) {
+			if (cur['status'] != null && cur['status'] != 0) {
 				updateRainfallTable(cur['dev_id'], '[DISABLED]', '', '', 'disabled');
 			}
 
@@ -387,7 +387,7 @@
 				.appendTo(chart_wrapper);
 
 			var div = 'line-chart-marker_'+ device['dev_id'];
-			if (device['status_id'] != null && device['status_id'] != 0) {
+			if (device['status'] != null && device['status'] != 0) {
 				$(document.getElementById(div)).css({'background':'url(images/disabled.png)'});
 			}
 		}	

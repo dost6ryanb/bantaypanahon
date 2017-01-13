@@ -77,7 +77,7 @@
             if (history) {
               postGetData(cur['dev_id'], key['sdate'], key['sdate'], "144", onWaterlevelDataResponseSuccess);
             } else {
-              if (cur['status_id'] == null || cur['status_id'] == '0') {
+              if (cur['status'] == null || cur['status'] == '0') {
                 postGetData(cur['dev_id'], key['sdate'], "", "", onWaterlevelDataResponseSuccess);
               }
             }
@@ -343,7 +343,7 @@
               'data-col': 'wld'
             })).appendTo(table);
 
-          if (cur['status_id'] != null && cur['status_id'] != 0) {
+          if (cur['status'] != null && cur['status'] != 0) {
             updateWaterlevelTable(cur['dev_id'], '[DISABLED]', "", "", 'disabled');
           }
 
@@ -371,7 +371,7 @@
             .appendTo(chart_wrapper);
 
           var div = 'line-chart-marker_' + cur['dev_id'];
-          if (cur['status_id'] != null && cur['status_id'] != 0) {
+          if (cur['status'] != null && cur['status'] != 0) {
             $(document.getElementById(div)).css({
               'background': 'url(images/disabled.png)'
             });
