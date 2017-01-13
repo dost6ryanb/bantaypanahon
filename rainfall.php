@@ -228,7 +228,7 @@
 				});
 
 				_.each(selectedDevices, function(c) {
-					if (c['status_id'] == "0") { //fetch only enabled device
+					if (c['status'] == "0") { //fetch only enabled device
 						fetchData(c['dev_id'], yesterdayDateText, baseDateText, "", duration);
 					}
 				});
@@ -453,7 +453,7 @@
 				{{#devices}}
 				<tr data-dev_id="{{dev_id}}">
 					<td>{{municipality}} - {{location}}</td>
-					<td data-col="result"{{#cssByStatus}}{{status_id}}{{/cssByStatus}}></td>
+					<td data-col="result"{{#cssByStatus}}{{status}}{{/cssByStatus}}></td>
 				</tr>
 				{{/devices}}
 			</table>

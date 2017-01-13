@@ -98,7 +98,7 @@
             }).appendTo(charts_container);
           chart_div.html('<div class="chart_overlay"><p>' + chart_title + '</p></div><div id="chart_' + cur['dev_id'] + '" class="chart"></div>');
 
-          if (cur['status_id'] != null && cur['status_id'] != 0) {
+          if (cur['status'] != null && cur['status'] != 0) {
             $("#chart_" + cur['dev_id']).css({
               'background': 'url(images/disabled.png)',
               'background-size': '100%',
@@ -119,7 +119,7 @@
             if (history) {
               postGetData(cur['dev_id'], key['sdate'], key['sdate'], "144", onWaterlevelDataResponseSuccess);
             } else {
-              if (cur['status_id'] == null || cur['status_id'] == '0') {
+              if (cur['status'] == null || cur['status'] == '0') {
                 postGetData(cur['dev_id'], key['sdate'], "", "", onWaterlevelDataResponseSuccess);
               }
             }
