@@ -1,14 +1,14 @@
-#container {
-/*	min-width:1212px;
-	max-width:1716px;*/
+.container {
+	padding: 5px 10px;
 }
+
 .chart_div {
 	width:400px;
 	height:300px;
 	margin:2px;
-	
 	display:inline-block;
 	float:left;
+	position: relative;
 }
 
 .chart {
@@ -29,21 +29,28 @@
 	display:inline-block;
 }
 
-#charts_div_container {
-	padding: 10px;
-}
-
 .chart_overlay {
-    color: white;
     height: 20px;
-    z-index: 100;
-    left: 60px;
-    top: 60px;
+    left: 0;
+    right: 0;
     font-size: 8pt;
     background: #2869E1;
+	position: absolute;
+	z-index: 100;
  }
 
- .chart_overlay p {
- 	padding: 4px;
+.chart_overlay.connected {
+	left: -10px;
+}
+
+.chart_overlay p {
+	padding: 4px;
  	margin: 0;
- }
+	color: #FFFFFF;
+}
+
+.chart_overlay.connected p {
+	padding: 4px 14px;
+	margin: 0;
+	color: #FFFFFF;
+}
