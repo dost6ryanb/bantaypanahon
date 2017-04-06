@@ -5,6 +5,7 @@ var key = {
 
 var app = {
     sdate: SDATE,
+    edate: SDATE,
     xhrHelper: xhrPoolHelper($)
 }
 
@@ -13,9 +14,11 @@ google.charts.load('current', {packages: ['corechart']});
 google.charts.setOnLoadCallback(function () {
     $(document).ready(function () {
         var string_date = moment(SDATE, 'MM/DD/YYYY').format('MMMM DD, YYYY');
-        updateTitle(string_date);
+        updateTitle('as of ' + string_date);
         initializeChartDivs('charts_div_container');
-        initializeDateTimePicker('datetimepicker_container');
+        //initializeDateTimePicker('datetimepicker_container');
+        initializeDateTimePickers('date_picker1', 'date_picker2');
+        initializeGoButton('go');
         initFetchData();
     });
 });
@@ -25,7 +28,7 @@ function updateTitle(text) {
     el_daterange.text(text);
 }
 
-function initializeDateTimePicker(div) {
+/*function initializeDateTimePicker(div) {
     var container = $(document.getElementById(div));
     $('<h2>Waterlevel Reading for &nbsp;</h2>').appendTo(container);
     var datepicker = $('<input type="text" style="height: 0px; width:0px; border: 0px;z-index: 10000; position: relative" id="dtpicker"/>');
@@ -52,13 +55,138 @@ function initializeDateTimePicker(div) {
     $('#sdate').click(function () {
         $('#dtpicker').datepicker('show');
     });
+}*/
+
+function initializeDateTimePickers(e1, e2) {
+    var maxDate = moment(SDATE, 'MM/DD/YYYY').toDate();
+    var from = $(document.getElementById(e1))
+            .datepicker({
+                defaultDate: "+1w",
+                changeMonth: true,
+                numberOfMonths: 2,
+                maxDate: maxDate
+            })
+            .on( "change", function() {
+                to.datepicker( "option", "minDate", getDate( this ) );
+
+                //processDateRange(getDate(this), getDate(document.getElementById(e2)));
+            }),
+        to = $(document.getElementById(e2)).datepicker({
+            defaultDate: "+1w",
+            changeMonth: true,
+            numberOfMonths: 2,
+            maxDate: maxDate
+        })
+            .on( "change", function() {
+                from.datepicker( "option", "maxDate", getDate( this ) );
+
+                //processDateRange(getDate(document.getElementById(e1)), getDate(this));
+            });
+
+}
+function getDate( element ) {
+    var dateFormat = "mm/dd/yy",
+        date;
+    try {
+        date = $.datepicker.parseDate( dateFormat, element.value );
+    } catch( error ) {
+        date = null;
+    }
+
+    return date;
+}
+
+function processDateRange(d1, d2) {
+    var sdate,
+        edate,
+        success = false;
+
+    if (d1 && d2) {
+        sdate = moment(d1);
+        edate = moment(d2);
+
+        if (sdate.isSame(edate)) {
+            updateTitle('for ' + sdate.format("MMMM DD, YYYY"));
+        } else if (sdate.isSame(edate, 'month')){
+            updateTitle('for ' + sdate.format("MMMM DD") + " - " + edate.format("DD, YYYY"));
+        } else {
+            updateTitle('from ' + sdate.format("MMMM DD, YYYY") + " to " + edate.format("MMMM DD, YYYY"));
+        }
+
+        success = true;
+    } else if (d1 && !d2) {
+        sdate = moment(d1);
+        edate = moment(sdate);
+
+        updateTitle('for ' + sdate.format("MMMM DD, YYYY"));
+        success = true;
+    } else if (!d1 && d2) {
+        edate = moment(d2);
+        sdate = moment(edate);
+
+        updateTitle('for ' + sdate.format("MMMM DD, YYYY"));
+        success = true;
+    } else {
+        success = false;
+    }
+
+    if (success) {
+        app.sdate = sdate.format("MM/DD/YYYY");
+        app.edate = edate.format("MM/DD/YYYY");
+
+        switch (Math.abs(sdate.diff(edate, 'day'))) {
+            case 0:
+                updateChartsDiv('sm');
+                break;
+            case 1:
+            case 2:
+                updateChartsDiv('md');
+                break;
+            case 3:
+            case 4:
+            case 5:
+                updateChartsDiv('lg');
+                break;
+            case 6:
+            case 7:
+                updateChartsDiv('xl');
+                break;
+            default:
+                updateChartsDiv('xxl');
+        }
+
+        console.log(app.sdate + " - " + app.edate);
+    } else {
+        console.log('sucess false');
+    }
+
+    return success;
+}
+
+function initializeGoButton(el) {
+    var $btn = $(document.getElementById(el));
+    $btn.button();
+
+    $btn.on('click', function() {
+        var d1 = getDate(document.getElementById('date_picker1'));
+        var d2 = getDate(document.getElementById('date_picker2'));
+
+        var valid = processDateRange(d1, d2);
+
+        if (valid) {
+            app.xhrHelper.abortAll();
+            initFetchData(true);
+        } else {
+            //alert no date
+        }
+
+    });
+
 }
 
 function initializeChartDivs(div) {
     var charts_container = $(document.getElementById(div));
-    charts_container.empty();
-    //charts_container.append($('<h4>Latest Waterlevel Reading @ ' + key['serverdate']+' '+ key['servertime'] +'</h4>'));
-
+    //charts_container.empty();
 
     var prevProvince = '';
     var prevRiverIndex = '';
@@ -86,22 +214,31 @@ function initializeChartDivs(div) {
                 'class': 'chart_div'
             }).appendTo(charts_container);
 
-        var chart_overlay_class = 'chart_overlay';
+        var chart_header_class = 'chart_header';
         if (addLeadingArrow) {
-            chart_overlay_class = 'chart_overlay connected';
+            chart_header_class += ' connected';
         }
 
-        chart_div.html('<div class="'+chart_overlay_class+'"><p>' + chart_title + '</p></div><div id="chart_' + cur['dev_id'] + '" class="chart"></div>');
+        chart_div.html('<div class="'+chart_header_class+'"><p>' + chart_title + '</p></div><div id="chart_' + cur['dev_id'] + '" class="chart"></div>');
 
         if (cur['status'] != null && cur['status'] != 0) {
-            $("#chart_" + cur['dev_id']).css({
-                'background': 'url(images/disabled.png)',
-                'background-size': '100%',
-                'background-repeat': 'no-repeat'
+            chart_div.children('.chart').each(function(id, el) {
+               $(el).addClass('disabled');
             });
         }
 
     }
+}
+
+function updateChartsDiv(sizeclass) {
+    var charts_container = $('#charts_div_container');
+    charts_container.find('.chart').each(function(id, el) {
+        $(el).html('');
+    });
+    charts_container.find('.chart_div').each(function(id, el) {
+        $(el).removeClass('sm md lg xl xxl').addClass(sizeclass);
+    });
+
 
 }
 
@@ -112,10 +249,10 @@ function initFetchData(history) {
             var cur = waterlevel_devices[i];
 
             if (history) {
-                postGetData(cur['dev_id'], key['sdate'], key['sdate'], "144", onWaterlevelDataResponseSuccess);
+                postGetData(cur['dev_id'], app.sdate, app.edate, "", onWaterlevelDataResponseSuccess);
             } else {
                 if (cur['status'] == null || cur['status'] == '0') {
-                    postGetData(cur['dev_id'], key['sdate'], "", "", onWaterlevelDataResponseSuccess);
+                    postGetData(cur['dev_id'], app.sdate, "", "", onWaterlevelDataResponseSuccess);
                 }
             }
         }
@@ -157,12 +294,9 @@ function onWaterlevelDataResponseSuccess(data) {
      data.data[0].waterlevel == null || data.data[0].waterlevel=='' // errouneous readings*/
     ) {
         //$(document.getElementById(div)).hide();
-        $(document.getElementById(div)).css({
-            'background': 'url(images/nodata.png)',
-            'background-size': '100%',
-            'background-repeat': 'no-repeat'
-        });
+        $(document.getElementById(div)).addClass('nodata');
     } else {
+        $(document.getElementById(div)).removeClass('nodata disabled');
         drawChartWaterlevel(div, data);
     }
 }
