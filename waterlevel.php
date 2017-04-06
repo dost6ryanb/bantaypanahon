@@ -29,9 +29,18 @@
     </div>
     <div id="content">
       <div class="container" >
-        <h1>Waterlevel Reading for <span id="daterange">HAR</span></h1>
+        <h1>Waterlevel Reading <span id="daterange"></span></h1>
         <div id="datetimepicker_container">
+            <label for="date_picker1">From: </label>
+            <input type="text" class='ui-corner-all ui-button ui-widget' id="date_picker1" name="date_picker1">
+            <label for="date_picker2">To: </label>
+            <input type="text" class='ui-corner-all ui-button ui-widget' id="date_picker2" name="date_picker2">
+            <button id='go' class='ui-corner-all ui-button ui-widget'>Go</button>
         </div>
+          <div id="beta-info" class="ui-state-highlight">
+              <span>Beta Warning. Choosing dates longer than 7 days may require more memory and network usage that it may crash your browser. Use with caution.</span>
+              <span class="ui-icon ui-icon-closethick"></span>
+          </div>
         <div id="charts_div_container"></div>
       </div>
     </div>
