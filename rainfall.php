@@ -45,7 +45,7 @@
 		}
 
 		return {
-			getRenderedTemplate(context) {
+			getRenderedTemplate: function(context) {
 				if (!_templateSource) {
 					build_template();
 				}
