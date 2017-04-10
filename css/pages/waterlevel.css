@@ -7,16 +7,72 @@
 	height:300px;
 	margin:2px;
 	display:inline-block;
-	float:left;
+	position: relative;
+	float: left;
+}
+
+.chart_header {
+	width: 100%;
+	height: 20px;
+	left: 0;
+	right: 0;
+	font-size: 8pt;
+	background: #2869E1;
 	position: relative;
 }
 
+.chart_header.connected {
+	left: -10px;
+	padding-right: 10px;
+}
+
+.chart_header p {
+	padding: 4px;
+	margin: 0;
+	color: #FFFFFF;
+}
+
+.chart_header.connected p {
+	padding: 4px 14px;
+	margin: 0;
+	color: #FFFFFF;
+}
+
 .chart {
-	width:400px;
-	height:280px;
+	width:100%;
+	height: 280px;
 	background-color:#d8d8d8;
 }
 
+.chart.disabled {
+	background: url('../../images/disabled.png') center / 100% no-repeat;
+	overflow: hidden;
+}
+
+.chart.nodata {
+	background: url('../../images/nodata.png') center / 100% no-repeat;
+	overflow: hidden;
+}
+
+.chart_div.sm {
+	width: 400px;
+}
+
+.chart_div.md {
+	width: 500px;
+}
+
+.chart_div.lg {
+	width: 600px;
+}
+
+.chart_div.xl {
+	width: 700px;
+}
+
+.chart_div.xxl {
+	width: 100%;
+}
 .provincelabel {
 	clear:both;
 	background: #2869E1;
@@ -27,30 +83,22 @@
 
 #datetimepicker_container h2{
 	display:inline-block;
+    position: relative;
 }
 
-.chart_overlay {
-    height: 20px;
-    left: 0;
-    right: 0;
-    font-size: 8pt;
-    background: #2869E1;
+#datetimepicker_container > input[type=text] {
+    z-index: 10000;
+    position: relative;
+}
+
+#beta-info {
+	display: block;
+	height: 30px;
+	padding: 5px 5px 5px;
+	font-weight: bold;
+	position: relative;
+}
+#beta-info span:last-child {
 	position: absolute;
-	z-index: 100;
- }
-
-.chart_overlay.connected {
-	left: -10px;
-}
-
-.chart_overlay p {
-	padding: 4px;
- 	margin: 0;
-	color: #FFFFFF;
-}
-
-.chart_overlay.connected p {
-	padding: 4px 14px;
-	margin: 0;
-	color: #FFFFFF;
+	right: 5px;
 }
