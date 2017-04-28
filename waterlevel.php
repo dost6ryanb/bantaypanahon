@@ -97,7 +97,7 @@
     <script src="vendor/datejs/date.min.js"></script>
     <script src="vendor/moment.js-2.18.1/moment.js"></script>
     <script src="vendor/jquery-ui-daterangepicker-0.6.0-beta.1/jquery.comiseo.daterangepicker.min.js"></script>
-    <script src="js/helper.js"></script>
+    <script src="js/ajax.helper.js"></script>
     <script src="js/waterlevel.js"></script>
   </body>
   <?php //include_once("analyticstracking.php") ?>
