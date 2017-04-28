@@ -1,8 +1,4 @@
 //waterlevel.js
-var key = {
-    'sdate': '<?php echo $sdate;?>'
-};
-
 var app = {
     sdate: SDATE,
     edate: SDATE,
@@ -27,35 +23,6 @@ function updateTitle(text) {
     var el_daterange = $('#daterange');
     el_daterange.text(text);
 }
-
-/*function initializeDateTimePicker(div) {
-    var container = $(document.getElementById(div));
-    $('<h2>Waterlevel Reading for &nbsp;</h2>').appendTo(container);
-    var datepicker = $('<input type="text" style="height: 0px; width:0px; border: 0px;z-index: 10000; position: relative" id="dtpicker"/>');
-    var sdate = $('<a title="Click to change" href="#" id="sdate">' + SERVER_DATE + '</a>');
-    datepicker.appendTo(container);
-    sdate.appendTo(container);
-
-
-    $('#dtpicker').datepicker({
-        onSelect: function (data) {
-            sdate.text(data);
-            console.log(data);
-            key['sdate'] = data;
-            //$.xhrPool.abortAll();
-            app.xhrHelper.abortAll();
-            initializeChartDivs('charts_div_container');
-            initFetchData(true);
-        }
-        //,
-       //  altField: '#datepicker_start',
-       //  altFormat : 'mm/dd/yy',
-        // dateFormat : 'yymmdd'
-    });
-    $('#sdate').click(function () {
-        $('#dtpicker').datepicker('show');
-    });
-}*/
 
 function initializeDateTimePickers(e1, e2) {
     var maxDate = moment(SDATE, 'MM/DD/YYYY').toDate();
@@ -252,7 +219,7 @@ function initFetchData(history) {
                 postGetData(cur['dev_id'], app.sdate, app.edate, "", onWaterlevelDataResponseSuccess);
             } else {
                 if (cur['status'] == null || cur['status'] == '0') {
-                    postGetData(cur['dev_id'], app.sdate, "", "", onWaterlevelDataResponseSuccess);
+                    postGetData(cur['dev_id'], app.sdate, "", 144, onWaterlevelDataResponseSuccess);
                 }
             }
         }
