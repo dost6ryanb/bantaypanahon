@@ -5,7 +5,7 @@ $sdate = $_POST['sdate'];
 $edate = $_POST['edate'];
 	
 if ($dev_id == false) return;
-if ($limit == FALSE) $limit = '100';
+if ($limit == FALSE) $limit = '';
 if ($sdate == FALSE) $sdate = '';
 if ($edate == FALSE) $edate = '';
 
