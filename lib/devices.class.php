@@ -47,7 +47,7 @@ class Devices {
 				$query = 'select v.*, normal, overflow, device_height, riverindex from v_devices v '.
 						'left outer join waterlevelinfo w on v.dev_id = w.devices_dev_id '.
 						'where v.type in ('. $types .') '.
-						'order by v.province, w.riverindex ASC';
+						'order by v.province, w.riverindex IS NOT NULL, w.riverindex ASC';
 				break;
 			case 'Rainfall' : 
 				$types  = "'VAISALA', 'Rain1', 'Rain2', 'Waterlevel & Rain 2', 'UAAWS', 'BSWM_Lufft'";
