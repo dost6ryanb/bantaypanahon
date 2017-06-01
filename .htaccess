@@ -1,0 +1,7 @@
+<IfModule mod_rewrite.c>
+ RewriteEngine on
+ RewriteCond %{REMOTE_ADDR} !^123\.456\.789\.000
+ RewriteCond %{REQUEST_URI} !/maintenance.php$ [NC]
+ RewriteCond %{REQUEST_URI} !\.(jpe?g?|png|gif|css|js) [NC]
+ RewriteRule .* /maintenance.php [R=302,L]
+</IfModule>
