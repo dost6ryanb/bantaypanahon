@@ -9,7 +9,8 @@ if ($limit == FALSE) $limit = '';
 if ($sdate == FALSE) $sdate = '';
 if ($edate == FALSE) $edate = '';
 
-$url = 'http://fmon.asti.dost.gov.ph/weather/home/index.php/device/getData/';
+//$url = 'http://fmon.asti.dost.gov.ph/weather/home/index.php/device/getData/';
+$url = 'http://fmon.asti.dost.gov.ph/api/index.php/device/getData/';
 $data = array('start' => '0', 'limit' => $limit, 'sDate' => $sdate, 'eDate' => $edate, 'pattern' => $dev_id);
 
 $options = array(
