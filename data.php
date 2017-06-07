@@ -15,10 +15,10 @@ $data = array('start' => '0', 'limit' => $limit, 'sDate' => $sdate, 'eDate' => $
 
 $options = array(
 	'http' => array(
-		'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+		'header'  => "Connection: close\r\nContent-type: application/x-www-form-urlencoded\r\n",
 		'method'  => 'POST',
 		'content' => http_build_query($data)/*,
-		'proxy' => 'tcp://127.0.0.1:8888'*/
+		'proxy' => 'tcp://192.168.1.146:8888'*/
 	),
 );
 
