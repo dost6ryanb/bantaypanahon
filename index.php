@@ -156,7 +156,7 @@
 			//<#-- ASTI BSWM_Lufft not ISO STANDARD dateTimeRead FIX -_-
 			if (!devicedtr) { 
 				var datefixed = data.data[0].dateTimeRead.substring(0, 19);
-				console.log(datefixed);
+//				console.log(datefixed);
 				devicedtr = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
 			}//--#>
 			var serverdtr = Date.parseExact(key['serverdate']+ ' '+ key['servertime']+':00', 'MM/dd/yyyy HH:mm:ss');
@@ -572,7 +572,7 @@
 			//<#-- ASTI BSWM_Lufft not ISO STANDARD dateTimeRead FIX -_-
 			if (!d) { 
 				var datefixed = time.dateTimeRead.substring(0, 19);
-				console.log(datefixed);
+//				console.log(datefixed);
 				d = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
 			}//--#>
 			time = d.toString('h:mm tt'); 
@@ -584,7 +584,7 @@
 		//<#-- ASTI BSWM_Lufft not ISO STANDARD dateTimeRead FIX -_-
 		if (!current_time_date) { 
 			var datefixed = data.data[0].dateTimeRead.substring(0, 19);
-			console.log(datefixed);
+//			console.log(datefixed);
 			current_time_date = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
 		}//--#>
 		var current_time = current_time_date.toString('h:mm tt');

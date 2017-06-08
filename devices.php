@@ -150,7 +150,7 @@
             //<#-- ASTI BSWM_Lufft not ISO STANDARD dateTimeRead FIX -_-
             if (!dtrd) {
               var datefixed = datum.dateTimeRead.substring(0, 19);
-              console.log(datefixed);
+//              console.log(datefixed);
               dtrd = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
             } //--#>
             var dtrc = Date.parseExact(datum.dateTimeReceived, 'yyyy-MM-dd HH:mm:ss');
@@ -183,13 +183,13 @@
           var d = Date.parseExact(data.data[data.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
           if (!d) {
             var datefixed = data.data[data.data.length - 1].dateTimeRead.substring(0, 19);
-            console.log(datefixed);
+//            console.log(datefixed);
             d = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
           } //--#>
           var d2 = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
           if (!d2) {
             var datefixed = data.data[0].dateTimeRead.substring(0, 19);
-            console.log(datefixed);
+//            console.log(datefixed);
             d2 = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
           } //--#>
 
@@ -240,7 +240,7 @@
             row[0] = Date.parseExact(data.data[j].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
             if (!row[0]) {
               var datefixed = data.data[j].dateTimeRead.substring(0, 19);
-              console.log("trimmed date " + datefixed);
+//              console.log("trimmed date " + datefixed);
               row[0] = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
             } //--#>
             row[1] = {
@@ -261,13 +261,13 @@
           var d = Date.parseExact(data.data[data.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
           if (!d) {
             var datefixed = data.data[data.data.length - 1].dateTimeRead.substring(0, 19);
-            console.log(datefixed);
+//            console.log(datefixed);
             d = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
           } //--#>
           var d2 = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
           if (!d2) {
             var datefixed = data.data[0].dateTimeRead.substring(0, 19);
-            console.log(datefixed);
+//            console.log(datefixed);
             d2 = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
           } //--#>
 
@@ -426,7 +426,7 @@
             row[0] = Date.parseExact(data.data[j].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
             if (!row[0]) {
               var datefixed = data.data[j].dateTimeRead.substring(0, 19);
-              console.log("trimmed date " + datefixed);
+//              console.log("trimmed date " + datefixed);
               row[0] = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
             } //--#>
             row[1] = {
@@ -447,13 +447,13 @@
           var d = Date.parseExact(data.data[data.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
           if (!d) {
             var datefixed = data.data[data.data.length - 1].dateTimeRead.substring(0, 19);
-            console.log(datefixed);
+//            console.log(datefixed);
             d = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
           } //--#>
           var d2 = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
           if (!d2) {
             var datefixed = data.data[0].dateTimeRead.substring(0, 19);
-            console.log(datefixed);
+//            console.log(datefixed);
             d2 = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
           } //--#>
 
@@ -536,8 +536,8 @@
           },
           DrawView: function() {
             if (data.count == -1 || data.count == 0 || data.data.length == 0) {
-              console.log(data.count);
-              console.log(data.data.length);
+//              console.log(data.count);
+//              console.log(data.data.length);
 
               currentView = DeviceView.VIEWS.NODATA;
             }
@@ -600,7 +600,7 @@
             temp.on('click', tempLinkHandler);
           },
           setDeviceType: function(t) {
-            console.log("fn>setDeviceType " + t);
+//            console.log("fn>setDeviceType " + t);
 
             chartLinks.find("input[name='chart-type']").checkboxradio();
             chartLinks.find("input[name='chart-type']").checkboxradio("disable");
@@ -638,7 +638,7 @@
             if (checkedEl != null) {
               var elID = checkedEl.attr('id');
               var elDisbaled = checkedEl.prop('disabled');
-              console.log(elID + " " + elDisbaled);
+//              console.log(elID + " " + elDisbaled);
 
               if (elDisbaled == false) {
                 switch (elID) {
@@ -656,7 +656,7 @@
                     break;
                 }
               } else {
-                console.log("Not available");
+//                console.log("Not available");
                 tblLinkHandler();
               }
 
@@ -795,28 +795,28 @@
           },
 
           LoadData: function() {
-            console.log(startDateOption.getDate());
+//            console.log(startDateOption.getDate());
             deviceView.ResetData();
             chartLinks.triggerSelected();
             var that = this;
-            console.log(deviceView.GetData());
+//            console.log(deviceView.GetData());
             dataLoader = DataLoader(device['dev_id'], startDateOption.getDate(),
               function(data) {
-                console.log('success');
-                console.log(data);
+//                console.log('success');
+//                console.log(data);
                 deviceView.SetData(data);
                 deviceView.DrawView();
                 that.CenterMe();
               },
               function() {
-                console.log('fail');
+//                console.log('fail');
                 deviceView.OnFail(function() {
-                  console.log("Retrying");
+//                  console.log("Retrying");
                   that.LoadData();
                 });
               },
               function() {
-                console.log('before send');
+//                console.log('before send');
                 deviceView.Empty();
                 deviceView.SetOnLoadAnim();
                 that.CenterMe();
@@ -911,7 +911,7 @@
           lat = lat.toFixed(6);
           var lng = pnt.lng();
           lng = lng.toFixed(6);
-          console.log("Latitude: " + lat + "  Longitude: " + lng);
+//          console.log("Latitude: " + lat + "  Longitude: " + lng);
         });
       }
 
@@ -1060,7 +1060,7 @@
       function attachMarkerClickEvent(marker, dev_id, status) {
         google.maps.event.addListener(marker, 'click', function() {
           if (CURRENT_MODE === MAP_MODES.SWITCH_STATUS) {
-            console.log('Switching Status');
+//            console.log('Switching Status');
             var newstatus;
             if (status == null || status == '0') {
               newstatus = '1';
@@ -1072,7 +1072,7 @@
 
             postUpdateDeviceStatus(dev_id, newstatus);
           } else if (CURRENT_MODE === MAP_MODES.VIEW_DATA) {
-            console.log('Viewing Data');
+//            console.log('Viewing Data');
             if (!ViewStateDialog.Initialized) {
               ViewStateDialog.Init('view-data-dialog');
             }
@@ -1158,8 +1158,8 @@
         var device = _.findWhere(devices, {
           dev_id: device_id
         });
-        console.log(data['dev_id']);
-        console.log(device);
+//        console.log(data['dev_id']);
+//        console.log(device);
         if (device != null) {
           device['status'] = status;
         }
@@ -1168,7 +1168,7 @@
       }
 
       function onFailPostUpdate(data) {
-        console.log('POST fail');
+//        console.log('POST fail');
       }
     </script>
   </head>
