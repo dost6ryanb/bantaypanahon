@@ -70,7 +70,7 @@
           beforeSend: fnBeforeSend,
           data: {
             start: 0,
-            limit: "200",
+            limit: '',
             sdate: s,
             edate: s,
             pattern: d
@@ -209,6 +209,17 @@
 
           var chart = new google.visualization.Table(c[0]);
           chart.draw(datatable, options);
+
+          c.append('<br><a id="downloadCSV">Download as CSV</a>');
+          $('#downloadCSV').off();
+          $('#downloadCSV').on('click', function () {
+                var csvFormattedDataTable = google.visualization.dataTableToCsv(datatable);
+                var encodedUri = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvFormattedDataTable);
+                this.href = encodedUri;
+                this.download = 'bantaypanahon.csv';
+                this.target = '_blank';
+          });
+
         }
 
         function DrawChartRain() {
@@ -475,11 +486,8 @@
             vAxis: {
               title: '',
               format: '# ºC',
-              minValue: '0',
-              maxValue: '50',
-              gridlines: {
-                count: 4
-              }
+              minValue: 0,
+              maxValue: 40
             },
             pointSize: 3,
             seriesType: "line",
