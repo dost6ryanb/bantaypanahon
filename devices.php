@@ -299,15 +299,13 @@
               0: {
                 title: 'Rain Value (mm)',
                 format: '# mm',
-                minValue: '0',
-                maxValue: '50'
+                 viewWindow: { min: 0, max: 20 }
               },
               1: {
                 title: 'Cumulative (mm)',
                 direction: -1,
                 format: '# mm',
-                minValue: '0',
-                maxValue: '200',
+                viewWindow: { min: 0, max: 300 }
               }
             },
             seriesType: "line",
@@ -1033,9 +1031,9 @@
           iconorigin = new google.maps.Point(0, 407);
         } else if (type == "Waterlevel & Rain 2" && status == "1") {
           iconorigin = new google.maps.Point(0, 370);
-        } else if ((type == "VAISALA" || type == "BSWM_Lufft" || type == "UAAWS" || type == "UPAWS") && status == "0") {
+        } else if ((type == "VAISALA" || type == "BSWM_Lufft" || type == "UAAWS" || type == "UPAWS" || type == "Davis") && status == "0") {
           iconorigin = new google.maps.Point(0, 259);
-        } else if ((type == "VAISALA" || type == "BSWM_Lufft" || type == "UAAWS" || type == "UPAWS") && status == "1") {
+        } else if ((type == "VAISALA" || type == "BSWM_Lufft" || type == "UAAWS" || type == "UPAWS" || type == "Davis") && status == "1") {
           iconorigin = new google.maps.Point(0, 222);
         } else {
           iconorigin = new google.maps.Point(0, 37);
@@ -1206,7 +1204,7 @@
         </div>
         <div class="legend">
           <div class="legendicon sprite vaisala"></div>
-          <div class="legendtext">VAISALA, UAAWS, or BSWM_Lufft</div>
+          <div class="legendtext">VAISALA, UAAWS, Davis, or BSWM_Lufft</div>
         </div>
         <div class="legend">
           <div class="legendicon sprite notok"></div>

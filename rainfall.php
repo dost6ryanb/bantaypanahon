@@ -228,7 +228,7 @@
 				});
 
 				_.each(selectedDevices, function(c) {
-					if (c['status'] == "0") { //fetch only enabled device
+					if (c['status'] == "0" || MyApp.SERVER_DATE != baseDateText) { //fetch only enabled device
 						fetchData(c['dev_id'], yesterdayDateText, baseDateText, "", duration);
 					}
 				});
@@ -367,15 +367,13 @@
 		  	0 : {
 		  		title: 'Rain Value (mm)',
 				format: '# mm',
-				minValue: '0',
-				maxValue: '50'
-		  	},
+                viewWindow: { min: 0, max: 20 }
+            },
 		  	1 : {
 		  		title: 'Cumulative (mm)',
 		  		direction: -1,
 		  		format: '# mm',
-		  		minValue: '0',
-				maxValue: '200',
+                viewWindow: { min: 0, max: 300 }
 		  	}
 		  },
 		  seriesType: "line",
