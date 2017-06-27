@@ -50,14 +50,14 @@ class Devices {
 						'order by v.province, w.riverindex IS NULL, w.riverindex ASC';
 				break;
 			case 'Rainfall' : 
-				$types  = "'VAISALA', 'Rain1', 'Rain2', 'Waterlevel & Rain 2', 'UAAWS', 'BSWM_Lufft'";
+				$types  = "'VAISALA', 'Rain1', 'Rain2', 'Waterlevel & Rain 2', 'UAAWS', 'BSWM_Lufft', 'Davis'";
 				
 				$query = 'select v.* from v_devices v '.
 						'where v.type in ('. $types .') '.
 						'order by v.province, v.district, v.municipality ASC';
 				break;
 			case 'Temperature' :
-				$types  = "'VAISALA', 'UAAWS', 'BSWM_Lufft'";
+				$types  = "'VAISALA', 'UAAWS', 'BSWM_Lufft', 'Davis'";
 				
 				$query = 'select v.* from v_devices v '.
 						'where v.type in ('. $types .') '.
