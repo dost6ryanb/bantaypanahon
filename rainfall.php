@@ -367,7 +367,7 @@
 		  	0 : {
 		  		title: 'Rain Value (mm)',
 				format: '# mm',
-                viewWindow: { min: 0, max: 20 }
+                viewWindow: { min: 0, max: 40 }
             },
 		  	1 : {
 		  		title: 'Cumulative (mm)',
