@@ -299,7 +299,7 @@
               0: {
                 title: 'Rain Value (mm)',
                 format: '# mm',
-                 viewWindow: { min: 0, max: 20 }
+                 viewWindow: { min: 0, max: 40 }
               },
               1: {
                 title: 'Cumulative (mm)',
@@ -603,11 +603,11 @@
 
             table.checkboxradio("enable");
 
-            if ($.inArray(t, ['VAISALA', 'Rain1', 'Rain2', 'Waterlevel & Rain 2', 'UAAWS', 'BSWM_Lufft']) != -1) {
+            if ($.inArray(t, ['VAISALA', 'Rain1', 'Rain2', 'Waterlevel & Rain 2', 'UAAWS', 'BSWM_Lufft', 'Davis']) != -1) {
               rain.checkboxradio("enable");
             }
 
-            if ($.inArray(t, ['VAISALA', 'UAAWS', 'BSWM_Lufft']) != -1) {
+            if ($.inArray(t, ['VAISALA', 'UAAWS', 'BSWM_Lufft', 'Davis']) != -1) {
               temp.checkboxradio("enable");
             }
 
