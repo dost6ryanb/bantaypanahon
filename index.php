@@ -298,12 +298,12 @@
 			})
 			.appendTo(legendscontainer);
         $('<div class="legendtitle">Daily Cumulative Rainfall</div class="legend">').appendTo(legendscontainer);
-		$('<div class="legend"><img src="'+key['marker'][0].src+'.png" > less than 5mm</div class="legend">').appendTo(legendscontainer);
-		$('<div class="legend"><img src="'+key['marker'][1].src+'.png" > 5mm to less than 25mm</div class="legend">').appendTo(legendscontainer);
-		$('<div class="legend"><img src="'+key['marker'][2].src+'.png" > 25mm to less than 50mm</div class="legend">').appendTo(legendscontainer);
-		$('<div class="legend"><img src="'+key['marker'][3].src+'.png" > 50mm to less than 75mm</div class="legend">').appendTo(legendscontainer);
-		$('<div class="legend"><img src="'+key['marker'][4].src+'.png" > 75mm to less than 100mm</div class="legend">').appendTo(legendscontainer);
-		$('<div class="legend"><img src="'+key['marker'][5].src+'.png" > 100mm or more</div class="legend">').appendTo(legendscontainer);
+		$('<div class="legend"><img src="'+key['marker'][0].src+'.png"><img src="'+key['marker'][0].src+'_now.png" style="display:none"> less than 5mm</div class="legend">').appendTo(legendscontainer);
+		$('<div class="legend"><img src="'+key['marker'][1].src+'.png"><img src="'+key['marker'][1].src+'_now.png" style="display:none"> 5mm to less than 25mm</div class="legend">').appendTo(legendscontainer);
+		$('<div class="legend"><img src="'+key['marker'][2].src+'.png"><img src="'+key['marker'][2].src+'_now.png" style="display:none"> 25mm to less than 50mm</div class="legend">').appendTo(legendscontainer);
+		$('<div class="legend"><img src="'+key['marker'][3].src+'.png"><img src="'+key['marker'][3].src+'_now.png" style="display:none"> 50mm to less than 75mm</div class="legend">').appendTo(legendscontainer);
+		$('<div class="legend"><img src="'+key['marker'][4].src+'.png"><img src="'+key['marker'][4].src+'_now.png" style="display:none"> 75mm to less than 100mm</div class="legend">').appendTo(legendscontainer);
+		$('<div class="legend"><img src="'+key['marker'][5].src+'.png"><img src="'+key['marker'][5].src+'_now.png" style="display:none"> 100mm or more</div class="legend">').appendTo(legendscontainer);
 		$('<div class="legend"><img src="images/overlay_now.png" > currently raining</div>').appendTo(legendscontainer);
 	}
 
