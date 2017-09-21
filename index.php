@@ -64,15 +64,16 @@
             }
         });
 
-        $(document).ready(function () {
-            initMap("map-canvas");
-            initMapLegends('legends');
-            initRainfallTable("rainfall-canvas");
-            initTicker('ticker--1');
-            initTicker('ticker--2');
-            initChartDivs('charts_div_container');
-            initFetchData();
-
+        google.charts.setOnLoadCallback(function () {
+            $(document).ready(function () {
+                initMap("map-canvas");
+                initMapLegends('legends');
+                initRainfallTable("rainfall-canvas");
+                initTicker('ticker--1');
+                initTicker('ticker--2');
+                initChartDivs('charts_div_container');
+                initFetchData();
+            });
         });
 
 
