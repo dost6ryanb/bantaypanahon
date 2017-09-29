@@ -31,7 +31,9 @@
 			{'label': '6 hr', 'minutes':'360'},
 			{'label': '9 hr', 'minutes':'540'},
 			{'label': '12 hr', 'minutes':'720'},
-			{'label': '24 hr', 'minutes':'1440'}
+			{'label': '24 hr', 'minutes':'1440'},
+			{'label': 'Last 2 Days', 'minutes':'2880'},
+			{'label': 'Last 3 Days', 'minutes':'4320'},
 		]
 	};
 
@@ -191,9 +193,9 @@
 				var selectedDevices = _.where(rainfall_devices, {province : location_filter});
 				var baseDate = basedate.clone();
 				var baseDateText = baseDate.toString("MM/dd/yyyy");
-				var yesterdayDate = baseDate.clone().add({days:-1});
+				var yesterdayDate = baseDate.clone().add({minutes:-(duration)});
 				var yesterdayDateText = yesterdayDate.toString("MM/dd/yyyy");
-				var timeText = (duration > 60) ? parseInt(duration/60) + ' hours' : '1 hour';
+				var timeText = (duration < 60 ) ? '1 hour' : (duration < 2880) ? parseInt(duration/60) + ' hours' : parseInt(duration/(60*24)) + ' days';
 				var options = {
 					cssClass : cssClass,
 					id : htmlID,
