@@ -17,12 +17,11 @@ $(document).ready(function() {
 
 
 function initMap(divcanvas) {
-	var DOST_CENTER = new google.maps.LatLng(10.712317, 122.562362); //DOST CENTER
+	var DOST_CENTER = new google.maps.LatLng(9.712317, 122.562362);
 	
 	var mapOptions = {
-  			//zoom: 6, //Whole Philippines View
-  			zoom: 8, //Region 6 Focus,
-  			minZoom:8,
+  			zoom: 7,
+  			//minZoom:8,
   			maxZoom:null,
   			center: DOST_CENTER,
   			disableDefaultUI: true,
@@ -52,20 +51,15 @@ function initDoppler() {
 		cache: false,
 		url: "doppler_proxy.php",
 		success: function(data){
-			console.log(data);
-
-			var bounds = new google.maps.LatLngBounds(new google.maps.LatLng(data["s"], data["w"]), new google.maps.LatLng(data["n"], data["e"]));
-            var link = data["imageUrl"] + "?random=" + (new Date).getTime();     
+			var result = data['result'];
+			var dbounds = JSON.parse(result['bounds']);
+			var bounds = new google.maps.LatLngBounds(new google.maps.LatLng(dbounds["s"], dbounds["w"]), new google.maps.LatLng(dbounds["n"], dbounds["e"]));
+            var link = result['gif'];
             var options = {
             	clickable: false
             }
-
             var doppler_overlay = new google.maps.GroundOverlay(link, bounds, options);
             doppler_overlay.setMap(DOPPLER_MAP);
-
-            var panes = DOPPLER_MAP.getPanes();
-
-             console.log(panes);
 		}
 	});
 }
@@ -79,6 +73,10 @@ function initDoppler() {
 		margin:0 auto;
 		background-color:#0C0C0C;
 	}
+    #map:hover {
+        -webkit-animation-play-state: paused; /* Chrome, Safari, Opera */
+        animation-play-state: paused;
+    }
 </style>
 </head>
 <body>
