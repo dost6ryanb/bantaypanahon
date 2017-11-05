@@ -39,7 +39,7 @@ function getDataFromPredictService($dev_id, $limit, $sdate, $edate) {
 }
 
 function getCacheAndPrint($key) {
-    $cache_life = intval(8); // minutes
+    $cache_life = intval(5); // minutes
     if ($cache_life <= 0) return null;
 
     // fully-qualified filename
