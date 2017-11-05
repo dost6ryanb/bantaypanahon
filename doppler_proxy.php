@@ -1,16 +1,13 @@
 <?php
-
-$date = new DateTime("now");
-$timestamp = $date->getTimestamp() . '000';
-
-$url = 'http://meteopilipinas.gov.ph/api/?key=250d41d4d52cbd2f8cd5b320314ada99&req=doppler&a=iloilo&_=' . $timestamp;
-
+$url = 'https://v2.meteopilipinas.gov.ph/api/radar-timeline?theme=null';
+//$data = array('request' => 'rd.iloilo-cappi-reflectivity');
+$data = array('request' => 'rd.iloilo-cmax-reflectivity');
 $options = array(
 	'http' => array(
 		'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-		'method'  => 'GET'/*,
-		'content' => http_build_query($data),
-		'proxy' => 'tcp://127.0.0.1:8888'*/
+		'method'  => 'POST',
+		'content' => http_build_query($data)/*,
+		'proxy' => 'tcp://192.168.1.174:8888'*/
 	),
 );
 
@@ -24,6 +21,4 @@ if ($result == FALSE) {
 } else {
 	echo $result;
 }
-
-
 ?>
