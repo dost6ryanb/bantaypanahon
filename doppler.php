@@ -36,15 +36,7 @@ function initMap(divcanvas) {
 	};
 		
 	DOPPLER_MAP = new google.maps.Map(document.getElementById(divcanvas), mapOptions);
-    DOPPLER_MAP.controls[google.maps.ControlPosition.BOTTOM_CENTER].push(document.getElementById('controls'));
-
-    /*google.maps.event.addListener(DOPPLER_MAP, 'click', function (event) {
-        var pnt = event.latLng;
-        var lat = pnt.lat();
-        lat = lat.toFixed(6);
-        var lng = pnt.lng();
-        lng = lng.toFixed(6);
-    });*/
+    DOPPLER_MAP.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(document.getElementById('controls'));
 }
 
 function initDoppler() {
@@ -103,6 +95,7 @@ function initDoppler() {
     }
     #controls {
         display: inline-table;
+        white-space: nowrap;
     }
 
     #controls > button {
@@ -110,7 +103,6 @@ function initDoppler() {
         height:30px;
         margin-bottom: 24px;
         vertical-align:middle;
-        white-space: nowrap;
         padding: 2px;
     }
 </style>
