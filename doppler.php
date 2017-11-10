@@ -9,6 +9,7 @@
 <script type="text/javascript">
 
 var DOPPLER_MAP;
+var CURRENT_OVERLAY;
 
 $(document).ready(function() {
 	initMap("map");
@@ -17,7 +18,7 @@ $(document).ready(function() {
 
 
 function initMap(divcanvas) {
-	var DOST_CENTER = new google.maps.LatLng(9.712317, 122.562362);
+	var DOST_CENTER = new google.maps.LatLng(10.712317, 122.562362);
 	
 	var mapOptions = {
   			zoom: 7,
@@ -35,14 +36,15 @@ function initMap(divcanvas) {
 	};
 		
 	DOPPLER_MAP = new google.maps.Map(document.getElementById(divcanvas), mapOptions);
-		
-    google.maps.event.addListener(DOPPLER_MAP, 'click', function (event) {
+    DOPPLER_MAP.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(document.getElementById('controls'));
+
+    /*google.maps.event.addListener(DOPPLER_MAP, 'click', function (event) {
         var pnt = event.latLng;
         var lat = pnt.lat();
         lat = lat.toFixed(6);
         var lng = pnt.lng();
         lng = lng.toFixed(6);
-    });
+    });*/
 }
 
 function initDoppler() {
@@ -54,12 +56,34 @@ function initDoppler() {
 			var result = data['result'];
 			var dbounds = JSON.parse(result['bounds']);
 			var bounds = new google.maps.LatLngBounds(new google.maps.LatLng(dbounds["s"], dbounds["w"]), new google.maps.LatLng(dbounds["n"], dbounds["e"]));
-            var link = result['gif'];
-            var options = {
-            	clickable: false
-            }
-            var doppler_overlay = new google.maps.GroundOverlay(link, bounds, options);
-            doppler_overlay.setMap(DOPPLER_MAP);
+
+			console.log(result['data']);
+
+			var el = document.getElementById('controls');
+			$.each(result['data'], function(k, v) {
+			    var time = v['time_mosaic'];
+			    var overlay_image = v['output_image_transparent_on_www'];
+                var doppler_overlay = new google.maps.GroundOverlay(overlay_image, bounds, {clickable: false});
+
+			    if (time) {
+                    $('<button/>', {id: k, name: k, text: time}).appendTo(el)
+                        .on('click', function() {
+                            CURRENT_OVERLAY.setMap(null);
+                            doppler_overlay.setMap(DOPPLER_MAP)
+                            CURRENT_OVERLAY = doppler_overlay;
+                        });
+                } else {
+                    $('<button/>', {id: k, name: k, text: "Animated"}).prependTo(el)
+                        .on('click', function() {
+                            CURRENT_OVERLAY.setMap(null);
+                            doppler_overlay.setMap(DOPPLER_MAP)
+                            CURRENT_OVERLAY = doppler_overlay;
+                        });
+                    doppler_overlay.setMap(DOPPLER_MAP)
+                    CURRENT_OVERLAY = doppler_overlay;
+                }
+
+            });
 		}
 	});
 }
@@ -77,12 +101,24 @@ function initDoppler() {
         -webkit-animation-play-state: paused; /* Chrome, Safari, Opera */
         animation-play-state: paused;
     }
+    #controls {
+        display: inline-table;
+        white-space: nowrap;
+    }
+
+    #controls > button {
+        font-size: smaller;
+        height:30px;
+        margin-bottom: 24px;
+        vertical-align:middle;
+        padding: 2px;
+    }
 </style>
 </head>
 <body>
 	<div id="map">
 	</div>
-	<div id="controls" style="display:none;">
+	<div id="controls">
 	</div>
 </body>
 </html>
