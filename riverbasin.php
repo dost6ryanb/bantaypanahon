@@ -771,5 +771,5 @@ switch ($q) {
     var waterlevel_devices = <?php echo json_encode(Devices::GetWaterDeviceFromBasin($riverbasin));?>;
     var temperature_devices = <?php echo json_encode(Devices::GetTempDeviceFromBasin($riverbasin));?>;
 </script>
-<?php //include_once("analyticstracking.php") ?>
+<?php include_once("analyticstracking.php") ?>
 </html>
