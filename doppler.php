@@ -49,8 +49,6 @@ function initDoppler() {
 			var dbounds = JSON.parse(result['bounds']);
 			var bounds = new google.maps.LatLngBounds(new google.maps.LatLng(dbounds["s"], dbounds["w"]), new google.maps.LatLng(dbounds["n"], dbounds["e"]));
 
-			console.log(result['data']);
-
 			var el = document.getElementById('controls');
 			$.each(result['data'], function(k, v) {
 			    var time = v['time_mosaic'];
