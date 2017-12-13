@@ -104,3 +104,15 @@
 	border-radius:5px;
 	float:left;
 }
+
+#riverbasins {
+	width: 120px;
+	height: auto;
+	background-color: #d2e5eb;
+	color: #2f34eb;
+}
+
+#riverbasins > ul {
+	padding:0;
+	padding-left: 20px;
+}

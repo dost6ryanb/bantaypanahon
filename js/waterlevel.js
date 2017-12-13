@@ -323,7 +323,7 @@ function drawChartWaterlevel(chartdiv, json) {
 
     }
 
-    var d = Date.parseExact(json.data[json.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+    //var d = Date.parseExact(json.data[json.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
     var d2 = Date.parseExact(json.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
 
     /*console.log(json.data[json.data.length - 1].dateTimeRead + " -- " + json.data[0].dateTimeRead);
@@ -331,23 +331,16 @@ function drawChartWaterlevel(chartdiv, json) {
      console.log('>>');
      */
     //var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); //from last data
-    var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); // from 8:00 AM
-    var title_enddatetime = d2.toString('MMMM d yyyy h:mm:ss tt');
+    //var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); // from 8:00 AM
+    var title_enddatetime = d2.toString('MMMM d, yyyy h:mm:ss tt');
 
     var options = {
         title: title_enddatetime,
         hAxis: {
             title: 'Waterlevel: ' + (json.data[0].waterlevel / 100) + ' m',
-            format: 'LLL d h:mm:ss a',
-            viewWindow: {
-                min: d,
-                max: d2
-            },
+            format: 'LLL d, h a',
             gridlines: {
                 color: 'none'
-            },
-            textStyle: {
-                fontSize: 10
             },
             textPosition: 'none'
         },

@@ -84,7 +84,42 @@ class Devices {
 			return false;
 		} 
 
-	}	
+	}
+
+	public static function GetRainFallDeviceFromBasin($basin) {
+        $connection = new PDO("sqlite:database/sqlite.db");
+        $types  = "'VAISALA', 'Rain1', 'Rain2', 'Waterlevel & Rain 2', 'UAAWS', 'BSWM_Lufft', 'Davis'";
+
+        $query = 'select v.* from v_devices v '.
+            'where v.type in ('. $types .') AND v.basin = "'. $basin .'"'.
+            'order by v.province, v.district, v.municipality ASC';
+
+        return $connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function GetWaterDeviceFromBasin($basin) {
+        $connection = new PDO("sqlite:database/sqlite.db");
+        $types ="'Waterlevel', 'Waterlevel & Rain 2'";
+
+        $query = 'select v.*, riverindex from v_devices v '.
+            'left outer join waterlevelinfo w on v.dev_id = w.devices_dev_id '.
+            'where v.type in ('. $types .') AND v.basin = "'. $basin .'"'.
+            'order by v.province, w.riverindex IS NULL, w.riverindex ASC';
+
+        return $connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function GetTempDeviceFromBasin($basin) {
+        $connection = new PDO("sqlite:database/sqlite.db");
+        $types  = "'VAISALA', 'UAAWS', 'BSWM_Lufft', 'Davis'";
+
+        $query = 'select v.* from v_devices v '.
+            'where v.type in ('. $types .') AND v.basin = "'. $basin .'"'.
+            'order by v.province, v.district, v.municipality ASC';
+
+        return $connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 }
 
 ?>

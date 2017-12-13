@@ -50,6 +50,8 @@
 #ticker-container {
     position: relative;
     margin:0;
+    display:box;
+    clear:both;
 }
 
 #ticker-container .ticker {
