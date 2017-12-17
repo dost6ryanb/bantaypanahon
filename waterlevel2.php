@@ -8,7 +8,6 @@
     <script type="text/javascript" src='js/jquery-ui.min.js'></script>
     <script type="text/javascript" src='js/date-en-US.js'></script>
     <script type="text/javascript" src='js/jquery.scrollTo.min.js'></script>
-    <script type="text/javascript" src='js/jquery.easy-ticker.min.js'></script>
     <link rel="stylesheet" href='css/jquery-ui.min.css'>
     <link rel="stylesheet" href='css/jquery-ui.theme.min.css'>
     <link rel="stylesheet" href='css/jquery-ui.structure.min.css'>
@@ -63,6 +62,7 @@
       google.charts.setOnLoadCallback(function() {
         $(document).ready(function() {
           initMap("map-canvas");
+          initRiverBasinTool('riverbasins');
           initWaterlevelTable("waterlevel-table");
           initChartDivs('charts_div_container');
           initFetchData();
@@ -548,7 +548,10 @@
           drawChartWaterlevel(div, data);
         }
 
+      }
 
+      function initRiverBasinTool(el) {
+          waterlevel_map.controls[google.maps.ControlPosition.RIGHT_TOP].push(document.getElementById(el));
       }
 
       function addTicker1(text) {
@@ -594,7 +597,15 @@
       </div>
       <div id='legends'>
       </div>
-
+        <div id="riverbasins">
+            <b>River Basin Map</b>
+            <ul>
+                <li><a href="riverbasin.php?q=1">Aklan River Basin</a></li>
+                <li><a href="riverbasin.php?q=2">Panay River Basin</a></li>
+                <li><a href="riverbasin.php?q=3">Tigum-Aganan River Basin</a></li>
+                <li><a href="riverbasin.php?q=4">Ilog-Hilabangan River Basin</a></li>
+            </ul>
+        </div>
     </div>
     <div id='footer'>
       <div id="ticker1">
@@ -641,8 +652,8 @@
         </div>
       </div>
       <div id='footerbanner' class='centeralign'>
-        Disaster Risk Reduction and Management Unit</br>
-        Department of Science and Technology Regional Office No. VI</br>
+        Disaster Risk Reduction and Management Unit<br>
+        Department of Science and Technology Regional Office No. VI<br>
         Copyright 2014
       </div>
     </div>
