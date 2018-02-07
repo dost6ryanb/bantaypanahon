@@ -45,7 +45,7 @@ function getDataFromPredictService($dev_id, $limit, $sdate, $edate) {
     $url = 'http://fmon.asti.dost.gov.ph/api/index.php/device/getData/'; //ASTI API
     $data = array('start' => '0', 'limit' => $limit, 'sDate' => $sdate, 'eDate' => $edate, 'pattern' => $dev_id);
     $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_PROXY, '192.168.1.200:8888');
+    //curl_setopt($ch, CURLOPT_PROXY, 'http://192.168.1.94:8888');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
     $response = curl_exec($ch);
@@ -59,14 +59,14 @@ function getDataFromPredictService($dev_id, $limit, $sdate, $edate) {
     }
 
 }
-/*
+
 function getDataFromWeatherAstiService($dev_id, $limit, $sdate, $edate) {
     $username = 'dostregion06';
     $password = 'dost.reg06[1117]';
     $url = 'http://weather.asti.dost.gov.ph/web-api/index.php/api/data/' . $dev_id . '/from/' . $sdate . '/to/' . $edate; //ASTI API
     //$data = array('start' => '0', 'limit' => $limit, 'sDate' => $sdate, 'eDate' => $edate, 'pattern' => $dev_id);
     $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_PROXY, '192.168.1.65:8888');
+    //curl_setopt($ch, CURLOPT_PROXY, 'http://192.168.1.94:8888');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
     curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
@@ -75,7 +75,7 @@ function getDataFromWeatherAstiService($dev_id, $limit, $sdate, $edate) {
     curl_close($ch);
     return $response;
 }
-*/
+
 //@return
 // on success - file is available, returns cache filename
 // on failure - no cache, returns null
