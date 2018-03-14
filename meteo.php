@@ -10,6 +10,9 @@
     body {
         overflow: hidden;
     }
+    .progress{
+        margin: 0;
+    }
     #map {
         margin: 0;
         padding: 0;
@@ -80,8 +83,11 @@
         </ul>
     </div>
 </nav>
-
+<div class="progress">
+    <div class="indeterminate"></div>
+</div>
 <div id="map">
+
 </div>
 <a id="doppler_time_selector" class="btn-floating btn-large waves-effect waves-light red btn modal-trigger" href="#modal1"><i class="material-icons">access_time</i></a>
 <div id="controls"></div>
@@ -102,6 +108,16 @@
     $(document).ready(function(){
         // the "href" attribute of the modal trigger must specify the modal ID that wants to be triggered
         $('.modal').modal();
+
+        $.ajaxSetup({
+            beforeSend: function (jqXHR) {
+                $('.progress').show();
+            },
+            stop: function (jqXHR) {
+                $('.progress').hide();
+            }
+        });
+
      });
 
     var METEO_MAP;
@@ -116,11 +132,6 @@
             center: dost_center,
             mapTypeId: 'mapbox',
             disableDefaultUI: true,
-        });
-
-        var marker = new google.maps.Marker({
-            position: dost_center,
-            map: map
         });
 
         map.mapTypes.set("mapbox", new google.maps.ImageMapType({
@@ -152,7 +163,10 @@
             console.log("Calling satellite()");
             satellite();
         });
-        //$("#toggle_tytrack")
+        $("#nav_tytrack").click(function(){
+            console.log("Calling tytrack()");
+            tytrack();
+        });
     }
 
     function doppler() {
@@ -210,8 +224,13 @@
             });
     }
 
+    function tytrack() {
+        alert("Not yet implemented");
+    }
+
     function hideControls() {
         $("#doppler_time_selector").hide();
+        $('.progress').hide();
     }
 
     function swapCurrentOverlay(overlay) {
