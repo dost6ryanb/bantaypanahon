@@ -142,8 +142,7 @@
     var forecastHull_array = [];
 
     function initMap() {
-        //var dost_center = new google.maps.LatLng(10.712317, 122.562362);
-        //var dost_center = new google.maps.LatLng(, );
+
         var map = new GMaps({
             el: '#map',
             lat: 13,
@@ -152,26 +151,6 @@
             mapTypeId: 'mapbox',
             disableDefaultUI: true,
         });
-        /*var map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 6,
-            minZoom: 6,
-            center: dost_center,
-            mapTypeId: 'mapbox',
-            disableDefaultUI: true,
-        });*/
-
-        /*map.mapTypes.set("mapbox", new google.maps.ImageMapType({
-            getTileUrl: function (coord, zoom) {
-                var tilesPerGlobe = 1 << zoom
-                    , x = coord.x % tilesPerGlobe;
-                if (x < 0)
-                    x = tilesPerGlobe + x;
-                return "//api.mapbox.com/styles/v1/dost6ryanb/cjcipbquu0khs2rqrlgcz44y7/tiles/256/" + zoom + "/" + x + "/" + coord.y + "?access_token=pk.eyJ1IjoiZG9zdDZyeWFuYiIsImEiOiI1OGMyZjdjNjZlYjlhNTMyNDc0NGQxOTY4ZDJlZjIxNyJ9.dkASVYIEPInwAEkwUkaGhQ";
-            },
-            tileSize: new google.maps.Size(256, 256),
-            name: "MapBox",
-            maxZoom: 18
-        }));*/
 
         map.addMapType("mapbox", {
             getTileUrl: function(coord, zoom) {
@@ -186,7 +165,7 @@
             maxZoom: 18
         });
 
-        //map.controls[google.maps.ControlPosition.TOP_CENTER].push(document.getElementById('controls'));
+
         var el = document.getElementById('controls').innerHTML;
         map.addControl({
             position: 'top_center',
@@ -266,16 +245,11 @@
                 hideControls();
                 var result = data['result'];
                 var bounds = JSON.parse(result.bounds);
-                console.log(result);
                 var swBound = new google.maps.LatLng(bounds.s, bounds.w);
                 var neBound = new google.maps.LatLng(bounds.n, bounds.e);
                 var imageBounds = new google.maps.LatLngBounds(swBound, neBound);
-                console.log(imageBounds);
-
                 var satImg = result.animated_image;
                 var sat_overlay = new google.maps.GroundOverlay(satImg, imageBounds);
-                console.log(satImg);
-                console.log(sat_overlay);
                 swapCurrentOverlay(sat_overlay);
             });
     }
@@ -297,14 +271,11 @@
                     cyclonePath_array = [];
                     cyclonePath_LatLng = [];
                     forecastLine_array = [];
-                    //if (value == "clear")
-                    //    return
                 }
 
                 for (var key in tracks) {
                         var data = tracks[key], cycloneName = data.cyclone_name, cycloneInfos = data.info, lastPoint,
                         lastTrack = null, forecastTrack = [];
-                    console.log(data);
                     for (var key in cycloneInfos) {
                         var cycloneInfo = cycloneInfos[key];
                         cyclonePath_array.push(new google.maps.LatLng(cycloneInfo.latitude, cycloneInfo.longitude));
@@ -489,7 +460,6 @@
 
     function addMarker(o) {
         var location = {lat: parseFloat(o.lat), lng: parseFloat(o.lng)};
-        console.log(location);
         var marker = new google.maps.Marker({
             position: location,
             map: o.map,
