@@ -384,10 +384,10 @@
     function swapCurrentOverlay(overlay) {
         if (CURRENT_OVERLAY) {
             CURRENT_OVERLAY.setMap(null);
-            overlay.setMap(METEO_MAP);
+            overlay.setMap(METEO_MAP.map);
             CURRENT_OVERLAY = overlay;
         } else {
-            overlay.setMap(METEO_MAP);
+            overlay.setMap(METEO_MAP.map);
             CURRENT_OVERLAY = overlay;
         }
     }
