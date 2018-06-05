@@ -303,7 +303,7 @@
 
                 for (var key in tracks) {
                     var data = tracks[key], cycloneName = data.cyclone_name, cycloneInfos = data.info, lastPoint,
-                        lastTrack = null, forecastTrack = [];
+                        lastTrack = null, forecastTrack = [], cyclonePath_LatLng = [];
                     console.log(data);
                     for (var key in cycloneInfos) {
                         var cycloneInfo = cycloneInfos[key];
