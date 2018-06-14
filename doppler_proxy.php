@@ -1,20 +1,27 @@
 <?php
-$url = 'https://v2.meteopilipinas.gov.ph/api/radar-timeline?theme=null';
-//$data = array('request' => 'rd.iloilo-cappi-reflectivity');
-$data = array('request' => 'rd.iloilo-cmax-reflectivity');
-$options = array(
-	'http' => array(
-		'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-		'method'  => 'POST',
-		'content' => http_build_query($data)/*,
-		'proxy' => 'tcp://192.168.1.174:8888'*/
-	),
-);
+function getdoppler() {
+    $url = 'https://v2.meteopilipinas.gov.ph/api/radar-timeline?theme=null';
+    $referer = 'https://v2.meteopilipinas.gov.ph/';
+    $data = array('request' => 'rd.iloilo-cmax-reflectivity');
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($ch, CURLOPT_REFERER, $referer);
+    $response = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
 
-//Cache-Control: public, max-age=60\r\n
-$context  = stream_context_create($options);
-$result = @file_get_contents($url, false, $context);
+    if ($http_code == 200) {
+        return $response;
+    } else {
+        return null;
+    }
+}
+
 header('Access-Control-Allow-Origin: *');
+header('Content-Type: application/json');
+
+$result = getdoppler();
 
 if ($result == FALSE) {
 	echo '{"success":"false"}';
