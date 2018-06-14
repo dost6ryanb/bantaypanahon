@@ -23,7 +23,7 @@
     <script type="text/javascript">
         setTimeout(function () {
             window.location.reload(true);
-        }, 900000); // refresh 15 minutes
+        }, 1800000); // refresh 15 minutes
         var key = {
             'sdate': '<?php echo $sdate;?>', 'numraindevices': 0, 'loadedraindevices': 0,
             'serverdate': '<?php echo date("m/d/Y");?>', 'servertime': '<?php echo date("H:i");?>',
@@ -229,6 +229,7 @@
                     style: google.maps.ZoomControlStyle.LARGE,
                     position: google.maps.ControlPosition.RIGHT_CENTER
                 },
+                mapStyleControl: true,
                 draggableCursor: 'crosshair',
                 styles: [{
                     "featureType": "administrative.land_parcel",
