@@ -8,12 +8,13 @@
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4yau_nw40dWy2TwW4OdUq4OJKbFs1EOc&sensor=false"></script>
 <script type="text/javascript">
 
-var DOPPLER_MAP;
+var METEO_MAP;
 var CURRENT_OVERLAY;
 
 $(document).ready(function() {
 	initMap("map");
 	initDoppler();
+	initKml();
 });
 
 
@@ -35,8 +36,8 @@ function initMap(divcanvas) {
   			styles: [{"featureType":"all","elementType":"labels.text.fill","stylers":[{"saturation":36},{"color":"#000000"},{"lightness":40}]},{"featureType":"all","elementType":"labels.text.stroke","stylers":[{"visibility":"on"},{"color":"#000000"},{"lightness":16}]},{"featureType":"all","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"administrative","elementType":"geometry.fill","stylers":[{"color":"#000000"},{"lightness":20}]},{"featureType":"administrative","elementType":"geometry.stroke","stylers":[{"color":"#000000"},{"lightness":17},{"weight":1.2}]},{"featureType":"landscape","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":20}]},{"featureType":"poi","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":21}]},{"featureType":"road.highway","elementType":"geometry.fill","stylers":[{"color":"#000000"},{"lightness":17}]},{"featureType":"road.highway","elementType":"geometry.stroke","stylers":[{"color":"#000000"},{"lightness":29},{"weight":0.2}]},{"featureType":"road.arterial","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":18}]},{"featureType":"road.local","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":16}]},{"featureType":"transit","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":19}]},{"featureType":"water","elementType":"geometry","stylers":[{"color":"#000000"},{"lightness":17}]}]
 	};
 		
-	DOPPLER_MAP = new google.maps.Map(document.getElementById(divcanvas), mapOptions);
-    DOPPLER_MAP.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(document.getElementById('controls'));
+	METEO_MAP = new google.maps.Map(document.getElementById(divcanvas), mapOptions);
+    METEO_MAP.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(document.getElementById('controls'));
 }
 
 function initDoppler() {
@@ -59,17 +60,17 @@ function initDoppler() {
                     $('<button/>', {id: k, name: k, text: time}).appendTo(el)
                         .on('click', function() {
                             CURRENT_OVERLAY.setMap(null);
-                            doppler_overlay.setMap(DOPPLER_MAP)
+                            doppler_overlay.setMap(METEO_MAP)
                             CURRENT_OVERLAY = doppler_overlay;
                         });
                 } else {
                     $('<button/>', {id: k, name: k, text: "Animated"}).prependTo(el)
                         .on('click', function() {
                             CURRENT_OVERLAY.setMap(null);
-                            doppler_overlay.setMap(DOPPLER_MAP)
+                            doppler_overlay.setMap(METEO_MAP)
                             CURRENT_OVERLAY = doppler_overlay;
                         });
-                    doppler_overlay.setMap(DOPPLER_MAP)
+                    doppler_overlay.setMap(METEO_MAP)
                     CURRENT_OVERLAY = doppler_overlay;
                 }
 
@@ -77,13 +78,25 @@ function initDoppler() {
 		}
 	});
 }
+
+function initKml() {
+    METEO_MAP.data.loadGeoJson(
+        'region6.geojson');
+        //'http://192.168.1.20/bantaypanahon/region6.geojson');
+    METEO_MAP.data.setStyle({
+        fillColor: 'white',
+        strokeColor: '#ff51d7',
+        fillOpacity: 0,
+        strokeWeight: 2
+    });
+}
 </script>
 <style>
 	body {background-color: black;}
 	p    {color: white;}
 	#map {
 		width:800px;
-		height:768px;
+		height:100%;
 		margin:0 auto;
 		background-color:#0C0C0C;
 	}
@@ -102,6 +115,12 @@ function initDoppler() {
         margin-bottom: 24px;
         vertical-align:middle;
         padding: 2px;
+    }
+
+    @media only screen and (min-width: 768px) {
+        #map {
+            width: 100%;
+        }
     }
 </style>
 </head>
