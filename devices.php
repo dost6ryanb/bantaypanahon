@@ -213,7 +213,8 @@
           c.append('<br><a id="downloadCSV">Download as CSV</a>');
           $('#downloadCSV').off();
           $('#downloadCSV').on('click', function () {
-                var csvFormattedDataTable = google.visualization.dataTableToCsv(datatable);
+                //var csvFormattedDataTable = google.visualization.dataTableToCsv(datatable);
+                var csvFormattedDataTable = dataTableToCSV(datatable);
                 var encodedUri = 'data:application/csv;charset=utf-8,' + encodeURIComponent(csvFormattedDataTable);
                 this.href = encodedUri;
                 this.download = 'bantaypanahon.csv';
@@ -221,6 +222,42 @@
           });
 
         }
+
+          /**
+           * Convert an instance of google.visualization.DataTable to CSV
+           * @param {google.visualization.DataTable} dataTable_arg DataTable to convert
+           * @return {String} Converted CSV String
+           */
+          function dataTableToCSV(dataTable_arg) {
+              var dt_cols = dataTable_arg.getNumberOfColumns();
+              var dt_rows = dataTable_arg.getNumberOfRows();
+
+              var csv_cols = [];
+              var csv_out;
+
+              // Iterate columns
+              for (var i=0; i<dt_cols; i++) {
+                  // Replace any commas in column labels
+                  csv_cols.push(dataTable_arg.getColumnLabel(i).replace(/,/g,""));
+              }
+
+              // Create column row of CSV
+              csv_out = csv_cols.join(",")+"\r\n";
+
+              // Iterate rows
+              for (i=0; i<dt_rows; i++) {
+                  var raw_col = [];
+                  for (var j=0; j<dt_cols; j++) {
+                      // Replace any commas in row values
+                      //raw_col.push(dataTable_arg.getFormattedValue(i, j, 'label').replace(/,/g,""));
+                      raw_col.push(dataTable_arg.getFormattedValue(i, j).replace(/,/g,""))
+                  }
+                  // Add row to CSV text
+                  csv_out += raw_col.join(",")+"\r\n";
+              }
+
+              return csv_out;
+          }
 
         function DrawChartRain() {
           __ResetView();
