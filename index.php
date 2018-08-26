@@ -766,6 +766,7 @@
     </div>
     <div id='rainfall-canvas'>
     </div>
+    <div style="display: none;">
     <div id='legends' class="custom-ctrl">
         <button id="togglelegends" class="ui-button ui-widget ui-corner-all ui-button-icon-only" title="Show/Hide Legends">
             <span class="ui-icon  ui-icon-arrowthick-2-ne-sw"></span>
@@ -799,6 +800,7 @@
         <button>2:00 PM</button>
         <button>2:00 PM</button>
         <button>2:00 PM</button>
+    </div>
     </div>
     <div id="ticker-container">
         <div class="ticker" id="ticker--1">
