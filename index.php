@@ -23,7 +23,7 @@
     <script type="text/javascript">
         setTimeout(function () {
             window.location.reload(true);
-        }, 1800000); // refresh 15 minutes
+        }, 1800000); // refresh 30 minutes
         var key = {
             'sdate': '<?php echo $sdate;?>', 'numraindevices': 0, 'loadedraindevices': 0,
             'serverdate': '<?php echo date("m/d/Y");?>', 'servertime': '<?php echo date("H:i");?>',
@@ -40,7 +40,7 @@
 
         var cumulative_rainfall_map;
         var cumulative_rainfall_map_markers = [];
-        var lastValidCenter;
+        var activeUI = "rainfall";
 
         google.charts.load('current', {packages: ['corechart']});
 
@@ -67,14 +67,21 @@
         google.charts.setOnLoadCallback(function () {
             $(document).ready(function () {
                 initMap("map-canvas");
-                initMapLegends('legends');
+                initControls();
                 initRainfallTable("rainfall-canvas");
                 initTicker('ticker--1');
                 initTicker('ticker--2');
                 initChartDivs('charts_div_container');
                 initFetchData();
+                initFeedee();
             });
         });
+
+        function initControls() {
+            initMapLegends('legends');
+            initMapChooser('chooser');
+            initDopplerControls('dopplertime');
+        }
 
 
         function initFetchData(history) {
@@ -231,6 +238,7 @@
                 },
                 mapStyleControl: true,
                 draggableCursor: 'crosshair',
+                mapTypeId: 'mapbox',
                 styles: [{
                     "featureType": "administrative.land_parcel",
                     "stylers": [{"visibility": "off"}]
@@ -247,84 +255,108 @@
             };
 
             cumulative_rainfall_map = new google.maps.Map(document.getElementById(divcanvas), mapOptions);
+            cumulative_rainfall_map.mapTypes.set("mapbox", new google.maps.ImageMapType({
+                getTileUrl: function (coord, zoom) {
+                    var tilesPerGlobe = 1 << zoom
+                        , x = coord.x % tilesPerGlobe;
+                    if (x < 0)
+                        x = tilesPerGlobe + x;
+                    return "//api.mapbox.com/styles/v1/dost6ryanb/cjcipbquu0khs2rqrlgcz44y7/tiles/256/" + zoom + "/" + x + "/" + coord.y + "?access_token=pk.eyJ1IjoiZG9zdDZyeWFuYiIsImEiOiI1OGMyZjdjNjZlYjlhNTMyNDc0NGQxOTY4ZDJlZjIxNyJ9.dkASVYIEPInwAEkwUkaGhQ";
+                },
+                tileSize: new google.maps.Size(256, 256),
+                name: "MapBox",
+                maxZoom: 18
+            }));
 
-            // Bounds for region xi
-            var strictBounds = new google.maps.LatLngBounds(
-                new google.maps.LatLng(9.1895, 119.1193),
-                new google.maps.LatLng(12.2171, 125.9308)
-            );
-
-            lastValidCenter = cumulative_rainfall_map.getCenter();
-
-            // Listen for the dragend event
-            google.maps.event.addListener(cumulative_rainfall_map, 'idle', function () {
-                var minLat = strictBounds.getSouthWest().lat();
-                var minLon = strictBounds.getSouthWest().lng();
-                var maxLat = strictBounds.getNorthEast().lat();
-                var maxLon = strictBounds.getNorthEast().lng();
-                var cBounds = cumulative_rainfall_map.getBounds();
-                var cMinLat = cBounds.getSouthWest().lat();
-                var cMinLon = cBounds.getSouthWest().lng();
-                var cMaxLat = cBounds.getNorthEast().lat();
-                var cMaxLon = cBounds.getNorthEast().lng();
-                var centerLat = cumulative_rainfall_map.getCenter().lat();
-                var centerLon = cumulative_rainfall_map.getCenter().lng();
-
-                if ((cMaxLat - cMinLat > maxLat - minLat) || (cMaxLon - cMinLon > maxLon - minLon)) {   //We can't position the canvas to strict borders with a current zoom level
-                    //cumulative_rainfall_map.setZoom(cumulative_rainfall_map.getZoom()+1);
-                    return;
-                }
-                if (cMinLat < minLat)
-                    var newCenterLat = minLat + ((cMaxLat - cMinLat) / 2);
-                else if (cMaxLat > maxLat)
-                    var newCenterLat = maxLat - ((cMaxLat - cMinLat) / 2);
-                else
-                    var newCenterLat = centerLat;
-                if (cMinLon < minLon)
-                    var newCenterLon = minLon + ((cMaxLon - cMinLon) / 2);
-                else if (cMaxLon > maxLon)
-                    var newCenterLon = maxLon - ((cMaxLon - cMinLon) / 2);
-                else
-                    var newCenterLon = centerLon;
-
-                if (newCenterLat != centerLat || newCenterLon != centerLon)
-                //cumulative_rainfall_map.setCenter(new google.maps.LatLng(newCenterLat, newCenterLon));
-                    cumulative_rainfall_map.panTo(new google.maps.LatLng(newCenterLat, newCenterLon));
-            });
-
-            google.maps.event.addListener(cumulative_rainfall_map, 'click', function (event) {
-                var pnt = event.latLng;
-                var lat = pnt.lat();
-                lat = lat.toFixed(6);
-                var lng = pnt.lng();
-                lng = lng.toFixed(6);
-            });
+/*            google.maps.event.addListener(cumulative_rainfall_map, 'idle', function () {
+                $("#content").css({visibility: 'visible'});
+            });*/
         }
 
         function initMapLegends(container) {
             legendscontainer = $(document.getElementById(container));
             cumulative_rainfall_map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById(container));
 
-            $('<button id="togglelegends">Hide Legend</button>')
+            $('#togglelegends')
                 .on('click', function () {
                     $('.legend').toggle();
                     $('.legendtitle').toggle();
-                    if ($(this).text() == "Show Legend") {
-                        $(this).text('Hide Legend');
-                    } else {
-                        $(this).text('Show Legend');
-                    }
-                })
-                .appendTo(legendscontainer);
-            $('<div class="legendtitle">Daily Cumulative Rainfall</div class="legend">').appendTo(legendscontainer);
-            $('<div class="legend"><img src="' + key['marker'][0].src + '.png"><img src="' + key['marker'][0].src + '_now.png" style="display:none"> less than 5mm</div class="legend">').appendTo(legendscontainer);
-            $('<div class="legend"><img src="' + key['marker'][1].src + '.png"><img src="' + key['marker'][1].src + '_now.png" style="display:none"> 5mm to less than 25mm</div class="legend">').appendTo(legendscontainer);
-            $('<div class="legend"><img src="' + key['marker'][2].src + '.png"><img src="' + key['marker'][2].src + '_now.png" style="display:none"> 25mm to less than 50mm</div class="legend">').appendTo(legendscontainer);
-            $('<div class="legend"><img src="' + key['marker'][3].src + '.png"><img src="' + key['marker'][3].src + '_now.png" style="display:none"> 50mm to less than 75mm</div class="legend">').appendTo(legendscontainer);
-            $('<div class="legend"><img src="' + key['marker'][4].src + '.png"><img src="' + key['marker'][4].src + '_now.png" style="display:none"> 75mm to less than 100mm</div class="legend">').appendTo(legendscontainer);
-            $('<div class="legend"><img src="' + key['marker'][5].src + '.png"><img src="' + key['marker'][5].src + '_now.png" style="display:none"> 100mm or more</div class="legend">').appendTo(legendscontainer);
-            $('<div class="legend"><img src="images/overlay_now.png" > currently raining</div>').appendTo(legendscontainer);
+                });
         }
+
+        function initMapChooser(container) {
+            choosercontainer = $(document.getElementById(container));
+            cumulative_rainfall_map.controls[google.maps.ControlPosition.TOP_RIGHT].push(document.getElementById(container));
+
+            $("#toggleRainfallMap").on('click', function () {
+                if (activeUI == 'rainfall') return; else activeUI = 'rainfall';
+
+
+                showUI();
+                console.log("toggleRainfallMap");
+                $('#toggleRainfallMap').addClass('active');
+                $('#toggleDoppler').removeClass('active');
+                $('#toggleTyphoonTrack').removeClass('active');
+                $('#toggleSatellite').removeClass('active');
+            });
+
+            $("#toggleDoppler").on('click', function () {
+                if (activeUI == 'doppler') return; else activeUI = 'doppler';
+
+
+                hideUI();
+                console.log("toggleDoppler");
+                $('#toggleDoppler').addClass('active');
+                $('#toggleRainfallMap').removeClass('active');
+                $('#toggleTyphoonTrack').removeClass('active');
+                $('#toggleSatellite').removeClass('active');
+            });
+
+            $("#toggleTyphoonTrack").on('click', function () {
+                if (activeUI == 'tytrack') return; else activeUI = 'tytrack';
+
+
+                hideUI();
+                console.log("toggleTyphoonTrack");
+                $('#toggleTyphoonTrack').addClass('active');
+                $('#toggleDoppler').removeClass('active');
+                $('#toggleRainfallMap').removeClass('active');
+                $('#toggleSatellite').removeClass('active');
+            });
+
+            $("#toggleSatellite").on('click', function () {
+                if (activeUI == 'satellite') return; else activeUI = 'satellite';
+
+                hideUI();
+                console.log("toggleSatellite");
+                $('#toggleSatellite').addClass('active');
+                $('#toggleDoppler').removeClass('active');
+                $('#toggleTyphoonTrack').removeClass('active');
+                $('#toggleRainfallMap').removeClass('active');
+
+            });
+
+
+            function showUI() {
+                $('#rainfall-canvas').css({width: '30%'}).show();
+                $('#map-canvas').css({width: '70%', height: '520px'});
+                $('#charts_div_container').show();
+            }
+
+            function hideUI() {
+                $('#rainfall-canvas').css({width: '0%'}).hide();
+                $('#map-canvas').css({width: '100%', height: '740px'});
+                $('#charts_div_container').hide();
+            }
+
+
+        }
+
+        function initDopplerControls(container) {
+            dopplertimecontainer = $(document.getElementById(container));
+            cumulative_rainfall_map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(document.getElementById(container));
+        }
+
 
         function initTicker(ticker) {
             $(document.getElementById(ticker)).css({'display': 'block'}).easyTicker({visible: 1, interval: 3500});
@@ -383,6 +415,7 @@
 
                 $('<tr/>', {'data-dev_id': cur.dev_id})
                     .append($('<td>' + cur.municipality + ' - ' + cur.location + '</td>'))
+                    //.append($('<td title="'+ cur.location + '">' + cur.municipality + '</td>'))
                     .append($('<td/>', {'data-col': 'dtr'}))
                     .append($('<td/>', {'data-col': 'rv'}))
                     .append($('<td/>', {'data-col': 'cr'})).appendTo(table);
@@ -393,7 +426,6 @@
 
             }
         }
-
 
         function initChartDivs(chartdiv) {
             var charts_container = document.getElementById(chartdiv);
@@ -413,6 +445,69 @@
                     $(document.getElementById(div)).css({'background': 'url(images/disabled.png)'});
                 }
             }
+        }
+
+        function initFeedee(div) {
+            var success = false;
+
+            $.ajax({
+                url: 'bulletin.php',
+                tryCount: 0,
+                retryLimit: 3,
+            }).done(function (res) {
+                console.log("success");
+
+                $("#feed24hourweather_issuedat").text(res.issuedat);
+                $("#feed24hourweather_synopsis").text(res.synopsis);
+                //$("#rss24hourweather_forecast").html(descriptionstr);
+
+            }).fail(function (jqXHR, textStatus) {
+                console.log("fail retrying");
+                this.tryCount++;
+                if (this.tryCount <= this.retryLimit) {
+                    $.ajax(this);
+                    return;
+                }
+                console.log("failed");
+                return;
+            });
+
+
+            /*rss sir rowen old
+            parseRSS(pagasa_weather_forecast, function(res){
+                var xmlDoc = $.parseXML(res);
+                var $xml = $(xmlDoc);
+                var desc = $xml.find('description');
+                var deschtml = desc.last().html().slice(9, -3);
+                //console.log(deschtml);
+                var descDoc = $.parseHTML(deschtml);
+                var table = $(descDoc).find('tr > td');
+                var longstr = $(descDoc).find('tr > td').eq(0).text();
+                var synopsisstr = $(descDoc).find('tr > td').eq(2).text();
+                var descriptionstr = $(descDoc).find('tr > td').eq(4).text();
+
+
+                var issuedatatstr, validitystr;
+                var tmp = longstr.split('Valid Beginning: ');
+
+                if (tmp.length > 1) {
+                    issuedatatstr = tmp[0].substr(11);
+                    validitystr = tmp[1];
+                }
+
+                console.log(issuedatatstr);
+                console.log(validitystr);
+                console.log(synopsisstr);
+                console.log(descriptionstr);
+
+                $("#rss24hourweather_issuedat").html(issuedatatstr);
+                $("#rss24hourweather_validity").html(validitystr);
+                $("#rss24hourweather_synopsis").html(synopsisstr);
+                $("#rss24hourweather_forecast").html(descriptionstr);
+
+            })
+            */
+
         }
 
         function drawChartWaterlevel(chartdiv, json) {
@@ -446,7 +541,7 @@
                 title: title_enddatetime,
 
                 hAxis: {
-                    title: 'Waterlevel: ' + (json.data[0].waterlevel / 100 ) + ' m',
+                    title: 'Waterlevel: ' + (json.data[0].waterlevel / 100) + ' m',
                     format: 'LLL d h:mm:ss a',
                     viewWindow: {min: d, max: d2},
                     gridlines: {color: 'none'},
@@ -671,7 +766,39 @@
     </div>
     <div id='rainfall-canvas'>
     </div>
-    <div id='legends'>
+    <div id='legends' class="custom-ctrl">
+        <button id="togglelegends" class="ui-button ui-widget ui-corner-all ui-button-icon-only" title="Show/Hide Legends">
+            <span class="ui-icon  ui-icon-arrowthick-2-ne-sw"></span>
+        </button>
+        <h1>Daily Cumulative Rainfall</h1>
+        <div style="display: none">
+            <img src="images/rain-lighter_now.png">
+            <img src="images/rain-light_now.png">
+            <img src="images/rain-moderate_now.png">
+            <img src="images/rain-heavy_now.png">
+            <img src="images/rain-intense_now.png">
+            <img src="images/rain-torrential_now.png">
+        </div>
+        <div class="legend"><img src="images/rain-lighter.png"><span>less than 5mm</span></div>
+        <div class="legend"><img src="images/rain-light.png"><span>5mm to less than 25mm</span></div>
+        <div class="legend"><img src="images/rain-moderate.png"><span>25mm to less than 50mm</span></div>
+        <div class="legend"><img src="images/rain-heavy.png"><span>50mm to less than 75mm</span></div>
+        <div class="legend"><img src="images/rain-intense.png"><span>75mm to less than 100mm</span></div>
+        <div class="legend"><img src="images/rain-torrential.png"><span>100mm or more</span></div>
+        <div class="legend"><img src="images/overlay_now.png"><span>currently raining</span></div>
+    </div>
+    <div id='chooser' class="custom-ctrl btn-group">
+        <button id="toggleRainfallMap" class="active">Rainfall</button>
+        <button id="toggleDoppler">Doppler</button>
+        <button id="toggleTyphoonTrack">Typhoon Track</button>
+        <button id="toggleSatellite">Satellite</button>
+    </div>
+    <div id="dopplertime" class="custom-ctrl btn-group">
+        <button>2:00 PM</button>
+        <button>2:00 PM</button>
+        <button>2:00 PM</button>
+        <button>2:00 PM</button>
+        <button>2:00 PM</button>
     </div>
     <div id="ticker-container">
         <div class="ticker" id="ticker--1">
@@ -685,50 +812,24 @@
     </div>
     <div id="charts_div_container">
     </div>
+    <div id="feeds">
+        <div id="feed24hourweather" class="feedcontainer">
+            <h1>DAILY WEATHER FORECAST</h1>
+            <span>24-Hours Weather forecast</span>
+            <br/>
+            <h2>Issued at</h2>
+            <span id="feed24hourweather_issuedat">[date time]</span>
+            <h2>Synopsis</h2>
+            <span id="feed24hourweather_synopsis">[synopsis]</span>
+            <h2>More info:</h2>
+            <a href="https://www1.pagasa.dost.gov.ph/index.php/general-weather/daily-weather-forecast" target="_blank">Source:
+                PAGASA</a>
+
+        </div>
+    </div>
 </div>
 <div id='footer'>
-    <div id='contactus'>
-        <div class='contact'>
-            <p class='contactname'>Department of Science and Technology Regional Office No. VI</p>
-            <p class='contactaddress'>Magsaysay Village La paz, Iloilo 5000</p>
-            <p class='contactnumber'>(033) 508-6739 / 320-0908 (Telefax)</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Aklan Provincial Science & Technology Center</p>
-            <p class='contactaddress'>Capitol Compound, Kalibo, Aklan</p>
-            <p class='contactnumber'>(036) 500-7550 (Telefax)</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Antique Provincial Science & Technology Center</p>
-            <p class='contactaddress'>San Jose de Buenevista, Antique</p>
-            <p class='contactnumber'>(036) 540-8025</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Capiz Provincial Science & Technology Center</p>
-            <p class='contactaddress'>CapSU, Roxas City, Capiz</p>
-            <p class='contactnumber'>(036) 522-1044</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Guimaras Provincial Science & Technology Center</p>
-            <p class='contactaddress'>PSHS Research Center, Jordan, Guimaras</p>
-            <p class='contactnumber'>(033) 396-1765</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Iloilo Provincial Science & Technology Center</p>
-            <p class='contactaddress'>DOST VI Compound, Iloilo City, Iloilo</p>
-            <p class='contactnumber'>(033) 508-7183</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Negros Occidental Provincial Science & Technology Center</p>
-            <p class='contactaddress'>Cottage Road, Bacolod City</p>
-            <p class='contactnumber'>(034) 707-0170</p>
-        </div>
-    </div>
-    <div id='footerbanner' class='centeralign'>
-        Disaster Risk Reduction and Management Unit</br>
-        Department of Science and Technology Regional Office No. VI</br>
-        Copyright 2014
-    </div>
+
 </div>
 </body>
 <script type="text/javascript">

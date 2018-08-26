@@ -85,10 +85,49 @@ function initKml() {
         //'http://192.168.1.20/bantaypanahon/region6.geojson');
     METEO_MAP.data.setStyle({
         fillColor: 'white',
-        strokeColor: '#ff51d7',
+        strokeColor: 'white',
         fillOpacity: 0,
-        strokeWeight: 2
+        strokeWeight: 1
     });
+
+    google.maps.event.addListener(METEO_MAP, 'zoom_changed', function() {
+        zoomLevel = METEO_MAP.getZoom();
+        console.log(zoomLevel);
+        if (zoomLevel >= 8) {
+            METEO_MAP.data.setStyle({
+                fillColor: 'white',
+                strokeColor: '#ff51d7',
+                fillOpacity: 0,
+                strokeWeight: 2
+            });
+
+        } else {
+            METEO_MAP.data.setStyle({
+                fillColor: 'white',
+                strokeColor: '#ff51d7',
+                fillOpacity: 0,
+                strokeWeight: 1
+            });
+        }
+    });
+
+    setInterval(function(){
+        METEO_MAP.data.setStyle({
+            fillColor: 'white',
+            strokeColor: getRandomColor(),
+            fillOpacity: 0,
+            strokeWeight: 1
+        });
+    }, Math.floor((Math.random() * 2000) + 500));
+}
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
 }
 </script>
 <style>
