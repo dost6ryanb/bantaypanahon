@@ -85,7 +85,6 @@
             initDopplerControls('dopplertime');
         }
 
-
         function initFetchData(history) {
             setTimeout(function () {
                 for (var i = 0; i < rainfall_devices.length; i++) {
@@ -229,8 +228,6 @@
             var mapOptions = {
                 //zoom: 6, //Whole Philippines View
                 zoom: 8, //Region 6 Focus,
-                minZoom: 8,
-                maxZoom: null,
                 center: DOST_CENTER,
                 disableDefaultUI: true,
                 zoomControl: true,
@@ -324,12 +321,10 @@
 
 
             function showRainfallUI() {
-                classicMode();
                 $('#legends').show();
             }
 
             function hideRainfallUI() {
-                fullScreenMapMode();
                 $('#legends').hide();
             }
 
@@ -342,24 +337,36 @@
             }
 
             function showSatUI() {
-                fullScreenMapMode();
+
             }
 
             function hideSatUI() {
-                classicMode();
+
+            }
+
+            function showTyTrackUI() {
+
+            }
+
+            function hideTyTrackUI() {
+
             }
 
             function fullScreenMapMode() {
                 $('#rainfall-canvas').css({width: '0%'}).hide();
                 $('#map-canvas').css({width: '100%', height: '740px'});
                 $('#charts_div_container').hide();
-            }
+                console.log('fullscreen');
+                WV_MAP.setZoom(6);
+              }
 
             function classicMode() {
                 $('#rainfall-canvas').css({width: '30%'}).show();
                 $('#map-canvas').css({width: '70%', height: '520px'});
                 $('#charts_div_container').show();
-            }
+                console.log('classic');
+                WV_MAP.setZoom(8);
+             }
 
             function hideCurrentAndShowNewUI(state, newState) {
                 switch (state) {
@@ -368,8 +375,8 @@
                         setMarkersVisibility(false);
                         break;
                     case 'doppler':
-                        WV_BOUNDARIES.setMap(null);
-                        CURRENT_OVERLAY.setMap(null);
+                        if (WV_BOUNDARIES )WV_BOUNDARIES.setMap(null);
+                        if (CURRENT_OVERLAY) CURRENT_OVERLAY.setMap(null);
                         hideDopplerUI();
                         break;
                     case 'satellite':
@@ -383,13 +390,16 @@
                     case 'rainfall':
                         showRainfallUI();
                         setMarkersVisibility(true);
+                        classicMode();
                         break;
                     case 'doppler':
                         WV_BOUNDARIES.setMap(WV_MAP);
                         showDopplerUI();
+                        fullScreenMapMode();
                         break;
                     case 'satellite':
                         showSatUI();
+                        fullScreenMapMode();
                         break;
                 }
 
@@ -491,6 +501,10 @@
                 });
         }
 
+        function initTyphoonTrack() {
+
+        }
+
         function swapCurrentOverlay(overlay) {
             if (CURRENT_OVERLAY) {
                 CURRENT_OVERLAY.setMap(null);
@@ -506,7 +520,6 @@
             dopplertimecontainer = $(document.getElementById(container));
             WV_MAP.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(document.getElementById(container));
         }
-
 
         function initTicker(ticker) {
             $(document.getElementById(ticker)).css({'display': 'block'}).easyTicker({visible: 1, interval: 3500});
@@ -742,7 +755,6 @@
             //$('<div/>').text('Waterlevel: '+json.data[0].waterlevel+ ' cm').css({'height':'20px'}).appendTo('#'+chartdiv);
         }
 
-
         function updateRainfallTable(device_id, dateTimeRead, rainvalue, raincumulative, dataclass) {
             var tr = $('tr[data-dev_id=\'' + device_id + '\']');
             var dtr = $('tr[data-dev_id=\'' + device_id + '\'] td[data-col=\'dtr\']');
@@ -806,24 +818,20 @@
             });
         }
 
-        // Sets the map on all markers in the array.
         function setAllMap(map) {
             for (var i = 0; i < WV_MAP_MARKERS.length; i++) {
                 WV_MAP_MARKERS[i].setMap(map);
             }
         }
 
-        // Removes the markers from the map, but keeps them in the array.
         function clearMarkers() {
             setAllMap(null);
         }
 
-        // Shows any markers currently in the array.
         function showMarkers() {
             setAllMap(WV_MAP);
         }
 
-        // Deletes all markers in the array by removing references to them.
         function deleteMarkers() {
             clearMarkers();
             WV_MAP_MARKERS = [];
