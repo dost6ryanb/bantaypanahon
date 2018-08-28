@@ -38,9 +38,10 @@
 
         };
 
-        var cumulative_rainfall_map;
-        var cumulative_rainfall_map_markers = [];
-        var activeUI = "rainfall";
+        var WV_MAP;
+        var WV_MAP_MARKERS = [];
+        var ACTIVE_UI = "rainfall";
+        var CURRENT_OVERLAY;
 
         google.charts.load('current', {packages: ['corechart']});
 
@@ -254,8 +255,8 @@
                 }]
             };
 
-            cumulative_rainfall_map = new google.maps.Map(document.getElementById(divcanvas), mapOptions);
-            cumulative_rainfall_map.mapTypes.set("mapbox", new google.maps.ImageMapType({
+            WV_MAP = new google.maps.Map(document.getElementById(divcanvas), mapOptions);
+            WV_MAP.mapTypes.set("mapbox", new google.maps.ImageMapType({
                 getTileUrl: function (coord, zoom) {
                     var tilesPerGlobe = 1 << zoom
                         , x = coord.x % tilesPerGlobe;
@@ -267,15 +268,11 @@
                 name: "MapBox",
                 maxZoom: 18
             }));
-
-/*            google.maps.event.addListener(cumulative_rainfall_map, 'idle', function () {
-                $("#content").css({visibility: 'visible'});
-            });*/
         }
 
         function initMapLegends(container) {
             legendscontainer = $(document.getElementById(container));
-            cumulative_rainfall_map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById(container));
+            WV_MAP.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById(container));
 
             $('#togglelegends')
                 .on('click', function () {
@@ -286,75 +283,151 @@
 
         function initMapChooser(container) {
             choosercontainer = $(document.getElementById(container));
-            cumulative_rainfall_map.controls[google.maps.ControlPosition.TOP_RIGHT].push(document.getElementById(container));
+            WV_MAP.controls[google.maps.ControlPosition.TOP_RIGHT].push(document.getElementById(container));
 
             $("#toggleRainfallMap").on('click', function () {
-                if (activeUI == 'rainfall') return; else activeUI = 'rainfall';
+                if (ACTIVE_UI == 'rainfall') return; else hideCurrentAndShowNewUI(ACTIVE_UI, 'rainfall');
 
-
-                showUI();
                 console.log("toggleRainfallMap");
-                $('#toggleRainfallMap').addClass('active');
-                $('#toggleDoppler').removeClass('active');
-                $('#toggleTyphoonTrack').removeClass('active');
-                $('#toggleSatellite').removeClass('active');
+                makeActiveClassOnly('#toggleRainfallMap');
             });
 
             $("#toggleDoppler").on('click', function () {
-                if (activeUI == 'doppler') return; else activeUI = 'doppler';
+                if (ACTIVE_UI == 'doppler') return; else hideCurrentAndShowNewUI(ACTIVE_UI, 'doppler');
 
-
-                hideUI();
                 console.log("toggleDoppler");
-                $('#toggleDoppler').addClass('active');
-                $('#toggleRainfallMap').removeClass('active');
-                $('#toggleTyphoonTrack').removeClass('active');
-                $('#toggleSatellite').removeClass('active');
+                initDoppler();
+                makeActiveClassOnly('#toggleDoppler');
+
             });
 
             $("#toggleTyphoonTrack").on('click', function () {
-                if (activeUI == 'tytrack') return; else activeUI = 'tytrack';
+                if (ACTIVE_UI == 'tytrack') return; else ACTIVE_UI = 'tytrack';
 
 
-                hideUI();
                 console.log("toggleTyphoonTrack");
-                $('#toggleTyphoonTrack').addClass('active');
-                $('#toggleDoppler').removeClass('active');
-                $('#toggleRainfallMap').removeClass('active');
-                $('#toggleSatellite').removeClass('active');
+                makeActiveClassOnly('#toggleTyphoonTrack');
             });
 
             $("#toggleSatellite").on('click', function () {
-                if (activeUI == 'satellite') return; else activeUI = 'satellite';
+                if (ACTIVE_UI == 'satellite') return; else ACTIVE_UI = 'satellite';
 
-                hideUI();
+
                 console.log("toggleSatellite");
-                $('#toggleSatellite').addClass('active');
-                $('#toggleDoppler').removeClass('active');
-                $('#toggleTyphoonTrack').removeClass('active');
-                $('#toggleRainfallMap').removeClass('active');
-
+                makeActiveClassOnly('#toggleSatellite');
             });
 
 
-            function showUI() {
+            function showRainfallUI() {
                 $('#rainfall-canvas').css({width: '30%'}).show();
                 $('#map-canvas').css({width: '70%', height: '520px'});
                 $('#charts_div_container').show();
+                $('#legends').show();
             }
 
-            function hideUI() {
+            function hideRainfallUI() {
                 $('#rainfall-canvas').css({width: '0%'}).hide();
                 $('#map-canvas').css({width: '100%', height: '740px'});
                 $('#charts_div_container').hide();
+                $('#legends').hide();
             }
 
+            function showDopplerUI() {
+                $('#dopplertime').show();
+            }
 
+            function hideDopplerUI() {
+                $('#dopplertime').hide().empty();
+            }
+
+            function hideCurrentAndShowNewUI(state, newState) {
+                switch (state) {
+                    case 'rainfall':
+                        hideRainfallUI();
+                        break;
+                    case 'doppler':
+                        CURRENT_OVERLAY.setMap(null);
+                        hideDopplerUI();
+                        break;
+                }
+
+                switch (newState) {
+                    case 'rainfall':
+                        showRainfallUI();
+                        break;
+                    case 'doppler':
+                        showDopplerUI();
+                        break;
+                }
+
+                ACTIVE_UI = newState;
+            }
+
+            function animateMapZoomTo(map, targetZoom) {
+                var currentZoom = arguments[2] || map.getZoom();
+                if (currentZoom != targetZoom) {
+                    google.maps.event.addListenerOnce(map, 'zoom_changed', function (event) {
+                        animateMapZoomTo(map, targetZoom, currentZoom + (targetZoom > currentZoom ? 1 : -1));
+                    });
+                    setTimeout(function () {
+                        map.setZoom(currentZoom)
+                    }, 80);
+                }
+            }
+
+            function makeActiveClassOnly(active) {
+                $('#chooser').children('button').removeClass('active');
+                $(active).addClass('active');
+            }
         }
+
+        function initDoppler() {
+            $.ajax({
+                dataType: 'json',
+                cache: false,
+                url: "meteo_proxy.php",
+                data: {rq: 'iloilo-doppler'}
+            }).done(function (data) {
+                var result = data['result'];
+                var dbounds = JSON.parse(result['bounds']);
+                var bounds = new google.maps.LatLngBounds(new google.maps.LatLng(dbounds["s"], dbounds["w"]), new google.maps.LatLng(dbounds["n"], dbounds["e"]));
+
+                var $dopplertime = $('#dopplertime');
+                $.each(result['data'], function (k, v) {
+                    var time = v['time_mosaic'],
+                        overlay_image = v['output_image_transparent_on_www'],
+                        doppler_overlay = new google.maps.GroundOverlay(overlay_image, bounds, {clickable: false});
+
+                    if (time) {
+                        $('<button/>', {id: k, name: k, text: time}).appendTo($dopplertime)
+                            .on('click', function () {
+                                CURRENT_OVERLAY.setMap(null);
+                                doppler_overlay.setMap(WV_MAP);
+                                CURRENT_OVERLAY = doppler_overlay;
+                                $dopplertime.children('button').removeClass('active');
+                                $(this).addClass('active');
+                            });
+                    } else {
+                        $('<button/>', {id: k, name: k, text: "Animated", class: 'active'}).prependTo($dopplertime)
+                            .on('click', function() {
+                                CURRENT_OVERLAY.setMap(null);
+                                doppler_overlay.setMap(WV_MAP);
+                                CURRENT_OVERLAY = doppler_overlay;
+                                $dopplertime.children('button').removeClass('active');
+                                $(this).addClass('active');
+                            });
+
+                        doppler_overlay.setMap(WV_MAP);
+                        CURRENT_OVERLAY = doppler_overlay;
+                    }
+                });
+            });
+        }
+
 
         function initDopplerControls(container) {
             dopplertimecontainer = $(document.getElementById(container));
-            cumulative_rainfall_map.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(document.getElementById(container));
+            WV_MAP.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(document.getElementById(container));
         }
 
 
@@ -608,13 +681,13 @@
             var marker = new google.maps.Marker({
                     position: pos,
                     icon: image,
-                    map: cumulative_rainfall_map,
+                    map: WV_MAP,
                     title: title + " (" + device_id + ")"
                 }//,
                 //url: server_name+base_url+'device/latest/'+ data.device[0].dev_id
             );
 
-            cumulative_rainfall_map_markers.push(marker);
+            WV_MAP_MARKERS.push(marker);
 
             google.maps.event.addListener(marker, 'click', function () {
                 var tr = $('tr[data-dev_id=\'' + device_id + '\']');
@@ -636,8 +709,8 @@
 
         // Sets the map on all markers in the array.
         function setAllMap(map) {
-            for (var i = 0; i < cumulative_rainfall_map_markers.length; i++) {
-                cumulative_rainfall_map_markers[i].setMap(map);
+            for (var i = 0; i < WV_MAP_MARKERS.length; i++) {
+                WV_MAP_MARKERS[i].setMap(map);
             }
         }
 
@@ -648,13 +721,13 @@
 
         // Shows any markers currently in the array.
         function showMarkers() {
-            setAllMap(cumulative_rainfall_map);
+            setAllMap(WV_MAP);
         }
 
         // Deletes all markers in the array by removing references to them.
         function deleteMarkers() {
             clearMarkers();
-            cumulative_rainfall_map_markers = [];
+            WV_MAP_MARKERS = [];
         }
 
         function updateWaterlevelChart(data) {
@@ -767,40 +840,37 @@
     <div id='rainfall-canvas'>
     </div>
     <div style="display: none;">
-    <div id='legends' class="custom-ctrl">
-        <button id="togglelegends" class="ui-button ui-widget ui-corner-all ui-button-icon-only" title="Show/Hide Legends">
-            <span class="ui-icon  ui-icon-arrowthick-2-ne-sw"></span>
-        </button>
-        <h1>Daily Cumulative Rainfall</h1>
-        <div style="display: none">
-            <img src="images/rain-lighter_now.png">
-            <img src="images/rain-light_now.png">
-            <img src="images/rain-moderate_now.png">
-            <img src="images/rain-heavy_now.png">
-            <img src="images/rain-intense_now.png">
-            <img src="images/rain-torrential_now.png">
+        <div id='legends' class="custom-ctrl">
+            <button id="togglelegends" class="ui-button ui-widget ui-corner-all ui-button-icon-only"
+                    title="Show/Hide Legends">
+                <span class="ui-icon  ui-icon-arrowthick-2-ne-sw"></span>
+            </button>
+            <h1>Daily Cumulative Rainfall</h1>
+            <div style="display: none">
+                <img src="images/rain-lighter_now.png">
+                <img src="images/rain-light_now.png">
+                <img src="images/rain-moderate_now.png">
+                <img src="images/rain-heavy_now.png">
+                <img src="images/rain-intense_now.png">
+                <img src="images/rain-torrential_now.png">
+            </div>
+            <div class="legend"><img src="images/rain-lighter.png"><span>less than 5mm</span></div>
+            <div class="legend"><img src="images/rain-light.png"><span>5mm to less than 25mm</span></div>
+            <div class="legend"><img src="images/rain-moderate.png"><span>25mm to less than 50mm</span></div>
+            <div class="legend"><img src="images/rain-heavy.png"><span>50mm to less than 75mm</span></div>
+            <div class="legend"><img src="images/rain-intense.png"><span>75mm to less than 100mm</span></div>
+            <div class="legend"><img src="images/rain-torrential.png"><span>100mm or more</span></div>
+            <div class="legend"><img src="images/overlay_now.png"><span>currently raining</span></div>
         </div>
-        <div class="legend"><img src="images/rain-lighter.png"><span>less than 5mm</span></div>
-        <div class="legend"><img src="images/rain-light.png"><span>5mm to less than 25mm</span></div>
-        <div class="legend"><img src="images/rain-moderate.png"><span>25mm to less than 50mm</span></div>
-        <div class="legend"><img src="images/rain-heavy.png"><span>50mm to less than 75mm</span></div>
-        <div class="legend"><img src="images/rain-intense.png"><span>75mm to less than 100mm</span></div>
-        <div class="legend"><img src="images/rain-torrential.png"><span>100mm or more</span></div>
-        <div class="legend"><img src="images/overlay_now.png"><span>currently raining</span></div>
-    </div>
-    <div id='chooser' class="custom-ctrl btn-group">
-        <button id="toggleRainfallMap" class="active">Rainfall</button>
-        <button id="toggleDoppler">Doppler</button>
-        <button id="toggleTyphoonTrack">Typhoon Track</button>
-        <button id="toggleSatellite">Satellite</button>
-    </div>
-    <div id="dopplertime" class="custom-ctrl btn-group">
-        <button>2:00 PM</button>
-        <button>2:00 PM</button>
-        <button>2:00 PM</button>
-        <button>2:00 PM</button>
-        <button>2:00 PM</button>
-    </div>
+        <div id='chooser' class="custom-ctrl btn-group">
+            <button id="toggleRainfallMap" class="active">Rainfall</button>
+            <button id="toggleDoppler">Doppler</button>
+            <button id="toggleTyphoonTrack">Typhoon Track</button>
+            <button id="toggleSatellite">Satellite</button>
+        </div>
+        <div id="dopplertime" class="custom-ctrl btn-group" style="display: none">
+
+        </div>
     </div>
     <div id="ticker-container">
         <div class="ticker" id="ticker--1">

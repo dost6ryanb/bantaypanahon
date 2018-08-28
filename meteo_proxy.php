@@ -47,7 +47,7 @@ function getdoppler()
 function getdoppleriloilo()
 {
     $url = 'https://v2.meteopilipinas.gov.ph/api/radar-timeline?theme=lightmap';
-    $data = array('request' => 'rd.iloilo-cmax-rainrate');
+    $data = array('request' => 'rd.iloilo-cappi-reflectivity');
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
