@@ -40,6 +40,7 @@
 
         var WV_MAP;
         var WV_MAP_MARKERS = [];
+        var WV_BOUNDARIES;
         var ACTIVE_UI = "rainfall";
         var CURRENT_OVERLAY;
 
@@ -293,10 +294,12 @@
             });
 
             $("#toggleDoppler").on('click', function () {
+                if (typeof WV_BOUNDARIES == 'undefined') initBoundaries();
                 if (ACTIVE_UI == 'doppler') return; else hideCurrentAndShowNewUI(ACTIVE_UI, 'doppler');
 
                 console.log("toggleDoppler");
                 initDoppler();
+
                 makeActiveClassOnly('#toggleDoppler');
 
             });
@@ -344,8 +347,10 @@
                 switch (state) {
                     case 'rainfall':
                         hideRainfallUI();
+                        setMarkersVisibility(false);
                         break;
                     case 'doppler':
+                        WV_BOUNDARIES.setMap(null);
                         CURRENT_OVERLAY.setMap(null);
                         hideDopplerUI();
                         break;
@@ -354,25 +359,15 @@
                 switch (newState) {
                     case 'rainfall':
                         showRainfallUI();
+                        setMarkersVisibility(true);
                         break;
                     case 'doppler':
+                        WV_BOUNDARIES.setMap(WV_MAP);
                         showDopplerUI();
                         break;
                 }
 
                 ACTIVE_UI = newState;
-            }
-
-            function animateMapZoomTo(map, targetZoom) {
-                var currentZoom = arguments[2] || map.getZoom();
-                if (currentZoom != targetZoom) {
-                    google.maps.event.addListenerOnce(map, 'zoom_changed', function (event) {
-                        animateMapZoomTo(map, targetZoom, currentZoom + (targetZoom > currentZoom ? 1 : -1));
-                    });
-                    setTimeout(function () {
-                        map.setZoom(currentZoom)
-                    }, 80);
-                }
             }
 
             function makeActiveClassOnly(active) {
@@ -422,6 +417,41 @@
                     }
                 });
             });
+        }
+
+        function initBoundaries() {
+            WV_BOUNDARIES = new google.maps.Data();
+            WV_BOUNDARIES.loadGeoJson('region6.geojson');
+
+
+            WV_BOUNDARIES.setStyle({
+                fillColor: 'white',
+                strokeColor: '#ff51d7',
+                fillOpacity: 0,
+                strokeWeight: 1
+            });
+
+            google.maps.event.addListener(WV_MAP, 'zoom_changed', function() {
+                zoomLevel = WV_MAP.getZoom();
+                console.log(zoomLevel);
+                if (zoomLevel >= 8) {
+                    WV_BOUNDARIES.setStyle({
+                        fillColor: 'white',
+                        strokeColor: '#ff51d7',
+                        fillOpacity: 0,
+                        strokeWeight: 2
+                    });
+
+                } else {
+                    WV_BOUNDARIES.setStyle({
+                        fillColor: 'white',
+                        strokeColor: '#ff51d7',
+                        fillOpacity: 0,
+                        strokeWeight: 1
+                    });
+                }
+            });
+
         }
 
 
@@ -524,7 +554,7 @@
             var success = false;
 
             $.ajax({
-                url: 'bulletin.php',
+                url: 'daily-weather-forecast.php',
                 tryCount: 0,
                 retryLimit: 3,
             }).done(function (res) {
@@ -532,7 +562,29 @@
 
                 $("#feed24hourweather_issuedat").text(res.issuedat);
                 $("#feed24hourweather_synopsis").text(res.synopsis);
-                //$("#rss24hourweather_forecast").html(descriptionstr);
+
+            }).fail(function (jqXHR, textStatus) {
+                console.log("fail retrying");
+                this.tryCount++;
+                if (this.tryCount <= this.retryLimit) {
+                    $.ajax(this);
+                    return;
+                }
+                console.log("failed");
+                return;
+            });
+
+            $.ajax({
+                url: 'regional-weather-forecast.php',
+                tryCount: 0,
+                retryLimit: 3,
+            }).done(function (res) {
+                console.log("success");
+
+                $("#regionalweather_issuedat").text(res.issuedat);
+                $("#regionalweather_validity").text(res.validity);
+                $("#regionalweather_synopsis").text(res.synopsis);
+                $("#regionalweather_forecast").text(res.forecast);
 
             }).fail(function (jqXHR, textStatus) {
                 console.log("fail retrying");
@@ -730,6 +782,14 @@
             WV_MAP_MARKERS = [];
         }
 
+        function setMarkersVisibility(state) {
+            for (var i = 0; i < WV_MAP_MARKERS.length; i++) {
+                WV_MAP_MARKERS[i].setVisible(state);
+            }
+        }
+
+
+
         function updateWaterlevelChart(data) {
             var device_id = data.device[0].dev_id;
             var div = 'line-chart-marker_' + device_id;
@@ -885,7 +945,7 @@
     <div id="charts_div_container">
     </div>
     <div id="feeds">
-        <div id="feed24hourweather" class="feedcontainer">
+        <div id="feed24hourweather" class="feedcontainer effect6">
             <h1>DAILY WEATHER FORECAST</h1>
             <span>24-Hours Weather forecast</span>
             <br/>
@@ -896,7 +956,21 @@
             <h2>More info:</h2>
             <a href="https://www1.pagasa.dost.gov.ph/index.php/general-weather/daily-weather-forecast" target="_blank">Source:
                 PAGASA</a>
-
+        </div>
+        <div id="regionalweather" class="feedcontainer effect6">
+            <h1>Regional Weather Forecast</h1>
+            <span>Visayas Weather forecast</span>
+            <h2>Issued at</h2>
+            <span id="regionalweather_issuedat">[date time]</span>
+            <h2>Valid Beginning</h2>
+            <span id="regionalweather_validity">[date time]</span>
+            <h2>Synopsis</h2>
+            <span id="regionalweather_synopsis">[synopsis]</span>
+            <h2>Forecast</h2>
+            <span id="regionalweather_forecast">[forecast]</span>
+            <h2>More info:</h2>
+            <a href="https://www1.pagasa.dost.gov.ph/index.php/vis-weather/local-weather-forecast" target="_blank">Source:
+                PAGASA</a>
         </div>
     </div>
 </div>
