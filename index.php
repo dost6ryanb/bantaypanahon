@@ -313,25 +313,23 @@
             });
 
             $("#toggleSatellite").on('click', function () {
-                if (ACTIVE_UI == 'satellite') return; else ACTIVE_UI = 'satellite';
+                if (ACTIVE_UI == 'satellite') return; else hideCurrentAndShowNewUI(ACTIVE_UI, 'satellite');
 
 
                 console.log("toggleSatellite");
+                initSatellite();
+
                 makeActiveClassOnly('#toggleSatellite');
             });
 
 
             function showRainfallUI() {
-                $('#rainfall-canvas').css({width: '30%'}).show();
-                $('#map-canvas').css({width: '70%', height: '520px'});
-                $('#charts_div_container').show();
+                classicMode();
                 $('#legends').show();
             }
 
             function hideRainfallUI() {
-                $('#rainfall-canvas').css({width: '0%'}).hide();
-                $('#map-canvas').css({width: '100%', height: '740px'});
-                $('#charts_div_container').hide();
+                fullScreenMapMode();
                 $('#legends').hide();
             }
 
@@ -341,6 +339,26 @@
 
             function hideDopplerUI() {
                 $('#dopplertime').hide().empty();
+            }
+
+            function showSatUI() {
+                fullScreenMapMode();
+            }
+
+            function hideSatUI() {
+                classicMode();
+            }
+
+            function fullScreenMapMode() {
+                $('#rainfall-canvas').css({width: '0%'}).hide();
+                $('#map-canvas').css({width: '100%', height: '740px'});
+                $('#charts_div_container').hide();
+            }
+
+            function classicMode() {
+                $('#rainfall-canvas').css({width: '30%'}).show();
+                $('#map-canvas').css({width: '70%', height: '520px'});
+                $('#charts_div_container').show();
             }
 
             function hideCurrentAndShowNewUI(state, newState) {
@@ -354,6 +372,11 @@
                         CURRENT_OVERLAY.setMap(null);
                         hideDopplerUI();
                         break;
+                    case 'satellite':
+                        CURRENT_OVERLAY.setMap(null);
+                        hideSatUI();
+                        break;
+
                 }
 
                 switch (newState) {
@@ -364,6 +387,9 @@
                     case 'doppler':
                         WV_BOUNDARIES.setMap(WV_MAP);
                         showDopplerUI();
+                        break;
+                    case 'satellite':
+                        showSatUI();
                         break;
                 }
 
@@ -396,25 +422,20 @@
                     if (time) {
                         $('<button/>', {id: k, name: k, text: time}).appendTo($dopplertime)
                             .on('click', function () {
-                                CURRENT_OVERLAY.setMap(null);
-                                doppler_overlay.setMap(WV_MAP);
-                                CURRENT_OVERLAY = doppler_overlay;
+                                swapCurrentOverlay(doppler_overlay);
                                 $dopplertime.children('button').removeClass('active');
                                 $(this).addClass('active');
                             });
                     } else {
                         $('<button/>', {id: k, name: k, text: "Animated", class: 'active'}).prependTo($dopplertime)
                             .on('click', function() {
-                                CURRENT_OVERLAY.setMap(null);
-                                doppler_overlay.setMap(WV_MAP);
-                                CURRENT_OVERLAY = doppler_overlay;
+                                swapCurrentOverlay(doppler_overlay);
                                 $dopplertime.children('button').removeClass('active');
                                 $(this).addClass('active');
                             });
 
-                        doppler_overlay.setMap(WV_MAP);
-                        CURRENT_OVERLAY = doppler_overlay;
-                    }
+                        swapCurrentOverlay(doppler_overlay);
+                     }
                 });
             });
         }
@@ -454,6 +475,32 @@
 
         }
 
+        function initSatellite() {
+            $.getJSON("meteo_proxy.php", {rq: 'sat-himawari'})
+                .done(function (data) {
+                    var result = data['result'];
+                    var bounds = JSON.parse(result.bounds);
+                    var swBound = new google.maps.LatLng(bounds.s, bounds.w);
+                    var neBound = new google.maps.LatLng(bounds.n, bounds.e);
+                    var imageBounds = new google.maps.LatLngBounds(swBound, neBound);
+
+                    var satImg = result.animated_image;
+                    var sat_overlay = new google.maps.GroundOverlay(satImg, imageBounds);
+                    swapCurrentOverlay(sat_overlay);
+
+                });
+        }
+
+        function swapCurrentOverlay(overlay) {
+            if (CURRENT_OVERLAY) {
+                CURRENT_OVERLAY.setMap(null);
+                overlay.setMap(WV_MAP);
+                CURRENT_OVERLAY = overlay;
+            } else {
+                overlay.setMap(WV_MAP);
+                CURRENT_OVERLAY = overlay;
+            }
+        }
 
         function initDopplerControls(container) {
             dopplertimecontainer = $(document.getElementById(container));
