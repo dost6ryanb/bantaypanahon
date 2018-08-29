@@ -85,8 +85,8 @@
                 initTicker('ticker--1');
                 initTicker('ticker--2');
                 initChartDivs('charts_div_container');
-                //initFetchData();
-                //initFeedee();
+                initFetchData();
+                initFeedee();
             });
         });
 
