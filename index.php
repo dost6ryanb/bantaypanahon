@@ -39,6 +39,7 @@
 
         };
 
+        var DOST_CENTER;
         var WV_MAP;
         var WV_MAP_MARKERS = [];
         var WV_BOUNDARIES;
@@ -233,7 +234,7 @@
         }
 
         function initMap(divcanvas) {
-            var DOST_CENTER = new google.maps.LatLng(10.712317, 122.562362); //DOST CENTER
+            DOST_CENTER = new google.maps.LatLng(10.712317, 122.562362); //DOST CENTER
 
             var mapOptions = {
                 //zoom: 6, //Whole Philippines View
@@ -377,6 +378,7 @@
                 $('#map-canvas').css({width: '70%', height: '520px'});
                 $('#charts_div_container').show();
                 console.log('classic');
+                WV_MAP.panTo(DOST_CENTER);
                 WV_MAP.setZoom(8);
              }
 
