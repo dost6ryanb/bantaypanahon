@@ -16,6 +16,7 @@
     <script type="text/javascript" src='js/jquery.scrollTo.min.js'></script>
     <script type="text/javascript" src='js/jquery.easy-ticker.min.js'></script>
     <script type="text/javascript" src='js/heat-index.js'></script>
+    <script type="text/javascript" src="js/tytrack_pagasa.js"></script>
     <script type="text/javascript"
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4yau_nw40dWy2TwW4OdUq4OJKbFs1EOc&sensor=false"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -43,6 +44,15 @@
         var WV_BOUNDARIES;
         var ACTIVE_UI = "rainfall";
         var CURRENT_OVERLAY;
+
+        var lines = [],
+            cyclone_marker_array = [],
+            hourly_cyclone_marker_array = [],
+            forecastCircles_array = [],
+            cyclonePath_array = [],
+            cyclonePath_LatLng = [],
+            forecastLine_array = []
+            forecastHull_array = [];
 
         google.charts.load('current', {packages: ['corechart']});
 
@@ -74,8 +84,8 @@
                 initTicker('ticker--1');
                 initTicker('ticker--2');
                 initChartDivs('charts_div_container');
-                initFetchData();
-                initFeedee();
+                //initFetchData();
+                //initFeedee();
             });
         });
 
@@ -302,10 +312,12 @@
             });
 
             $("#toggleTyphoonTrack").on('click', function () {
-                if (ACTIVE_UI == 'tytrack') return; else ACTIVE_UI = 'tytrack';
+                if (ACTIVE_UI == 'tytrack') return; else hideCurrentAndShowNewUI(ACTIVE_UI, 'tytrack');
 
 
                 console.log("toggleTyphoonTrack");
+                initTyphoonTrack();
+
                 makeActiveClassOnly('#toggleTyphoonTrack');
             });
 
@@ -383,6 +395,10 @@
                         CURRENT_OVERLAY.setMap(null);
                         hideSatUI();
                         break;
+                    case 'tytrack':
+                        hideTyTrackUI();
+                        clearCyTracks();
+                        break;
 
                 }
 
@@ -401,6 +417,11 @@
                         showSatUI();
                         fullScreenMapMode();
                         break;
+                    case 'tytrack':
+                        showTyTrackUI();
+                        fullScreenMapMode();
+                        break;
+
                 }
 
                 ACTIVE_UI = newState;
@@ -417,7 +438,8 @@
                 dataType: 'json',
                 cache: false,
                 url: "meteo_proxy.php",
-                data: {rq: 'iloilo-doppler'}
+                //data: {rq: 'iloilo-doppler'}
+                data: {rq: 'ph-doppler'}
             }).done(function (data) {
                 var result = data['result'];
                 var dbounds = JSON.parse(result['bounds']);
@@ -502,7 +524,119 @@
         }
 
         function initTyphoonTrack() {
+            $.getJSON('meteo_proxy.php', {rq: 'cyclone-track'})
+                .done(function(d){
+                    var tracks = d['result'];
+                    var value = "hourly";
 
+                    var lastTrack = null
+                        , forecastTrack = [];
+
+                    if (lines.length != 0) {
+                        lines = [];
+                        cyclone_marker_array = [];
+                        hourly_cyclone_marker_array = [];
+                        forecastCircles_array = [];
+                        cyclonePath_array = [];
+                        cyclonePath_LatLng = [];
+                        forecastLine_array = [];
+                    }
+
+                    for (var key in tracks) {
+                        var data = tracks[key], cycloneName = data.cyclone_name, cycloneInfos = data.info, lastPoint, lastTrack = null, forecastTrack = [], cyclonePath_LatLng = [];
+
+                        for (var key in cycloneInfos) {
+                            var cycloneInfo = cycloneInfos[key];
+
+                            cyclonePath_array.push(new google.maps.LatLng(cycloneInfo.latitude, cycloneInfo.longitude));
+                            cyclonePath_LatLng.push([cycloneInfo.latitude, cycloneInfo.longitude]);
+
+                            var image = new google.maps.MarkerImage(cycloneInfo.icon, null, new google.maps.Point(0, 0), new google.maps.Point(13, 13));
+                            var cyclone_marker = addTyTrackMarker({
+                                lat: cycloneInfo.latitude,
+                                lng: cycloneInfo.longitude,
+                                title: cycloneName,
+                                icon: image,
+                                infoWindow: {
+                                    content: "<p>" + cycloneName + "</p>as of: " + cycloneInfo.dateTime + "<br/>Coordinates: " + cycloneInfo.latitude + "° " + cycloneInfo.longitude + "°"
+                                }
+                            }, WV_MAP);
+
+                            if (value == "hourly") {
+                                hourly_cyclone_marker_array.push(cyclone_marker)
+                            } else {
+                                cyclone_marker_array.push(cyclone_marker);
+                            }
+                            if (cycloneInfo.isForecast == "true") {
+                                forecastTrack.push(cycloneInfo)
+                            } else {
+                                var lastPoint = new google.maps.LatLng(cycloneInfo.latitude, cycloneInfo.longitude);
+                                lastTrack = cycloneInfo
+                            }
+                        }
+
+                        var lineSymbol = {
+                            path: 'M -2,0 0,-2 2,0 0,2 z',
+                            strokeColor: '#FFF',
+                            fillColor: '#F00',
+                            fillOpacity: 1
+                        };
+
+                        if (forecastTrack.length > 0) {
+                            polygon = drawPolygon({
+                                paths: nfc(forecastTrack, lastTrack),
+                                strokeOpacity: 0.8,
+                                strokeWeight: 2,
+                                strokeColor: '#00868B'
+                            }, WV_MAP);
+                        }
+
+                        line = drawPolyline({
+                            path: ra(cyclonePath_LatLng),
+                            strokeColor: '#008000',
+                            strokeOpacity: 1,
+                            strokeWeight: 2,
+                            icons: [{
+                                icon: lineSymbol,
+                                offset: '100%'
+                            }]
+                        }, WV_MAP);
+
+                        for (var key in forecastTrack) {
+                            var cycloneInfo = forecastTrack[key]
+                                , cyclone_circles = drawCircle({
+                                lat: cycloneInfo.latitude,
+                                lng: cycloneInfo.longitude,
+                                radius: cycloneInfo.radius * 1e3,
+                                fillColor: cycloneInfo.color,
+                                fillOpacity: 0.3,
+                                strokeOpacity: 0.5,
+                                strokeWeight: 1
+                            }, WV_MAP);
+                            forecastCircles_array.push(cyclone_circles);
+                            //addToCoordinates(cyclone_circles);
+                        }
+
+                        lines.push(line);
+                        if (typeof polygon != 'undefined')
+                            forecastHull_array.push(polygon)
+                    }
+                });
+        }
+
+        function clearCyTracks() {
+            setMapNullArray(lines);
+            setMapNullArray(cyclone_marker_array);
+            setMapNullArray(hourly_cyclone_marker_array);
+            setMapNullArray(forecastHull_array);
+            setMapNullArray(forecastCircles_array);
+        }
+
+        function setMapNullArray(markers) {
+            for (var key in markers)
+                markers[key].setMap(null);
+            markers.splice(0, markers.length);
+            markers = []
         }
 
         function swapCurrentOverlay(overlay) {
@@ -818,6 +952,173 @@
             });
         }
 
+        function addTyTrackMarker(options, map) {
+            if (options.lat == undefined && options.lng == undefined && options.position == undefined) {
+                throw 'No latitude or longitude defined.';
+            }
+            var base_options = {
+                position: new google.maps.LatLng(options.lat, options.lng),
+                map: null
+            }, marker_options =  extend_object(base_options, options);
+
+            delete marker_options.lat;
+            delete marker_options.lng;
+
+            var marker = new google.maps.Marker(marker_options);
+
+            marker.setMap(map);
+
+            if (options.infoWindow) {
+                marker.infoWindow = new google.maps.InfoWindow(options.infoWindow);
+
+                marker.addListener('click', function() {
+                    marker.infoWindow.open(map, marker);
+                });
+            }
+
+            return marker;
+        }
+
+        function drawPolyline(options, map) {
+            var path = [],
+                points = options.path;
+
+            if (points.length) {
+                if (points[0][0] === undefined) {
+                    path = points;
+                }
+                else {
+                    for (var i = 0, latlng; latlng = points[i]; i++) {
+                        path.push(new google.maps.LatLng(latlng[0], latlng[1]));
+                    }
+                }
+            }
+
+            var polyline_options = {
+                map: map,
+                path: path,
+                strokeColor: options.strokeColor,
+                strokeOpacity: options.strokeOpacity,
+                strokeWeight: options.strokeWeight,
+                geodesic: options.geodesic,
+                clickable: true,
+                editable: false,
+                visible: true
+            };
+            var polyline = new google.maps.Polyline(polyline_options);
+
+            return polyline;
+
+        }
+
+        function drawCircle(options, map) {
+            options =  extend_object({
+                map: map,
+                center: new google.maps.LatLng(options.lat, options.lng)
+            }, options);
+
+            delete options.lat;
+            delete options.lng;
+
+            var polygon = new google.maps.Circle(options);
+
+            return polygon;
+        }
+
+        function drawPolygon(options, map) {
+            options = extend_object({
+                map: map
+            }, options);
+
+            options.paths = [options.paths.slice(0)];
+
+            if (options.paths.length > 0) {
+                if (options.paths[0].length > 0) {
+                    options.paths = array_flat(array_map(options.paths, arrayToLatLng));
+                }
+            }
+
+            var polygon = new google.maps.Polygon(options);
+
+            return polygon;
+        }
+
+        var arrayToLatLng = function(coords) {
+            var i;
+
+            for (i = 0; i < coords.length; i++) {
+                if (!(coords[i] instanceof google.maps.LatLng)) {
+                    if (coords[i].length > 0 && typeof(coords[i][0]) === "object") {
+                        coords[i] = arrayToLatLng(coords[i]);
+                    }
+                    else {
+                        coords[i] = coordsToLatLngs(coords[i]);
+                    }
+                }
+            }
+
+            return coords;
+        };
+
+        var coordsToLatLngs = function(coords) {
+            var first_coord = coords[0],
+                second_coord = coords[1];
+
+            return new google.maps.LatLng(first_coord, second_coord);
+        };
+
+        var array_map = function(array, callback) {
+            var original_callback_params = Array.prototype.slice.call(arguments, 2),
+                array_return = [],
+                array_length = array.length,
+                i;
+
+            if (Array.prototype.map && array.map === Array.prototype.map) {
+                array_return = Array.prototype.map.call(array, function(item) {
+                    var callback_params = original_callback_params.slice(0);
+                    callback_params.splice(0, 0, item);
+
+                    return callback.apply(this, callback_params);
+                });
+            }
+            else {
+                for (i = 0; i < array_length; i++) {
+                    callback_params = original_callback_params;
+                    callback_params.splice(0, 0, array[i]);
+                    array_return.push(callback.apply(this, callback_params));
+                }
+            }
+
+            return array_return;
+        };
+
+        var array_flat = function(array) {
+            var new_array = [],
+                i;
+
+            for (i = 0; i < array.length; i++) {
+                new_array = new_array.concat(array[i]);
+            }
+
+            return new_array;
+        };
+
+        function extend_object(obj, new_obj) {
+            var name;
+
+            if (obj === new_obj) {
+                return obj;
+            }
+
+            for (name in new_obj) {
+                if (new_obj[name] !== undefined) {
+                    obj[name] = new_obj[name];
+                }
+            }
+
+            return obj;
+        }
+
         function setAllMap(map) {
             for (var i = 0; i < WV_MAP_MARKERS.length; i++) {
                 WV_MAP_MARKERS[i].setMap(map);
@@ -1013,7 +1314,7 @@
                 PAGASA</a>
         </div>
         <div id="regionalweather" class="feedcontainer effect6">
-            <h1>Regional Weather Forecast</h1>
+            <h1>REGIONAL WEATHER FORECAST</h1>
             <span>Visayas Weather forecast</span>
             <h2>Issued at</h2>
             <span id="regionalweather_issuedat">[date time]</span>

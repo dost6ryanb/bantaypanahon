@@ -1,4 +1,5 @@
 <?php
+header('Content-Type: application/json');
 $rq = $_GET['rq'];
 
 
@@ -26,6 +27,7 @@ function getdoppler()
     $data = array('request' => 'rd.mosaic-cmax-reflectivity');
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(
         'Origin: https://v2.meteopilipinas.gov.ph',
@@ -70,6 +72,7 @@ function getdoppleriloilo()
 
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
     curl_close($ch);
 
     if ($http_code == 200) {
@@ -85,6 +88,7 @@ function getsat()
     $data = array('request' => 'sat.himawari-ir1');
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST,true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(
         'Origin: https://v2.meteopilipinas.gov.ph',
@@ -93,6 +97,7 @@ function getsat()
     ));
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
     curl_close($ch);
 
     if ($http_code == 200) {
@@ -108,7 +113,10 @@ function getcytrck()
     $data = array('request' => '36hourly');
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    //$referer = 'https://v2.meteopilipinas.gov.ph/';
+    //curl_setopt($ch, CURLOPT_REFERER, $referer);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(
         'Origin: https://v2.meteopilipinas.gov.ph',
         'X-Requested-With: XMLHttpRequest',
@@ -116,11 +124,12 @@ function getcytrck()
     ));
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error = curl_error($ch);
     curl_close($ch);
 
     if ($http_code == 200) {
         return $response;
     } else {
-        return null;
+        return json_encode(array("success" => "false", "http_code" => $http_code, "curl_error" => $error));
     }
 }
