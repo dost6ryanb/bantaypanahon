@@ -1,8 +1,11 @@
+
 #map-canvas {
     height: 520px;
     width: 70%;
     float: left;
     display: inline-block;
+    background: url('../../images/erangel.jpg') center center no-repeat;
+    background-size:cover;
 }
 
 #rainfall-canvas {
@@ -26,25 +29,20 @@
     border-width: 1px;
 }
 
-.legend {
-    margin: 4px;
+#legends .legend {
+    padding-left: 6px;
     white-space: nowrap;
-    clear: both;
+    display: block;
 }
 
-.legend img {
+#legends .legend img {
     width: 24px;
 }
 
-.legendtitle {
+#legends.legendtitle {
     clear: both;
     font-weight: bolder;
     text-align: center;
-}
-
-#togglelegends {
-    margin: 10px;
-    clear: both;
 }
 
 #ticker-container {
@@ -109,14 +107,186 @@
 }
 
 #legends {
-    background: rgba(220, 220, 255, 0.5);
-    padding: 6px;
+    text-align: left;
+    width: 230px;
+    margin-left: 10px;
 }
 
 #legends #togglelegends {
-    background: #2869E1;
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    margin-top: 5px;
+    margin-left: 190px;
+}
+#legends h1 {
+    font-size: small;
+    padding-left: 6px;
+    margin: .2em 0 .2em 0;
+}
+
+#legends .legend img {
+    margin-right: 12px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#legends .legend span{
+    vertical-align: middle;
+    font-size: smaller;
+}
+
+#legends .legend {
+    display: block;
+    margin-bottom: 2px;
+}
+
+#bulletin {
+    background: #0d66c4;
+    height: 30px;
+}
+
+.custom-ctrl {
+    background-color : #fff;
+    border : 2px solid #fff;
+    border-radius: 3px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.3);
+    cursor: pointer;
+    margin-bottom: 22px;
+    text-align: center;
+
+    color: rgb(25,25,25);
+    font-family: Roboto,Arial,sans-serif;
+    font-size: 16px;
+    line-height: 38px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+.custom-ctrl button {
+    background-color: #f5f5f5;
+    border: 2px solid rgba(255, 255, 255, 0);
+    cursor: pointer;
+}
+
+.custom-ctrl button.active {
+    background-color: #e1e1e1;
+}
+
+
+
+.btn-group button {
+    background-color: #f5f5f5;
+    border: 2px solid rgba(255, 255, 255, 0);  /* Green border */
+    cursor: pointer; /* Pointer/hand icon */
+    float: left; /* Float the buttons side by side */
+}
+
+.btn-group button:not(:last-child) {
+    border-right: none; /* Prevent double borders */
+}
+
+/* Clear floats (clearfix hack) */
+.btn-group:after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+/* Add a background color on hover */
+.btn-group button:hover {
+    background-color: #e5e5e5;
+}
+
+#feeds {
+    position: relative;
+    background-color: #2693f0;
+    padding: 2px;
+    display: block;
+    overflow: auto;
+    width: 100%;
+}
+
+.feedcontainer {
+    margin: 5px 5px 10px;
+    vertical-align: top;
+    display: inline-block;
+    position: relative;
+    background-color: #0089e9;
+    padding: 5px 20px 18px;
+    width: 400px;
+    /*height: 200px;*/
+    overflow: auto;
+    border-radius: 10px;
+
+    font-size: 18px;
+    word-spacing: 2px;
+    color: #000000;
+    text-decoration: none;
+    font-style: normal;
+    font-variant: normal;
+    text-transform: none;
+}
+
+.feedcontainer h2 {
+    letter-spacing: 1px;
+}
+
+.feedcontainer h1 {
+    font-size: smaller;
+    font-weight: bolder;
+    line-height: 1em;
+}
+
+.feedcontainer h2 {
+    font-size: x-small;
+    font-weight: bold;
+    color: #1c1c1c;
+}
+
+.feedcontainer span, .feedcontainer a{
+    font-weight: normal;
+    font-size: x-small;
+    color: #fafafa;
+}
+
+.feedcontainer a{
+    text-decoration: underline;
     color: white;
-    border: 0;
-    border-radius: 5px;
-    float: left;
+}
+
+.feedcontainer p {
+    font-weight: lighter;
+}
+
+.effect6
+{
+    position:relative;
+    -webkit-box-shadow:0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+    -moz-box-shadow:0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+    box-shadow:0 1px 4px rgba(0, 0, 0, 0.3), 0 0 40px rgba(0, 0, 0, 0.1) inset;
+}
+.effect6:before, .effect6:after
+{
+    content:"";
+    position:absolute;
+    z-index:-1;
+    -webkit-box-shadow:0 0 20px rgba(0,0,0,0.8);
+    -moz-box-shadow:0 0 20px rgba(0,0,0,0.8);
+    box-shadow:0 0 20px rgba(0,0,0,0.8);
+    top:50%;
+    bottom:0;
+    left:10px;
+    right:10px;
+    -moz-border-radius:100px / 10px;
+    border-radius:100px / 10px;
+}
+.effect6:after
+{
+    right:10px;
+    left:auto;
+    -webkit-transform:skew(8deg) rotate(3deg);
+    -moz-transform:skew(8deg) rotate(3deg);
+    -ms-transform:skew(8deg) rotate(3deg);
+    -o-transform:skew(8deg) rotate(3deg);
+    transform:skew(8deg) rotate(3deg);
 }
