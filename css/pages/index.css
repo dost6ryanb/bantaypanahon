@@ -212,6 +212,7 @@
     display: inline-block;
     position: relative;
     background-color: #0089e9;
+    /*background-color: #2fa8fc;*/
     padding: 5px 20px 18px;
     width: 400px;
     /*height: 200px;*/
@@ -247,6 +248,7 @@
     font-weight: normal;
     font-size: x-small;
     color: #fafafa;
+    /*color: #232121;*/
 }
 
 .feedcontainer a{
