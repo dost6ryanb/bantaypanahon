@@ -44,7 +44,8 @@ function initDoppler() {
 	$.ajax({
 		dataType: "json",
 		cache: false,
-		url: "doppler_proxy.php",
+		url: "meteo_proxy.php",
+        data: {rq: 'iloilo-doppler'},
 		success: function(data){
 			var result = data['result'];
 			var dbounds = JSON.parse(result['bounds']);
@@ -60,17 +61,17 @@ function initDoppler() {
                     $('<button/>', {id: k, name: k, text: time}).appendTo(el)
                         .on('click', function() {
                             CURRENT_OVERLAY.setMap(null);
-                            doppler_overlay.setMap(METEO_MAP)
+                            doppler_overlay.setMap(METEO_MAP);
                             CURRENT_OVERLAY = doppler_overlay;
                         });
                 } else {
                     $('<button/>', {id: k, name: k, text: "Animated"}).prependTo(el)
                         .on('click', function() {
                             CURRENT_OVERLAY.setMap(null);
-                            doppler_overlay.setMap(METEO_MAP)
+                            doppler_overlay.setMap(METEO_MAP);
                             CURRENT_OVERLAY = doppler_overlay;
                         });
-                    doppler_overlay.setMap(METEO_MAP)
+                    doppler_overlay.setMap(METEO_MAP);
                     CURRENT_OVERLAY = doppler_overlay;
                 }
 
@@ -85,7 +86,7 @@ function initKml() {
         //'http://192.168.1.20/bantaypanahon/region6.geojson');
     METEO_MAP.data.setStyle({
         fillColor: 'white',
-        strokeColor: 'white',
+        strokeColor: '#ff51d7',
         fillOpacity: 0,
         strokeWeight: 1
     });
@@ -111,24 +112,24 @@ function initKml() {
         }
     });
 
-    setInterval(function(){
+    /*setInterval(function(){
         METEO_MAP.data.setStyle({
             fillColor: 'white',
             strokeColor: getRandomColor(),
             fillOpacity: 0,
             strokeWeight: 1
         });
-    }, Math.floor((Math.random() * 2000) + 500));
+    }, Math.floor((Math.random() * 2000) + 500));*/
 }
 
-function getRandomColor() {
+/*function getRandomColor() {
     var letters = '0123456789ABCDEF';
     var color = '#';
     for (var i = 0; i < 6; i++) {
         color += letters[Math.floor(Math.random() * 16)];
     }
     return color;
-}
+}*/
 </script>
 <style>
 	body {background-color: black;}
