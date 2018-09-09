@@ -883,7 +883,7 @@
                 maxZoom: null,
                 center: DOST_CENTER,
                 disableDefaultUI: true,
-                mapTypeId: 'bantaypanahonstyle',
+                mapTypeId: 'mapbox',
                 mapTypeControl: true,
                 mapTypeControlOptions: {
                     mapTypeIds: ['bantaypanahonstyle', 'osm', 'mapbox', 'mapboxdark']
