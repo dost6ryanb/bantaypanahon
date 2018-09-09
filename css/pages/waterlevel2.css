@@ -92,27 +92,39 @@
 	white-space: nowrap;
 }
 
-#legends {
-	background: rgba(220, 220, 255, 0.5);
-    padding: 6px;
-}
-
-#legends #togglelegends {
-	background:#2869E1;
-	color:white;
-	border:0;
-	border-radius:5px;
-	float:left;
-}
-
 #riverbasins {
-	width: 120px;
-	height: auto;
-	background-color: #d2e5eb;
-	color: #2f34eb;
+	text-align: left;
+	font-size: small;
 }
 
-#riverbasins > ul {
-	padding:0;
+#riverbasins ul {
 	padding-left: 20px;
+	margin: 0;
+}
+
+
+.custom-ctrl {
+	background-color : #fff;
+	border : 2px solid #fff;
+	border-radius: 3px;
+	box-shadow: 0 2px 6px rgba(0,0,0,.3);
+	cursor: pointer;
+	margin-bottom: 22px;
+	text-align: center;
+
+	color: rgb(25,25,25);
+	font-family: Roboto,Arial,sans-serif;
+	font-size: 16px;
+	line-height: 38px;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+.custom-ctrl button {
+	background-color: #f5f5f5;
+	border: 2px solid rgba(255, 255, 255, 0);
+	cursor: pointer;
+}
+
+.custom-ctrl button.active {
+	background-color: #e1e1e1;
 }

@@ -602,21 +602,24 @@
     </div>
     <div id='waterlevel-table'>
     </div>
-    <div id='legends'>
-        <div style="display: none">
-            <img src="images/waterlevel_down.png">
-            <img src="images/waterlevel_up.png">
+    <div style="display: none">
+        <div id='legends'>
+            <div style="display: none">
+                <img src="images/waterlevel_down.png">
+                <img src="images/waterlevel_up.png">
+            </div>
+        </div>
+        <div id="riverbasins"  class="custom-ctrl">
+            <b>River Basin Map</b>
+            <ul>
+                <li><a href="riverbasin.php?q=1">Aklan River Basin</a></li>
+                <li><a href="riverbasin.php?q=2">Panay River Basin</a></li>
+                <li><a href="riverbasin.php?q=3">Tigum-Aganan River Basin</a></li>
+                <li><a href="riverbasin.php?q=4">Ilog-Hilabangan River Basin</a></li>
+            </ul>
         </div>
     </div>
-    <div id="riverbasins">
-        <b>River Basin Map</b>
-        <ul>
-            <li><a href="riverbasin.php?q=1">Aklan River Basin</a></li>
-            <li><a href="riverbasin.php?q=2">Panay River Basin</a></li>
-            <li><a href="riverbasin.php?q=3">Tigum-Aganan River Basin</a></li>
-            <li><a href="riverbasin.php?q=4">Ilog-Hilabangan River Basin</a></li>
-        </ul>
-    </div>
+
 </div>
 <div id='footer'>
     <div id="ticker1">
