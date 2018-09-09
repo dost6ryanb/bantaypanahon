@@ -32,13 +32,13 @@ if (strlen($title) <= 20) {
 $tmpStr = explode("Issued at: ", $title, 2);
 if (sizeof($tmpStr)>1) {
     $tmpStr = $tmpStr[1];
-    $tmpStr = explode("Valid Beginning: ", $tmpStr, 2);
+    $tmpStr = explode("Valid Beginning:", $tmpStr, 2);
     $issuedAtStr= $tmpStr[0];
     $tmpStr = $tmpStr[1];
-    $tmpStr = explode("SYNOPSIS: ", $tmpStr, 2);
+    $tmpStr = explode("SYNOPSIS:", $tmpStr, 2);
     $validityStr = $tmpStr[0];
     $tmpStr = $tmpStr[1];
-    $tmpStr = explode("FORECAST:  ", $tmpStr, 2);
+    $tmpStr = explode("FORECAST:", $tmpStr, 2);
     $synopsisStr = $tmpStr[0];
     $tmpStr = $tmpStr[1];
     $tmpStr = explode("PAGBANA-BANA: ", $tmpStr, 2);
