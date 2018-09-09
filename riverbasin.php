@@ -259,25 +259,12 @@ switch ($q) {
                 maxZoom: null,
                 center: DOST_CENTER,
                 disableDefaultUI: true,
+                mapTypeId: 'mapbox',
                 zoomControl: true,
                 zoomControlOptions: {
                     style: google.maps.ZoomControlStyle.LARGE,
                     position: google.maps.ControlPosition.RIGHT_CENTER
                 },
-                draggableCursor: 'crosshair',
-                styles: [{
-                    "featureType": "administrative.land_parcel",
-                    "stylers": [{"visibility": "off"}]
-                }, {"featureType": "poi", "stylers": [{"visibility": "off"}]}, {
-                    "featureType": "road",
-                    "stylers": [{"visibility": "off"}]
-                }, {"featureType": "road.highway", "stylers": [{"visibility": "on"}]}, {
-                    "featureType": "road.arterial",
-                    "stylers": [{"visibility": "on"}]
-                }, {"featureType": "landscape", "stylers": [{"lightness": 47}]}, {
-                    "featureType": "water",
-                    "stylers": [{"lightness": 39}]
-                }]
             };
 
             cumulative_rainfall_map = new google.maps.Map(document.getElementById(divcanvas), mapOptions);
@@ -326,39 +313,30 @@ switch ($q) {
                     cumulative_rainfall_map.panTo(new google.maps.LatLng(newCenterLat, newCenterLon));
             });
 
-            google.maps.event.addListener(cumulative_rainfall_map, 'click', function (event) {
-                var pnt = event.latLng;
-                var lat = pnt.lat();
-                lat = lat.toFixed(6);
-                var lng = pnt.lng();
-                lng = lng.toFixed(6);
-                console.log(lat + ', ' + lng);
-            });
+            cumulative_rainfall_map.mapTypes.set("mapbox", new google.maps.ImageMapType({
+                getTileUrl: function (coord, zoom) {
+                    var tilesPerGlobe = 1 << zoom
+                        , x = coord.x % tilesPerGlobe;
+                    if (x < 0)
+                        x = tilesPerGlobe + x;
+                    //return "http://tile.openstreetmap.org/" + zoom + "/" + x + "/" + coord.y + ".png"
+                    return "https://api.mapbox.com/styles/v1/dost6ryanb/cjcipbquu0khs2rqrlgcz44y7/tiles/256/" + zoom + "/" + x + "/" + coord.y + "?access_token=pk.eyJ1IjoiZG9zdDZyeWFuYiIsImEiOiI1OGMyZjdjNjZlYjlhNTMyNDc0NGQxOTY4ZDJlZjIxNyJ9.dkASVYIEPInwAEkwUkaGhQ";
+                },
+                tileSize: new google.maps.Size(256, 256),
+                name: "MapBox",
+                maxZoom: 18
+            }));
         }
 
         function initMapLegends(container) {
             legendscontainer = $(document.getElementById(container));
             cumulative_rainfall_map.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(document.getElementById(container));
 
-            $('<button id="togglelegends">Hide Legend</button>')
+            $('#togglelegends')
                 .on('click', function () {
                     $('.legend').toggle();
                     $('.legendtitle').toggle();
-                    if ($(this).text() == "Show Legend") {
-                        $(this).text('Hide Legend');
-                    } else {
-                        $(this).text('Show Legend');
-                    }
-                })
-                .appendTo(legendscontainer);
-            $('<div class="legendtitle">Daily Cumulative Rainfall</div class="legend">').appendTo(legendscontainer);
-            $('<div class="legend"><img src="' + key['marker'][0].src + '.png"><img src="' + key['marker'][0].src + '_now.png" style="display:none"> less than 5mm</div class="legend">').appendTo(legendscontainer);
-            $('<div class="legend"><img src="' + key['marker'][1].src + '.png"><img src="' + key['marker'][1].src + '_now.png" style="display:none"> 5mm to less than 25mm</div class="legend">').appendTo(legendscontainer);
-            $('<div class="legend"><img src="' + key['marker'][2].src + '.png"><img src="' + key['marker'][2].src + '_now.png" style="display:none"> 25mm to less than 50mm</div class="legend">').appendTo(legendscontainer);
-            $('<div class="legend"><img src="' + key['marker'][3].src + '.png"><img src="' + key['marker'][3].src + '_now.png" style="display:none"> 50mm to less than 75mm</div class="legend">').appendTo(legendscontainer);
-            $('<div class="legend"><img src="' + key['marker'][4].src + '.png"><img src="' + key['marker'][4].src + '_now.png" style="display:none"> 75mm to less than 100mm</div class="legend">').appendTo(legendscontainer);
-            $('<div class="legend"><img src="' + key['marker'][5].src + '.png"><img src="' + key['marker'][5].src + '_now.png" style="display:none"> 100mm or more</div class="legend">').appendTo(legendscontainer);
-            $('<div class="legend"><img src="images/overlay_now.png" > currently raining</div>').appendTo(legendscontainer);
+                });
         }
 
         function initTicker(ticker) {
@@ -706,7 +684,29 @@ switch ($q) {
     </div>
     <div id='rainfall-canvas'>
     </div>
-    <div id='legends'>
+    <div style="display: none;">
+        <div id='legends' class="custom-ctrl">
+            <button id="togglelegends" class="ui-button ui-widget ui-corner-all ui-button-icon-only"
+                    title="Show/Hide Legends">
+                <span class="ui-icon  ui-icon-arrowthick-2-ne-sw"></span>
+            </button>
+            <h1>Daily Cumulative Rainfall</h1>
+            <div style="display: none">
+                <img src="images/rain-lighter_now.png">
+                <img src="images/rain-light_now.png">
+                <img src="images/rain-moderate_now.png">
+                <img src="images/rain-heavy_now.png">
+                <img src="images/rain-intense_now.png">
+                <img src="images/rain-torrential_now.png">
+            </div>
+            <div class="legend"><img src="images/rain-lighter.png"><span>less than 5mm</span></div>
+            <div class="legend"><img src="images/rain-light.png"><span>5mm to less than 25mm</span></div>
+            <div class="legend"><img src="images/rain-moderate.png"><span>25mm to less than 50mm</span></div>
+            <div class="legend"><img src="images/rain-heavy.png"><span>50mm to less than 75mm</span></div>
+            <div class="legend"><img src="images/rain-intense.png"><span>75mm to less than 100mm</span></div>
+            <div class="legend"><img src="images/rain-torrential.png"><span>100mm or more</span></div>
+            <div class="legend"><img src="images/overlay_now.png"><span>currently raining</span></div>
+        </div>
     </div>
     <div id="ticker-container">
         <div class="ticker" id="ticker--1">
