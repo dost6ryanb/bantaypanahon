@@ -398,6 +398,7 @@
                         hideSatUI();
                         break;
                     case 'tytrack':
+                        if (CURRENT_OVERLAY) CURRENT_OVERLAY.setMap(null);
                         hideTyTrackUI();
                         clearCyTracks();
                         break;
