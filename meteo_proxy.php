@@ -50,8 +50,8 @@ function getdoppler()
 function getdoppleriloilo()
 {
     $host = "https://v2-cloud.meteopilipinas.gov.ph";
-    $url = "$host/api/radar-timeline?theme=lightmap";
-    $data = array('request' => 'rd.iloilo-cappi-reflectivity');
+    $url = "$host/api/radar-timeline?theme=null";
+    $data = array('request' => 'rd.iloilo-cmax-reflectivity');
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
