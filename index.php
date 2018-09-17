@@ -453,15 +453,14 @@
                     var time = v['time_mosaic'],
                         overlay_image = v['output_image_transparent_on_www'],
                         doppler_overlay = new google.maps.GroundOverlay(overlay_image, bounds, {clickable: false});
-
-                    if (time) {
+                     // if (time) {
                         $('<button/>', {id: k, name: k, text: time}).appendTo($dopplertime)
                             .on('click', function () {
                                 swapCurrentOverlay(doppler_overlay);
                                 $dopplertime.children('button').removeClass('active');
                                 $(this).addClass('active');
                             });
-                    } else {
+                     /*} else {
                         $('<button/>', {id: k, name: k, text: "Animated", class: 'active'}).prependTo($dopplertime)
                             .on('click', function() {
                                 swapCurrentOverlay(doppler_overlay);
@@ -470,8 +469,19 @@
                             });
 
                         swapCurrentOverlay(doppler_overlay);
-                     }
+                     }*/
                 });
+                var overlay_image = result["gif"],
+                    doppler_overlay = new google.maps.GroundOverlay(overlay_image, bounds, {clickable: false});
+
+                $('<button/>', {id: "AnimatedDoppler", name: "AnimatedDoppler", text: "Animated", class: 'active'}).prependTo($dopplertime)
+                    .on('click', function() {
+                        swapCurrentOverlay(doppler_overlay);
+                        $dopplertime.children('button').removeClass('active');
+                        $(this).addClass('active');
+                    });
+
+                swapCurrentOverlay(doppler_overlay);
             });
         }
 
@@ -918,6 +928,11 @@
         }
 
         function addMarker(device_id, posx, posy, title, type, marker_url) {
+            var visible = false;
+            if (ACTIVE_UI == 'rainfall') {
+                visible = true;
+            }
+
             var pos = new google.maps.LatLng(posx, posy);
             var image = {
                 url: marker_url,
@@ -930,6 +945,7 @@
                     position: pos,
                     icon: image,
                     map: WV_MAP,
+                    visible: visible,
                     title: title + " (" + device_id + ")"
                 }//,
                 //url: server_name+base_url+'device/latest/'+ data.device[0].dev_id
