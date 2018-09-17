@@ -14,7 +14,7 @@ var CURRENT_OVERLAY;
 $(document).ready(function() {
 	initMap("map");
 	initDoppler();
-	initKml();
+	//initKml();
 });
 
 
@@ -57,25 +57,25 @@ function initDoppler() {
 			    var overlay_image = v['output_image_transparent_on_www'];
                 var doppler_overlay = new google.maps.GroundOverlay(overlay_image, bounds, {clickable: false});
 
-			    if (time) {
                     $('<button/>', {id: k, name: k, text: time}).appendTo(el)
                         .on('click', function() {
                             CURRENT_OVERLAY.setMap(null);
                             doppler_overlay.setMap(METEO_MAP);
                             CURRENT_OVERLAY = doppler_overlay;
                         });
-                } else {
-                    $('<button/>', {id: k, name: k, text: "Animated"}).prependTo(el)
-                        .on('click', function() {
-                            CURRENT_OVERLAY.setMap(null);
-                            doppler_overlay.setMap(METEO_MAP);
-                            CURRENT_OVERLAY = doppler_overlay;
-                        });
-                    doppler_overlay.setMap(METEO_MAP);
-                    CURRENT_OVERLAY = doppler_overlay;
-                }
 
             });
+            var overlay_image = result["gif"],
+                doppler_overlay = new google.maps.GroundOverlay(overlay_image, bounds, {clickable: false});
+
+            $('<button/>', {id: "AnimatedDoppler", text: "Animated"}).prependTo(el)
+                .on('click', function() {
+                    CURRENT_OVERLAY.setMap(null);
+                    doppler_overlay.setMap(METEO_MAP);
+                    CURRENT_OVERLAY = doppler_overlay;
+                });
+            doppler_overlay.setMap(METEO_MAP);
+            CURRENT_OVERLAY = doppler_overlay;
 		}
 	});
 }

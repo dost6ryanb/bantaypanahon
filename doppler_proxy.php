@@ -1,7 +1,7 @@
 <?php
 function getdoppler() {
-    $url = 'https://v2.meteopilipinas.gov.ph/api/radar-timeline?theme=null';
-    $referer = 'https://v2.meteopilipinas.gov.ph/';
+    $url = 'https://v2-cloud.meteopilipinas.gov.ph/api/radar-timeline?theme=null';
+    $referer = 'https://v2-cloud.meteopilipinas.gov.ph/';
     $data = array('request' => 'rd.iloilo-cmax-reflectivity');
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
