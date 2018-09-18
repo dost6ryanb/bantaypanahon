@@ -14,7 +14,7 @@ var CURRENT_OVERLAY;
 $(document).ready(function() {
 	initMap("map");
 	initDoppler();
-	//initKml();
+	initKml();
 });
 
 
