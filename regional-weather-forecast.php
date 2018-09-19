@@ -41,7 +41,7 @@ if (sizeof($tmpStr)>1) {
     $tmpStr = explode("FORECAST:", $tmpStr, 2);
     $synopsisStr = $tmpStr[0];
     $tmpStr = $tmpStr[1];
-    $tmpStr = explode("PAGBANA-BANA: ", $tmpStr, 2);
+    $tmpStr = explode("PAGBANA-BANA:", $tmpStr, 2);
     $forecastStr = $tmpStr[0];
     $data = array("success"=>true, "issuedat"=>$issuedAtStr, "validity"=>$validityStr, "synopsis"=>$synopsisStr, "forecast"=>$forecastStr);
 } else {
