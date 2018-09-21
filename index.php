@@ -277,6 +277,25 @@
                 name: "MapBox",
                 maxZoom: 18
             }));
+
+            var lineSymbol = {
+                path: 'M 0,-1 0,1',
+                strokeOpacity: 1,
+                scale: 4,
+                strokeColor: 'white',
+                strokeWeight: 1
+            };
+
+            var line = new google.maps.Polyline({
+                path: [{lat: 25, lng: 120}, {lat: 25, lng: 135}, {lat: 5, lng: 135}, {lat: 5, lng: 115}, {lat: 15, lng: 115}, {lat: 21, lng: 120}, {lat: 25, lng: 120}],
+                strokeOpacity: 0,
+                icons: [{
+                    icon: lineSymbol,
+                    offset: '0',
+                    repeat: '20px'
+                }],
+                map: WV_MAP
+            });
         }
 
         function initMapLegends(container) {
