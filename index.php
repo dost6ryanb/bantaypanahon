@@ -46,6 +46,8 @@
         var ACTIVE_UI = "rainfall";
         var CURRENT_OVERLAY;
 
+        var LAST_RAIN_DEVID = 0, LAST_WTR_DEVID = 0, LAST_AWS_DEVID = 0;
+
         var lines = [],
             cyclone_marker_array = [],
             hourly_cyclone_marker_array = [],
@@ -98,7 +100,9 @@
 
         function initFetchData(history) {
             setTimeout(function () {
-                for (var i = 0; i < rainfall_devices.length; i++) {
+                var t = getIndexOfDevID(rainfall_devices, LAST_RAIN_DEVID);
+                console.log(t);
+                for (var i = t; i < rainfall_devices.length; i++) {
                     var cur = rainfall_devices[i];
                     if (history) {
                         postGetData(cur['dev_id'], key['sdate'], key['sdate'], 1, onRainfallDataResponseSuccess);
@@ -113,8 +117,8 @@
             }, 200);
 
             setTimeout(function () {
-
-                for (var i = 0; i < waterlevel_devices.length; i++) {
+                var t = getIndexOfDevID(waterlevel_devices, LAST_WTR_DEVID);
+                for (var i = t; i < waterlevel_devices.length; i++) {
                     var cur = waterlevel_devices[i];
                     if (history) {
                         postGetData(cur['dev_id'], key['sdate'], key['sdate'], "144", onWaterlevelDataResponseSuccess);
@@ -127,7 +131,8 @@
             }, 200);
 
             setTimeout(function () {
-                for (var i = 0; i < temperature_devices.length; i++) {
+                var t = getIndexOfDevID(temperature_devices, LAST_AWS_DEVID);
+                for (var i = t; i < temperature_devices.length; i++) {
                     var cur = temperature_devices[i];
                     // if (history) {
                     postGetData(cur.dev_id, key['sdate'], key['sdate'], 96, onTemperatureDataResponseSuccess);
@@ -165,6 +170,7 @@
 
         function onRainfallDataResponseSuccess(data) {
             var device_id = data.device[0].dev_id;
+            LAST_RAIN_DEVID = device_id;
 
             $('#loadedraindevices').text(++key['loadedraindevices']);
 
@@ -402,6 +408,7 @@
              }
 
             function hideCurrentAndShowNewUI(state, newState) {
+                $.xhrPool.abortAll();
                 switch (state) {
                     case 'rainfall':
                         hideRainfallUI();
@@ -426,6 +433,7 @@
 
                 switch (newState) {
                     case 'rainfall':
+                        initFetchData();
                         showRainfallUI();
                         setMarkersVisibility(true);
                         classicMode();
@@ -1186,6 +1194,7 @@
 
         function updateWaterlevelChart(data) {
             var device_id = data.device[0].dev_id;
+            LAST_WTR_DEVID = device_id;
             var div = 'line-chart-marker_' + device_id;
             if (data.count == -1 || // fmon.predict 404
                 data.count == 0 || // sensor no reading according to fmon.predict
@@ -1203,6 +1212,7 @@
             if (data.count == 0 || data.data == null || data.device[0].minmax['max'] == null) return;
             var text = "";
             var device_id = data.device[0].dev_id;
+            LAST_AWS_DEVID = device_id;
             var device = search(temperature_devices, 'dev_id', device_id);
 
             var municipality = device['municipality'];
@@ -1267,6 +1277,15 @@
                 }
             }
             return ret;
+        }
+
+        function getIndexOfDevID(o, dev_id) {
+            if (dev_id == 0) return 0;
+            for (var i = 0; i < o.length; i++) {
+                if(o[i]['dev_id'] == dev_id) {
+                    return i-1;
+                }
+            }
         }
     </script>
 </head>
