@@ -420,7 +420,7 @@
                         hideDopplerUI();
                         break;
                     case 'satellite':
-                        CURRENT_OVERLAY.setMap(null);
+                        if (CURRENT_OVERLAY) CURRENT_OVERLAY.setMap(null);
                         hideSatUI();
                         break;
                     case 'tytrack':
