@@ -88,7 +88,8 @@ function getsat()
 {
     $host = "https://v2-cloud.meteopilipinas.gov.ph";
     $url = "$host/api/satellite?theme=null";
-    $data = array('request' => 'sat.himawari-ir1');
+    //$data = array('request' => 'sat.himawari-ir1');
+    $data = array('request' => 'sat.himawari-ir1-color');
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST,true);
