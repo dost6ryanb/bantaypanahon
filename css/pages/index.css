@@ -48,7 +48,7 @@
 #ticker-container {
     position: relative;
     margin:0;
-    display:box;
+    display:block;
     clear:both;
 }
 
@@ -151,7 +151,6 @@
     border : 2px solid #fff;
     border-radius: 3px;
     box-shadow: 0 2px 6px rgba(0,0,0,.3);
-    cursor: pointer;
     margin-bottom: 22px;
     text-align: center;
 
@@ -162,6 +161,7 @@
     padding-left: 5px;
     padding-right: 5px;
 }
+
 .custom-ctrl button {
     background-color: #f5f5f5;
     border: 2px solid rgba(255, 255, 255, 0);
@@ -171,8 +171,6 @@
 .custom-ctrl button.active {
     background-color: #e1e1e1;
 }
-
-
 
 .btn-group button {
     background-color: #f5f5f5;
@@ -197,6 +195,24 @@
     background-color: #e5e5e5;
 }
 
+.custom-ctrl form {
+    text-align: left;
+    font-size: small;
+}
+.custom-ctrl input, .custom-ctrl label{
+    cursor: pointer;
+}
+
+#toggleLayers {
+    display: block;
+    width: 32px;
+    height: 32px;
+    background-image: url("../../images/layers.png");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-color: #f9f9f9;
+}
 #feeds {
     position: relative;
     background-color: #2693f0;
