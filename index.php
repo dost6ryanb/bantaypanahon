@@ -319,6 +319,16 @@
             choosercontainer = $(document.getElementById(container));
             WV_MAP.controls[google.maps.ControlPosition.TOP_RIGHT].push(document.getElementById(container));
 
+            $("#toggleLayers").on('click', function () {
+                $(this).hide();
+                $("#layersform").show();
+            });
+
+            $("#layersform input").on('click', function () {
+                $("#layersform").hide();
+                $("#toggleLayers").show();
+            });
+
             $("#toggleRainfallMap").on('click', function () {
                 if (ACTIVE_UI == 'rainfall') return; else hideCurrentAndShowNewUI(ACTIVE_UI, 'rainfall');
 
@@ -1336,10 +1346,13 @@
             <div class="legend"><img src="images/overlay_now.png"><span>currently raining</span></div>
         </div>
         <div id='chooser' class="custom-ctrl btn-group">
-            <button id="toggleRainfallMap" class="active">Rainfall</button>
-            <button id="toggleDoppler">Doppler</button>
-            <button id="toggleTyphoonTrack">Typhoon Track</button>
-            <button id="toggleSatellite">Satellite</button>
+            <button id="toggleLayers"></button>
+            <form id="layersform" style="display: none">
+                <input id="toggleRainfallMap" type="radio" name="chooser_c" value="toggleRainfallMap" checked><label for="toggleRainfallMap"><i>Rainfall</i></label> <br>
+                <input id="toggleDoppler" type="radio" name="chooser_c" value="toggleDoppler"><label for="toggleDoppler"><i>Doppler</i></label> <br>
+                <input id="toggleTyphoonTrack" type="radio" name="chooser_c" value="toggleTyphoonTrack"><label for="toggleTyphoonTrack"><i>Typhoon Track</i></label> <br>
+                <input id="toggleSatellite" type="radio" name="chooser_c" value="toggleSatellite"><label for="toggleSatellite"><i>Satellite</i></label> <br>
+            </form>
         </div>
         <div id="dopplertime" class="custom-ctrl btn-group" style="display: none">
 
