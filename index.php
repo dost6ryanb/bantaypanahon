@@ -367,6 +367,10 @@
                 makeActiveClassOnly('#toggleSatellite');
             });
 
+            $("#toggleWeatherForecast").on('click', function () {
+                $("#regionalweather").dialog("open");
+            });
+
 
             function showRainfallUI() {
                 $('#legends').show();
@@ -795,29 +799,6 @@
         }
 
         function initFeedee(div) {
-            var success = false;
-
-            $.ajax({
-                url: 'daily-weather-forecast.php',
-                tryCount: 0,
-                retryLimit: 3,
-            }).done(function (res) {
-                console.log("success");
-
-                $("#feed24hourweather_issuedat").text(res.issuedat);
-                $("#feed24hourweather_synopsis").text(res.synopsis);
-
-            }).fail(function (jqXHR, textStatus) {
-                console.log("fail retrying");
-                this.tryCount++;
-                if (this.tryCount <= this.retryLimit) {
-                    $.ajax(this);
-                    return;
-                }
-                console.log("failed");
-                return;
-            });
-
             $.ajax({
                 url: 'regional-weather-forecast.php',
                 tryCount: 0,
@@ -838,9 +819,12 @@
                     return;
                 }
                 console.log("failed");
-                return;
             });
 
+            $("#regionalweather").dialog({
+                autoOpen:false,
+                width: 600
+            });
 
             /*rss sir rowen old
             parseRSS(pagasa_weather_forecast, function(res){
@@ -878,7 +862,6 @@
             */
 
         }
-
         function drawChartWaterlevel(chartdiv, json) {
             //console.log(json.device[0].dev_id + " " + json.device[0].location);
             var datatable = new google.visualization.DataTable();
@@ -1330,28 +1313,29 @@
             </button>
             <h1>Daily Cumulative Rainfall</h1>
             <div style="display: none">
-                <img src="images/rain-lighter_now.png">
-                <img src="images/rain-light_now.png">
-                <img src="images/rain-moderate_now.png">
-                <img src="images/rain-heavy_now.png">
-                <img src="images/rain-intense_now.png">
-                <img src="images/rain-torrential_now.png">
+                <img src="images/rain-lighter_now.png"/>
+                <img src="images/rain-light_now.png"/>
+                <img src="images/rain-moderate_now.png"/>
+                <img src="images/rain-heavy_now.png"/>
+                <img src="images/rain-intense_now.png"/>
+                <img src="images/rain-torrential_now.png"/>
             </div>
-            <div class="legend"><img src="images/rain-lighter.png"><span>less than 5mm</span></div>
-            <div class="legend"><img src="images/rain-light.png"><span>5mm to less than 25mm</span></div>
-            <div class="legend"><img src="images/rain-moderate.png"><span>25mm to less than 50mm</span></div>
-            <div class="legend"><img src="images/rain-heavy.png"><span>50mm to less than 75mm</span></div>
-            <div class="legend"><img src="images/rain-intense.png"><span>75mm to less than 100mm</span></div>
-            <div class="legend"><img src="images/rain-torrential.png"><span>100mm or more</span></div>
-            <div class="legend"><img src="images/overlay_now.png"><span>currently raining</span></div>
+            <div class="legend"><img src="images/rain-lighter.png"/><span>less than 5mm</span></div>
+            <div class="legend"><img src="images/rain-light.png"/><span>5mm to less than 25mm</span></div>
+            <div class="legend"><img src="images/rain-moderate.png"/><span>25mm to less than 50mm</span></div>
+            <div class="legend"><img src="images/rain-heavy.png"/><span>50mm to less than 75mm</span></div>
+            <div class="legend"><img src="images/rain-intense.png"/><span>75mm to less than 100mm</span></div>
+            <div class="legend"><img src="images/rain-torrential.png"/><span>100mm or more</span></div>
+            <div class="legend"><img src="images/overlay_now.png"/><span>currently raining</span></div>
         </div>
         <div id='chooser' class="custom-ctrl btn-group">
-            <button id="toggleLayers"></button>
+            <button id="toggleLayers"><img src="images/layers.png"/></button>
             <form id="layersform" style="display: none">
-                <input id="toggleRainfallMap" type="radio" name="chooser_c" value="toggleRainfallMap" checked><label for="toggleRainfallMap"><i>Rainfall</i></label> <br>
-                <input id="toggleDoppler" type="radio" name="chooser_c" value="toggleDoppler"><label for="toggleDoppler"><i>Doppler</i></label> <br>
-                <input id="toggleTyphoonTrack" type="radio" name="chooser_c" value="toggleTyphoonTrack"><label for="toggleTyphoonTrack"><i>Typhoon Track</i></label> <br>
-                <input id="toggleSatellite" type="radio" name="chooser_c" value="toggleSatellite"><label for="toggleSatellite"><i>Satellite</i></label> <br>
+                <input id="toggleRainfallMap" type="radio" name="chooser_c" value="toggleRainfallMap" checked><label for="toggleRainfallMap">Rainfall</label> <br>
+                <input id="toggleDoppler" type="radio" name="chooser_c" value="toggleDoppler"><label for="toggleDoppler">Doppler</label> <br>
+                <input id="toggleTyphoonTrack" type="radio" name="chooser_c" value="toggleTyphoonTrack"><label for="toggleTyphoonTrack">Typhoon Track</label> <br>
+                <input id="toggleSatellite" type="radio" name="chooser_c" value="toggleSatellite"><label for="toggleSatellite">Satellite</label> <br>
+                <ul><li id="toggleWeatherForecast">Weather Forecast</li></ul>
             </form>
         </div>
         <div id="dopplertime" class="custom-ctrl btn-group" style="display: none">
@@ -1371,19 +1355,7 @@
     <div id="charts_div_container">
     </div>
     <div id="feeds">
-        <div id="feed24hourweather" class="feedcontainer effect6">
-            <h1>DAILY WEATHER FORECAST</h1>
-            <span>24-Hours Weather forecast</span>
-            <br/>
-            <h2>Issued at</h2>
-            <span id="feed24hourweather_issuedat">[date time]</span>
-            <h2>Synopsis</h2>
-            <span id="feed24hourweather_synopsis">[synopsis]</span>
-            <h2>More info:</h2>
-            <a href="https://www1.pagasa.dost.gov.ph/index.php/general-weather/daily-weather-forecast" target="_blank">Source:
-                PAGASA</a>
-        </div>
-        <div id="regionalweather" class="feedcontainer effect6">
+         <div id="regionalweather" style="display:none" class="feedcontainer">
             <h1>REGIONAL WEATHER FORECAST</h1>
             <span>Visayas Weather forecast</span>
             <h2>Issued at</h2>

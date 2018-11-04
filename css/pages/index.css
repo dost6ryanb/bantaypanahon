@@ -198,16 +198,22 @@
 .custom-ctrl form {
     text-align: left;
     font-size: small;
+    margin: 0;
 }
-.custom-ctrl input, .custom-ctrl label{
+.custom-ctrl input, .custom-ctrl label, li{
     cursor: pointer;
 }
 
-#toggleLayers {
+.custom-ctrl ul {
+    margin: 0;
+    padding: 0 6px 0 20px;
+}
+#toggleLayers img{
     display: block;
     width: 32px;
+    margin: -2px -4px -2px -4px;
     height: 32px;
-    background-image: url("../../images/layers.png");
+    /*background-image: url("../../images/layers.png");*/
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -227,13 +233,13 @@
     vertical-align: top;
     display: inline-block;
     position: relative;
-    background-color: #0089e9;
+    /*background-color: #0089e9;*/
     /*background-color: #2fa8fc;*/
     padding: 5px 20px 18px;
-    width: 400px;
+    width: 600px;
     /*height: 200px;*/
     overflow: auto;
-    border-radius: 10px;
+    /*border-radius: 10px;*/
 
     font-size: 18px;
     word-spacing: 2px;
@@ -242,6 +248,11 @@
     font-style: normal;
     font-variant: normal;
     text-transform: none;
+    font-family: "Times New Roman", Times, serif;
+}
+
+#regionalweather {
+    background-color: #0089e9;
 }
 
 .feedcontainer h2 {
@@ -255,21 +266,21 @@
 }
 
 .feedcontainer h2 {
-    font-size: x-small;
+    font-size: small;
     font-weight: bold;
     color: #1c1c1c;
 }
 
 .feedcontainer span, .feedcontainer a{
     font-weight: normal;
-    font-size: x-small;
-    color: #fafafa;
-    /*color: #232121;*/
+    font-size: medium;
+    /*color: #fafafa;*/
+    color: #232121;
 }
 
 .feedcontainer a{
     text-decoration: underline;
-    color: white;
+    /*color: white;*/
 }
 
 .feedcontainer p {
