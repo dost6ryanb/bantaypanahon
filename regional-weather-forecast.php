@@ -18,10 +18,14 @@ while (!$success) {
 $xpathParent = '//*[@id="content"]/div/div[2]';
 $scraper->setParentNode($xpathParent);
 
-$xpathSynopsis = '//*[@id="content"]/div/div[2]/p';
+$xpathSynopsis = '//*[@id="content"]/div/div[2]';
 
 $title = $scraper->setNodeTitle($xpathSynopsis)->getTitle();
 
+$html = $scraper->getHtml();
+$p_only = $scraper->strip_tags_content($html, "<p>");
+$text_only = strip_tags($p_only);
+$clean = preg_replace('/\s+/', ' ', $text_only); //remove whitespace from beginning and double spaces
 //dd($title);
 //if title is short or not complete
 if (strlen($title) <= 20) {
