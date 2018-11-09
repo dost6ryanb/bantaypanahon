@@ -16,7 +16,6 @@
     <script type="text/javascript" src='js/jquery.scrollTo.min.js'></script>
     <script type="text/javascript" src='js/jquery.easy-ticker.min.js'></script>
     <script type="text/javascript" src='js/heat-index.js'></script>
-    <script type="text/javascript" src="js/tytrack_pagasa.js"></script>
     <script type="text/javascript"
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4yau_nw40dWy2TwW4OdUq4OJKbFs1EOc&sensor=false"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>

@@ -190,7 +190,6 @@
     display: table;
 }
 
-/* Add a background color on hover */
 .btn-group button:hover {
     background-color: #e5e5e5;
 }
@@ -252,7 +251,7 @@
 }
 
 #regionalweather {
-    background-color: #0089e9;
+    background-color: #57a4ff;
 }
 
 .feedcontainer h2 {
