@@ -16,7 +16,6 @@
     <script type="text/javascript" src='js/jquery.scrollTo.min.js'></script>
     <script type="text/javascript" src='js/jquery.easy-ticker.min.js'></script>
     <script type="text/javascript" src='js/heat-index.js'></script>
-    <script type="text/javascript" src="js/tytrack_pagasa.js"></script>
     <script type="text/javascript"
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4yau_nw40dWy2TwW4OdUq4OJKbFs1EOc&sensor=false"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -562,19 +561,13 @@
         }
 
         function initSatellite() {
-            $.getJSON("meteo_proxy.php", {rq: 'sat-himawari'})
-                .done(function (data) {
-                    var result = data['result'];
-                    var bounds = JSON.parse(result.bounds);
-                    var swBound = new google.maps.LatLng(bounds.s, bounds.w);
-                    var neBound = new google.maps.LatLng(bounds.n, bounds.e);
-                    var imageBounds = new google.maps.LatLngBounds(swBound, neBound);
+            var swBound = new google.maps.LatLng(-1.0593208520000024, 103.99541937000095);
+            var neBound = new google.maps.LatLng(30.014531363000003, 147.02927158600028);
+            var imageBounds = new google.maps.LatLngBounds(swBound, neBound);
 
-                    var satImg = result.animated_image;
-                    var sat_overlay = new google.maps.GroundOverlay(satImg, imageBounds);
-                    swapCurrentOverlay(sat_overlay);
-
-                });
+            var satImg = "http://121.58.193.148/repo/mtsat-colored/24hour/latest-him-colored-hourly.gif";
+            var sat_overlay = new google.maps.GroundOverlay(satImg, imageBounds);
+            swapCurrentOverlay(sat_overlay);
         }
 
         function initTyphoonTrack() {
@@ -825,41 +818,6 @@
                 autoOpen:false,
                 width: 600
             });
-
-            /*rss sir rowen old
-            parseRSS(pagasa_weather_forecast, function(res){
-                var xmlDoc = $.parseXML(res);
-                var $xml = $(xmlDoc);
-                var desc = $xml.find('description');
-                var deschtml = desc.last().html().slice(9, -3);
-                //console.log(deschtml);
-                var descDoc = $.parseHTML(deschtml);
-                var table = $(descDoc).find('tr > td');
-                var longstr = $(descDoc).find('tr > td').eq(0).text();
-                var synopsisstr = $(descDoc).find('tr > td').eq(2).text();
-                var descriptionstr = $(descDoc).find('tr > td').eq(4).text();
-
-
-                var issuedatatstr, validitystr;
-                var tmp = longstr.split('Valid Beginning: ');
-
-                if (tmp.length > 1) {
-                    issuedatatstr = tmp[0].substr(11);
-                    validitystr = tmp[1];
-                }
-
-                console.log(issuedatatstr);
-                console.log(validitystr);
-                console.log(synopsisstr);
-                console.log(descriptionstr);
-
-                $("#rss24hourweather_issuedat").html(issuedatatstr);
-                $("#rss24hourweather_validity").html(validitystr);
-                $("#rss24hourweather_synopsis").html(synopsisstr);
-                $("#rss24hourweather_forecast").html(descriptionstr);
-
-            })
-            */
 
         }
         function drawChartWaterlevel(chartdiv, json) {
