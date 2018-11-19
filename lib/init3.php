@@ -18,7 +18,7 @@ include_once 'lib/devices.class.php';
 	$server_name = $_SERVER['SERVER_NAME'];
 ?>
 <script type="text/javascript" >
-    var DOCUMENT_ROOT = "http://<?php echo $server_name;?>/bantaypanahon/";
+    var DOCUMENT_ROOT = "http://<?php echo $server_name;?>/";
     var SERVER_DATE = '<?php echo date("F d,Y");?>';
     var SERVER_TIME = '<?php echo date("g:i A");?>';
     var SERVER_NAME = '<?php echo $_SERVER['SERVER_NAME'];?>';
