@@ -55,7 +55,7 @@
             forecastCircles_array = [],
             cyclonePath_array = [],
             cyclonePath_LatLng = [],
-            forecastLine_array = []
+            forecastLine_array = [],
             forecastHull_array = [];
 
         google.charts.load('current', {packages: ['corechart']});
