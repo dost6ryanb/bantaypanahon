@@ -1,5 +1,4 @@
-<?php header('Location: index3.php');?>
-<?php include_once 'lib/init.php' ?>
+<?php include_once 'lib/init3.php' ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -27,8 +26,10 @@
             window.location.reload(true);
         }, 1800000); // refresh 30 minutes
         var key = {
-            'sdate': '<?php echo $sdate;?>', 'numraindevices': 0, 'loadedraindevices': 0,
-            'serverdate': '<?php echo date("m/d/Y");?>', 'servertime': '<?php echo date("H:i");?>',
+            'sdate': SDATE, 'edate': EDATE, 'numraindevices': 0, 'loadedraindevices': 0,
+            'serverdate': '<?php echo date("Y-m-d");?>', 'servertime': '<?php echo date("H:i");?>',
+            'startDateTime': '',
+            'endDateTime': '',
             'marker': [
                 {'min': 0.01, 'max': 5, 'name': 'lighter', 'src': 'images/rain-lighter'},
                 {'min': 5, 'max': 25, 'name': 'light', 'src': 'images/rain-light'},
@@ -39,6 +40,9 @@
             ]
 
         };
+
+        key['startDateTime'] = Date.parseExact(key['sdate'] + ' 08:00:00', 'yyyy-MM-dd HH:mm:ss');
+        key['endDateTime'] = Date.parseExact(key['edate'] + ' 07:59:59', 'yyyy-MM-dd HH:mm:ss');
 
         var DOST_CENTER;
         var WV_MAP;
@@ -85,8 +89,8 @@
                 initMap("map-canvas");
                 initControls();
                 initRainfallTable("rainfall-canvas");
-                initTicker('ticker--1');
-                initTicker('ticker--2');
+                //initTicker('ticker--1');
+                //initTicker('ticker--2');
                 initChartDivs('charts_div_container');
                 initFetchData();
                 initFeedee();
@@ -106,10 +110,10 @@
                 for (var i = t; i < rainfall_devices.length; i++) {
                     var cur = rainfall_devices[i];
                     if (history) {
-                        postGetData(cur['dev_id'], key['sdate'], key['sdate'], 1, onRainfallDataResponseSuccess);
+                        postGetData(cur['dev_id'], key['sdate'], key['edate'], 1, onRainfallDataResponseSuccess);
                     } else {
                         if (cur['status'] == null || cur['status'] == '0') {
-                            postGetData(cur['dev_id'], key['sdate'], "", 1, onRainfallDataResponseSuccess);
+                            postGetData(cur['dev_id'], key['sdate'], key['edate'], 1, onRainfallDataResponseSuccess);
                         } // else SKIP
                     }
 
@@ -122,15 +126,15 @@
                 for (var i = t; i < waterlevel_devices.length; i++) {
                     var cur = waterlevel_devices[i];
                     if (history) {
-                        postGetData(cur['dev_id'], key['sdate'], key['sdate'], "144", onWaterlevelDataResponseSuccess);
+                        postGetData(cur['dev_id'], key['sdate'], key['edate'], "144", onWaterlevelDataResponseSuccess);
                     } else {
                         if (cur['status'] == null || cur['status'] == '0') {
-                            postGetData(cur['dev_id'], key['sdate'], "", "", onWaterlevelDataResponseSuccess);
+                            postGetData(cur['dev_id'], key['sdate'],  key['edate'], "", onWaterlevelDataResponseSuccess);
                         }
                     }
                 }
             }, 200);
-
+            /*
             setTimeout(function () {
                 var t = getIndexOfDevID(temperature_devices, LAST_AWS_DEVID);
                 for (var i = t; i < temperature_devices.length; i++) {
@@ -145,16 +149,15 @@
                 }
 
             }, 200);
+            */
         }
 
         function postGetData(dev_id, sdate, edate, limit, successcallback) {
             $.ajax({
-                url: DOCUMENT_ROOT + 'data.php',
-                //url:'http://localhost/dost6arc/api/archive',
+                url: DOCUMENT_ROOT + 'data3.php',
                 type: "POST",
                 data: {
                     start: 0,
-                    limit: limit,
                     sdate: sdate,
                     edate: edate,
                     pattern: dev_id,
@@ -170,39 +173,43 @@
         }
 
         function onRainfallDataResponseSuccess(data) {
-            var device_id = data.device[0].dev_id;
+            var device_id = data[0].station_id;
             LAST_RAIN_DEVID = device_id;
-
             $('#loadedraindevices').text(++key['loadedraindevices']);
+            var newdata = $.grep(data.Data, function(n, i) {
+               thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+               result = thisdate.between(key['startDateTime'], key['endDateTime']);
+               //if (result) console.log(thisdate.toString() + " - " + result);
+                return result;
+            });
 
-            if (data.count == -1) {// cannot reach predict
-                //TODO either add retry or initiate retry;
-            } else if (data.count == 0 ||// sensor no reading according to fmon.predict
-                data.data.length == 0 || // predict reports that it has reading but actually doesnt have
-                data.data[0].rain_cumulative == null || data.data[0].rain_cumulative == '' // errouneous readings
-            ) {
+            data.Data = newdata;
+            //console.log(data);
+
+            if (data.Data.length == 0) {
                 updateRainfallTable(device_id, '[NO DATA]', '', '', 'nodata');
             } else {
+                var last = data.Data.length - 1;
                 var device = search(rainfall_devices, 'dev_id', device_id);
                 //var timeread = data.data[0].dateTimeRead.substring(10).substring(0, 6);
-                var devicedtr = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+                var devicedtr = Date.parseExact(data.Data[last]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
                 //<#-- ASTI BSWM_Lufft not ISO STANDARD dateTimeRead FIX -_-
                 if (!devicedtr) {
                     var datefixed = data.data[0].dateTimeRead.substring(0, 19);
 //				console.log(datefixed);
                     devicedtr = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
                 }//--#>
-                var serverdtr = Date.parseExact(key['serverdate'] + ' ' + key['servertime'] + ':00', 'MM/dd/yyyy HH:mm:ss');
+                var serverdtr = Date.parseExact(key['serverdate'] + ' ' + key['servertime'] + ':00', 'yyyy-MM-dd HH:mm:ss');
                 var hour12time = devicedtr.toString("h:mm tt");
 
+                var rc = getRainCumulative(data.Data);
+                var rv = parseFloat(data.Data[last]['Rainfall Amount']).toFixed(2);
                 if (key['sdate'] == key['serverdate'] && devicedtr.add({minutes: 15}).compareTo(serverdtr) == -1) { //late
-                    updateRainfallTable(device_id, hour12time, data.data[0].rain_value, data.data[0].rain_cumulative, 'latedata');
+                    updateRainfallTable(device_id, hour12time, rv, rc, 'latedata');
                 } else {
-                    updateRainfallTable(device_id, hour12time, data.data[0].rain_value, data.data[0].rain_cumulative, 'dataok');
+                    updateRainfallTable(device_id, hour12time, rv, rc, 'dataok');
                 }
 
-                var rc = parseFloat(data.data[0].rain_cumulative);
-                var rv = parseFloat(data.data[0].rain_value);
                 var marker_url;
                 for (var i = 0; i < key['marker'].length; i++) {
                     limit = key['marker'][i];
@@ -213,7 +220,7 @@
                             marker_url = limit['src'] + '.png';
                         }
                         addMarker(device['dev_id'], device['posx'], device['posy'], device['municipality'] + ' - ' + device['location'], device['type'], marker_url);
-                        var text = "[Cumulative Rainfall] " + device['municipality'] + ' - ' + device['location'] + ' : ' + data.data[0].rain_cumulative + ' mm';
+                        var text = "[Cumulative Rainfall] " + device['municipality'] + ' - ' + device['location'] + ' : ' + rc + ' mm';
                         addTicker(text, 'ticker--1__list');
 
                         break;
@@ -222,13 +229,22 @@
             }
         }
 
+        function getRainCumulative(data) {
+            var total = 0;
+            $.each(data,function() {
+                var rn = parseFloat(this['Rainfall Amount']);
+                total += rn;
+            });
+            return total.toFixed(2);
+        }
+
         function onRainfallDataResponseFail(dev_id) {
             var retryhtml = '<a href=javascript:retryFetchRain(' + dev_id + ')>Retry</a>';
             updateRainfallTable(dev_id, retryhtml, null, null);
         }
 
         function retryFetchRain(dev_id) {
-            postGetData(dev_id, key['sdate'], key['sdate'], 1, onRainfallDataResponseSuccess);
+            postGetData(dev_id, key['sdate'], key['edate'], 1, onRainfallDataResponseSuccess);
             updateRainfallTable(dev_id, '', '', '');
         }
 
@@ -724,7 +740,15 @@
             $('#dtpicker2').datepicker({
                 onSelect: function (data) {
                     sdate.find('a').text(data);
-                    key['sdate'] = data;
+                    newsdate = Date.parseExact(data, 'MM/dd/yyyy');
+                    newedate= Date.parseExact(data, 'MM/dd/yyyy');
+                    newedate = newedate.addDays(1);
+                    key['sdate'] = newsdate.toString('yyyy-MM-dd');
+                    key['edate'] = newedate.toString('yyyy-MM-dd');
+                    startDateTime = Date.parseExact(key['sdate'] + ' 08:00:00', 'yyyy-MM-dd HH:mm:ss');
+                    endDateTime = Date.parseExact(key['edate'] + ' 07:59:59', 'yyyy-MM-dd HH:mm:ss');
+                    key['startDateTime'] = startDateTime;
+                    key['endDateTime'] = endDateTime;
                     key['numraindevices'] = 0;
                     key['loadedraindevices'] = 0;
                     $.xhrPool.abortAll();
@@ -732,10 +756,12 @@
                     clearRainfallTable();
                     clearAllTicker('ticker1list');
                     clearAllTicker('ticker2list');
-                    LAST_WTR_DEVID = 0;
-                    LAST_AWS_DEVID = 0;
+                    console.log(key);
                     LAST_RAIN_DEVID = 0;
+                    LAST_AWS_DEVID = 0;
+                    LAST_WTR_DEVID = 0;
                     initFetchData(true);
+
                 }/*,
                  altField: '#datepicker_start',
                  altFormat : 'mm/dd/yy',
@@ -826,27 +852,35 @@
 
         }
         function drawChartWaterlevel(chartdiv, json) {
-            //console.log(json.device[0].dev_id + " " + json.device[0].location);
+            var newdata = $.grep(json.Data, function(n, i) {
+                thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+                result = thisdate.between(key['startDateTime'], key['endDateTime']);
+                //if (result) console.log(thisdate.toString() + " - " + result);
+                return result;
+            });
+            json.Data = newdata;
+
+            var last = json.Data.length - 1;
             var datatable = new google.visualization.DataTable();
             datatable.addColumn('datetime', 'DateTimeRead');
             datatable.addColumn('number', 'Waterlevel'); //add column from index i
 
-            for (var j = 0; j < json.data.length; j++) {
+            for (var j = 0; j < json.Data.length; j++) {
                 var row = Array(2);
-                row[0] = Date.parseExact(json.data[j].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-
-                if (json.data[j].waterlevel != null) {
+                row[0] = Date.parseExact(json.Data[j]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+                waterlevel = json.Data[j]['Waterlevel'];
+                if (waterlevel != null) {
                     row[1] = {
-                        v: parseFloat(json.data[j].waterlevel / 100),
-                        f: (json.data[j].waterlevel / 100) + ' m'
+                        v: parseFloat(waterlevel),
+                        f: waterlevel + ' m'
                     };
                 }
                 datatable.addRow(row);
                 //console.log(json.data[j].waterlevel + " " + typeof json.data[j].waterlevel);
             }
 
-            var d = Date.parseExact(json.data[json.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-            var d2 = Date.parseExact(json.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+            var d = Date.parseExact(json.Data[0]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+            var d2 = Date.parseExact(json.Data[last]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
 
             //var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); //from last data
             var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); // from 8:00 AM
@@ -856,7 +890,7 @@
                 title: title_enddatetime,
 
                 hAxis: {
-                    title: 'Waterlevel: ' + (json.data[0].waterlevel / 100) + ' m',
+                    title: 'Waterlevel: ' + json.Data[0]['Waterlevel'] + ' m',
                     format: 'LLL d h:mm:ss a',
                     viewWindow: {min: d, max: d2},
                     gridlines: {color: 'none'},
@@ -1151,19 +1185,14 @@
 
 
         function updateWaterlevelChart(data) {
-            var device_id = data.device[0].dev_id;
+            var device_id = data[0]['station_id'];
             LAST_WTR_DEVID = device_id;
             var div = 'line-chart-marker_' + device_id;
-            if (data.count == -1 || // fmon.predict 404
-                data.count == 0 || // sensor no reading according to fmon.predict
-                data.data.length == 0 /*|| // predict reports that it has reading but actually doesnt have
-             data.data[0].waterlevel == null || data.data[0].waterlevel == '' // errouneous readings*/
-            ) {
+            if (data.Data.length == 0) {
                 $(document.getElementById(div)).css({'background': 'url(images/nodata.png)'});
             } else {
                 drawChartWaterlevel(div, data);
             }
-
         }
 
         function updateTemperatureTicker(data) {
@@ -1346,5 +1375,5 @@
     var waterlevel_devices = <?php echo json_encode(Devices::GetDevicesByParam('Waterlevel'));?>;
     var temperature_devices = <?php echo json_encode(Devices::GetDevicesByParam('Temperature'));?>;
 </script>
-<?php include_once("analyticstracking.php") ?>
+<?php //include_once("analyticstracking.php") ?>
 </html>
