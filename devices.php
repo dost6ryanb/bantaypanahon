@@ -1,4 +1,4 @@
-<?php include_once 'lib/init.php' ?>
+<?php include_once 'lib/init3.php' ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -35,7 +35,13 @@
         }
 
         var CURRENT_MODE = MAP_MODES.VIEW_DATA;
-        var SDATE = '<?php echo $sdate;?>';
+
+        var app = {
+            sdate: SDATE,
+            edate: EDATE,
+            startDateTime: '',
+            endDateTime: ''
+        };
 
         var devices_map;
         var devices_map_markers = [];
@@ -62,8 +68,8 @@
             }
         });
 
-        var DataLoader = (function (d, s, fnSuccess, fnFail, fnBeforeSend) {
-            var daurl = DOCUMENT_ROOT + 'data.php';
+        var DataLoader = (function (d, s, e, fnSuccess, fnFail, fnBeforeSend) {
+            var daurl = DOCUMENT_ROOT + 'data3.php';
 
             $.ajax({
                 url: daurl,
@@ -73,7 +79,7 @@
                     start: 0,
                     limit: '',
                     sdate: s,
-                    edate: s,
+                    edate: e,
                     pattern: d
                 },
                 dataType: 'json'
@@ -131,28 +137,21 @@
                 c.attr("class", "dialog--table");
 
                 var datatable = new google.visualization.DataTable();
-                datatable.addColumn('datetime', 'dateTimeRead');
-                datatable.addColumn('datetime', 'dateTimeReceived');
+                datatable.addColumn('datetime', 'DateTimeRead');
+                //datatable.addColumn('datetime', 'dateTimeReceived');
 
                 var columnLength = 2;
 
-                for (var key in data.data[0]) {
-                    if (key != 'dateTimeRead' && key != 'dateTimeReceived') {
+                for (var key in data.Data[0]) {
+                    if (key != 'Datetime Read') {
                         datatable.addColumn('string', key);
                         columnLength++;
                     }
                 }
 
-                for (var j = 0; j < data.data.length; j++) {
-                    var datum = data.data[j];
-                    var dtrd = Date.parseExact(datum.dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-                    //<#-- ASTI BSWM_Lufft not ISO STANDARD dateTimeRead FIX -_-
-                    if (!dtrd) {
-                        var datefixed = datum.dateTimeRead.substring(0, 19);
-//              console.log(datefixed);
-                        dtrd = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
-                    } //--#>
-                    var dtrc = Date.parseExact(datum.dateTimeReceived, 'yyyy-MM-dd HH:mm:ss');
+                for (var j = 0; j < data.Data.length; j++) {
+                    var datum = data.Data[j];
+                    var dtrd = Date.parseExact(datum['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
 
                     var row = [];
 
@@ -160,39 +159,24 @@
                         v: dtrd,
                         f: dtrd.toString('yyyy-MM-dd HH:mm:ss')
                     });
-                    row.push({
-                        v: dtrc,
-                        f: dtrc.toString('yyyy-MM-dd HH:mm:ss')
-                    });
 
                     for (var key2 in datum) {
 
-                        if (key2 != 'dateTimeRead' && key2 != 'dateTimeReceived')
+                        if (key2 != 'Datetime Read')
                             row.push(datum[key2]);
                     }
 
                     datatable.addRow(row);
-
                 }
 
 
                 var maxdate;
                 var mindate;
+                var last = data.Data.length - 1;
 
-                var d = Date.parseExact(data.data[data.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-                if (!d) {
-                    var datefixed = data.data[data.data.length - 1].dateTimeRead.substring(0, 19);
-//            console.log(datefixed);
-                    d = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
-                } //--#>
-                var d2 = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-                if (!d2) {
-                    var datefixed = data.data[0].dateTimeRead.substring(0, 19);
-//            console.log(datefixed);
-                    d2 = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
-                } //--#>
+                var d = Date.parseExact(data.Data[last]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+                var d2 = Date.parseExact(data.Data[0]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
 
-                //var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); //from last data
                 var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); // from 8:00 AM
                 var title_enddatetime = d2.toString('MMMM d yyyy h:mm:ss tt');
 
@@ -267,18 +251,16 @@
                 datatable.addColumn('number', 'Cumulative Rain');
                 datatable.addColumn('number', 'Rain Value');
 
-                for (var j = 0; j < data.data.length; j++) {
-                    var rainValue = parseFloat(data.data[j].rain_value);
-                    var rainCumulative = parseFloat(data.data[j].rain_cumulative);
+
+                var rain_cumulative_tmp = 0.00;
+                for (var j = 0; j < data.Data.length; j++) {
+                    var rainValue = parseFloat(data.Data[j]['Rainfall Amount']);
+                    var rainCumulative = rainValue + rain_cumulative_tmp;
+                    rain_cumulative_tmp = rainCumulative;
 
                     var row = Array(3);
 
-                    row[0] = Date.parseExact(data.data[j].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-                    if (!row[0]) {
-                        var datefixed = data.data[j].dateTimeRead.substring(0, 19);
-//              console.log("trimmed date " + datefixed);
-                        row[0] = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
-                    } //--#>
+                    row[0] = Date.parseExact(data.Data[j]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
                     row[1] = {
                         v: rainCumulative, //cumulative rain
                         f: rainCumulative + ' mm'
@@ -294,27 +276,18 @@
                 var maxdate;
                 var mindate;
 
-                var d = Date.parseExact(data.data[data.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-                if (!d) {
-                    var datefixed = data.data[data.data.length - 1].dateTimeRead.substring(0, 19);
-//            console.log(datefixed);
-                    d = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
-                } //--#>
-                var d2 = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-                if (!d2) {
-                    var datefixed = data.data[0].dateTimeRead.substring(0, 19);
-//            console.log(datefixed);
-                    d2 = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
-                } //--#>
+                var last = data.Data.length - 1;
 
-                //var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); //from last data
+                var d2 = Date.parseExact(data.Data[last]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+                var d = Date.parseExact(data.Data[0]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+
                 var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); // from 8:00 AM
                 var title_enddatetime = d2.toString('MMMM d yyyy h:mm:ss tt');
 
                 var options = {
                     title: 'Rainfall Reading from ' + title_startdatetime + ' to ' + title_enddatetime,
                     hAxis: {
-                        title: 'Rainfall Cumulative: ' + data.data[0].rain_cumulative + " mm",
+                        title: 'Rainfall Cumulative: ' + rain_cumulative_tmp + " mm",
                         viewWindow: {
                             min: d,
                             max: d2
@@ -372,12 +345,13 @@
                 datatable.addColumn('datetime', 'DateTimeRead');
                 datatable.addColumn('number', 'Waterlevel');
 
-                for (var j = 0; j < data.data.length; j++) {
+                for (var j = 0; j < data.Data.length; j++) {
                     var row = Array(2);
 
-                    row[0] = Date.parseExact(data.data[j].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-                    if (data.data[j].waterlevel != null) {
-                        var waterlevel = parseFloat(data.data[j].waterlevel) / 100;
+                    row[0] = Date.parseExact(data.Data[j]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+                    if (data.Data[j]['Waterlevel'] != null) {
+                        var waterlevel = parseFloat(data.Data[j]['Waterlevel']);
+
                         row[1] = {
                             v: waterlevel,
                             f: waterlevel + ' m'
@@ -390,17 +364,18 @@
                 var maxdate;
                 var mindate;
 
-                var d = Date.parseExact(data.data[data.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-                var d2 = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+                var last = data.Data.length - 1;
 
-                //var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); //from last data
+                var d2 = Date.parseExact(data.Data[last]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+                var d = Date.parseExact(data.Data[0]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+
                 var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); // from 8:00 AM
                 var title_enddatetime = d2.toString('MMMM d yyyy h:mm:ss tt');
 
                 var options = {
                     title: 'Waterlevel Reading from ' + title_startdatetime + ' to ' + title_enddatetime,
                     hAxis: {
-                        title: 'Waterlevel: ' + (data.data[0].waterlevel / 100) + ' m',
+                        title: 'Waterlevel: ' + data.Data[last]['Waterlevel'] + ' m',
                         viewWindow: {
                             min: d,
                             max: d2
@@ -448,21 +423,16 @@
                 datatable.addColumn('number', 'Heat Index');
 
 
-                for (var j = 0; j < data.data.length; j++) {
-                    var temp = parseFloat(data.data[j].air_temperature);
-                    var humidity = parseFloat(data.data[j].air_humidity);
+                for (var j = 0; j < data.Data.length; j++) {
+                    var temp = parseFloat(data.Data[j]['Air Temperature']);
+                    var humidity = parseFloat(data.Data[j]['Air Humidity']);
                     var heat_index = Math.round(HI.heatIndex({
                         temperature: temp,
                         humidity: humidity
                     }), 2);
                     var row = Array(3);
 
-                    row[0] = Date.parseExact(data.data[j].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-                    if (!row[0]) {
-                        var datefixed = data.data[j].dateTimeRead.substring(0, 19);
-//              console.log("trimmed date " + datefixed);
-                        row[0] = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
-                    } //--#>
+                    row[0] = Date.parseExact(data.Data[j]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
                     row[1] = {
                         v: temp,
                         f: temp + ' °C'
@@ -478,20 +448,11 @@
                 var maxdate;
                 var mindate;
 
-                var d = Date.parseExact(data.data[data.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-                if (!d) {
-                    var datefixed = data.data[data.data.length - 1].dateTimeRead.substring(0, 19);
-//            console.log(datefixed);
-                    d = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
-                } //--#>
-                var d2 = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-                if (!d2) {
-                    var datefixed = data.data[0].dateTimeRead.substring(0, 19);
-//            console.log(datefixed);
-                    d2 = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
-                } //--#>
+                var last = data.Data.length - 1;
 
-                //var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); //from last data
+                var d2 = Date.parseExact(data.Data[last]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+                var d = Date.parseExact(data.Data[0]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+
                 var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); // from 8:00 AM
                 var title_enddatetime = d2.toString('MMMM d yyyy h:mm:ss tt');
 
@@ -569,10 +530,7 @@
                     currentView = v;
                 },
                 DrawView: function () {
-                    if (data.count == -1 || data.count == 0 || data.data.length == 0) {
-//              console.log(data.count);
-//              console.log(data.data.length);
-
+                    if (data.Data.length < 1) {
                         currentView = DeviceView.VIEWS.NODATA;
                     }
 
@@ -706,6 +664,7 @@
             var date;
 
             $(dtpicker).datepicker({
+                dateFormat: "yy-mm-dd",
                 onSelect: function (data) {
                     date = data;
                     dateChangeHandler(data);
@@ -788,7 +747,7 @@
                         }
                     });
                     startDateOption = DateOption('sdate');
-                    startDateOption.setDate(SDATE);
+                    startDateOption.setDate(app.sdate);
                     startDateOption.onDateChanged(function (d) {
                         that.LoadData();
                     });
@@ -829,23 +788,31 @@
                 },
 
                 LoadData: function () {
-//            console.log(startDateOption.getDate());
                     deviceView.ResetData();
                     chartLinks.triggerSelected();
                     var that = this;
-//            console.log(deviceView.GetData());
-                    dataLoader = DataLoader(device['dev_id'], startDateOption.getDate(),
+
+                    app.sdate = startDateOption.getDate();
+                    app.edate = Date.parseExact(app.sdate, 'yyyy-MM-dd').addDays(1).toString('yyyy-MM-dd');
+                    app.startDateTime = Date.parseExact(app.sdate + ' 08:00:00', 'yyyy-MM-dd HH:mm:ss');
+                    app.endDateTime = Date.parseExact(app.edate + ' 07:59:59', 'yyyy-MM-dd HH:mm:ss');
+                    console.log(app);
+                    dataLoader = DataLoader(device['dev_id'], app.sdate, app.edate,
                         function (data) {
-//                console.log('success');
-//                console.log(data);
+                            var newdata = $.grep(data.Data, function(n, i) {
+                                thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+                                result = thisdate.between( app.startDateTime, app.endDateTime);
+                                 return result;
+                            });
+                            data.Data = newdata;
+                            data.Data.length = newdata.length;
+
                             deviceView.SetData(data);
                             deviceView.DrawView();
                             that.CenterMe();
                         },
                         function () {
-//                console.log('fail');
                             deviceView.OnFail(function () {
-//                  console.log("Retrying");
                                 that.LoadData();
                             });
                         },
