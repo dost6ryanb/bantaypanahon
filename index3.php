@@ -50,6 +50,7 @@
         var WV_BOUNDARIES;
         var ACTIVE_UI = "rainfall";
         var CURRENT_OVERLAY;
+        var HISTORY = false;
 
         var LAST_RAIN_DEVID = 0, LAST_WTR_DEVID = 0, LAST_AWS_DEVID = 0;
 
@@ -104,6 +105,7 @@
         }
 
         function initFetchData(history) {
+            if (history) HISTORY = true;
             setTimeout(function () {
                 var t = getIndexOfDevID(rainfall_devices, LAST_RAIN_DEVID);
                 console.log(t);
@@ -176,14 +178,16 @@
             var device_id = data[0].station_id;
             LAST_RAIN_DEVID = device_id;
             $('#loadedraindevices').text(++key['loadedraindevices']);
+
             var newdata = $.grep(data.Data, function(n, i) {
                thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
                result = thisdate.between(key['startDateTime'], key['endDateTime']);
                //if (result) console.log(thisdate.toString() + " - " + result);
                 return result;
             });
-
+            var len = newdata.length;
             data.Data = newdata;
+            data.Data.length = len;
             //console.log(data);
 
             if (data.Data.length == 0) {
@@ -852,13 +856,16 @@
 
         }
         function drawChartWaterlevel(chartdiv, json) {
-            var newdata = $.grep(json.Data, function(n, i) {
-                thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
-                result = thisdate.between(key['startDateTime'], key['endDateTime']);
-                //if (result) console.log(thisdate.toString() + " - " + result);
-                return result;
-            });
-            json.Data = newdata;
+            if (HISTORY) {
+                var newdata = $.grep(json.Data, function(n, i) {
+                    thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+                    result = thisdate.between(key['startDateTime'], key['endDateTime']);
+                    //if (result) console.log(thisdate.toString() + " - " + result);
+                    return result;
+                });
+                json.Data = newdata;
+                json.Data.length = newdata.length;
+            }
 
             var last = json.Data.length - 1;
             var datatable = new google.visualization.DataTable();

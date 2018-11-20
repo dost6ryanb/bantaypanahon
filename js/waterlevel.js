@@ -1,18 +1,23 @@
 //waterlevel.js
 var app = {
     sdate: SDATE,
-    edate: SDATE,
-    xhrHelper: xhrPoolHelper($)
-}
+    edate: EDATE,
+    startDateTime: '',
+    endDateTime: '',
+    xhrHelper: xhrPoolHelper($),
+    history: false,
+};
+
+app.startDateTime = Date.parseExact(app.sdate + ' 08:00:00', 'yyyy-MM-dd HH:mm:ss');
+app.endDateTime = Date.parseExact(app.edate + ' 07:59:59', 'yyyy-MM-dd HH:mm:ss');
 
 google.charts.load('current', {packages: ['corechart']});
 
 google.charts.setOnLoadCallback(function () {
     $(document).ready(function () {
-        var string_date = moment(SDATE, 'MM/DD/YYYY').format('MMMM DD, YYYY');
+        var string_date = moment(SDATE, 'YYYY-MM-DD').format('MMMM DD, YYYY');
         updateTitle('as of ' + string_date);
         initializeChartDivs('charts_div_container');
-        //initializeDateTimePicker('datetimepicker_container');
         initializeDateTimePickers('date_picker1', 'date_picker2');
         initializeGoButton('go');
         initFetchData();
@@ -98,24 +103,28 @@ function processDateRange(d1, d2) {
     }
 
     if (success) {
-        app.sdate = sdate.format("MM/DD/YYYY");
-        app.edate = edate.format("MM/DD/YYYY");
+        app.sdate = sdate.format("YYYY-MM-DD");
+        edate.add('1', 'days');
+        app.edate = edate.format("YYYY-MM-DD");
+        app.startDateTime = Date.parseExact(app.sdate + ' 08:00:00', 'yyyy-MM-dd HH:mm:ss');
+        app.endDateTime = Date.parseExact(app.edate + ' 07:59:59', 'yyyy-MM-dd HH:mm:ss');
 
         switch (Math.abs(sdate.diff(edate, 'day'))) {
             case 0:
+            case 1:
                 updateChartsDiv('sm');
                 break;
-            case 1:
             case 2:
+            case 3:
                 updateChartsDiv('md');
                 break;
-            case 3:
             case 4:
             case 5:
+            case 6:
                 updateChartsDiv('lg');
                 break;
-            case 6:
             case 7:
+            case 8:
                 updateChartsDiv('xl');
                 break;
             default:
@@ -210,6 +219,7 @@ function updateChartsDiv(sizeclass) {
 }
 
 function initFetchData(history) {
+    if (history) app.history = true;
     setTimeout(function () {
 
         for (var i = 0; i < waterlevel_devices.length; i++) {
@@ -219,7 +229,7 @@ function initFetchData(history) {
                 postGetData(cur['dev_id'], app.sdate, app.edate, "", onWaterlevelDataResponseSuccess);
             } else {
                 if (cur['status'] == null || cur['status'] == '0') {
-                    postGetData(cur['dev_id'], app.sdate, "", 144, onWaterlevelDataResponseSuccess);
+                    postGetData(cur['dev_id'], app.sdate, app.edate, 144, onWaterlevelDataResponseSuccess);
                 }
             }
         }
@@ -229,7 +239,7 @@ function initFetchData(history) {
 
 function postGetData(dev_id, sdate, edate, limit, successcallback) {
     $.ajax({
-        url: DOCUMENT_ROOT + 'data.php',
+        url: DOCUMENT_ROOT + 'data3.php',
         type: "POST",
         data: {
             start: 0,
@@ -249,17 +259,10 @@ function postGetData(dev_id, sdate, edate, limit, successcallback) {
 }
 
 function onWaterlevelDataResponseSuccess(data) {
-    var device_id = data.device[0].dev_id;
+    var device_id = data[0].station_id;
     var div = 'chart_' + device_id;
 
-    if (data.count == -1) { // fmon.predict 404
-
-
-    } else if (data.count == 0 || // sensor no reading according to fmon.predict
-        data.data.length == 0
-    /*|| // predict reports that it has reading but actually doesnt have
-     data.data[0].waterlevel == null || data.data[0].waterlevel=='' // errouneous readings*/
-    ) {
+    if (data.Data.length <= 1) {
         //$(document.getElementById(div)).hide();
         $(document.getElementById(div)).addClass('nodata');
     } else {
@@ -274,6 +277,18 @@ function onRainfallDataResponseFail(dev_id) {
 
 
 function drawChartWaterlevel(chartdiv, json) {
+    if (app.history) {
+        var newdata = $.grep(json.Data, function(n, i) {
+            thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+            result = thisdate.between(app.startDateTime, app.endDateTime);
+            return result;
+        });
+        var len = newdata.length;
+        json.Data = newdata;
+        json.Data.length = len;
+    }
+
+
     var datatable = new google.visualization.DataTable();
     datatable.addColumn('datetime', 'DateTimeRead');
     datatable.addColumn('number', 'Waterlevel'); //add column from index i
@@ -283,13 +298,13 @@ function drawChartWaterlevel(chartdiv, json) {
     datatable.addColumn('number', 'Waterlevel Above Sensor'); //add column from index i
     datatable.addColumn('number', 'Waterlevel Possible Overflow'); //add column from index i
 
-    device = search(waterlevel_devices, "dev_id", json.device[0]['dev_id']);
-    //console.log(device);
+    device = search(waterlevel_devices, "dev_id", json[0].station_id);
 
-    for (var j = 0; j < json.data.length; j++) {
+    console.log(json);
+    for (var j = 0; j < json.Data.length; j++) {
         var row = Array(5);
 
-        row[0] = Date.parseExact(json.data[j].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+        row[0] = Date.parseExact(json.Data[j]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
 
         //if (value > 1) {
         /*row[2] = {
@@ -297,8 +312,8 @@ function drawChartWaterlevel(chartdiv, json) {
          f:formattedvalue
          };*/
         //} else {
-        if (json.data[j].waterlevel != null) {
-            var value = json.data[j].waterlevel / 100;
+        var value = json.Data[j]['Waterlevel'];
+        if (value != null) {
             var formattedvalue = value + ' m';
             row[1] = {
                 v: parseFloat(value),
@@ -306,7 +321,7 @@ function drawChartWaterlevel(chartdiv, json) {
             };
         }
         //}
-        if (j == 0 || j == json.data.length - 1) {
+        if (j == 0 || j == json.Data.length - 1) {
 
             if (device['device_height'] != null) {
                 row[3] = parseFloat(device['device_height']);
@@ -323,21 +338,17 @@ function drawChartWaterlevel(chartdiv, json) {
 
     }
 
+    var last = json.Data.length - 1;
     //var d = Date.parseExact(json.data[json.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-    var d2 = Date.parseExact(json.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+    var d2 = Date.parseExact(json.Data[last]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
 
-    /*console.log(json.data[json.data.length - 1].dateTimeRead + " -- " + json.data[0].dateTimeRead);
-     console.log(d + " -- " + d2);
-     console.log('>>');
-     */
-    //var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); //from last data
-    //var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); // from 8:00 AM
+
     var title_enddatetime = d2.toString('MMMM d, yyyy h:mm:ss tt');
 
     var options = {
         title: title_enddatetime,
         hAxis: {
-            title: 'Waterlevel: ' + (json.data[0].waterlevel / 100) + ' m',
+            title: 'Waterlevel: ' + json.Data[0]['Waterlevel'] + ' m',
             format: 'LLL d, h a',
             gridlines: {
                 color: 'none'

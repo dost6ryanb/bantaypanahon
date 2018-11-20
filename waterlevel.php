@@ -1,4 +1,4 @@
-<?php include_once 'lib/init.php'?>
+<?php include_once 'lib/init3.php'?>
 <!DOCTYPE html>
 <html>
   <head>
