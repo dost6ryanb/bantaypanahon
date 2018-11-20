@@ -1382,5 +1382,5 @@
     var waterlevel_devices = <?php echo json_encode(Devices::GetDevicesByParam('Waterlevel'));?>;
     var temperature_devices = <?php echo json_encode(Devices::GetDevicesByParam('Temperature'));?>;
 </script>
-<?php //include_once("analyticstracking.php") ?>
+<?php include_once("analyticstracking.php") ?>
 </html>
