@@ -20,7 +20,7 @@
         <img id='logo_right' src='images/header_1_right.png'/>
         <div id='menu'>
 		<ul>
-			<li ><a href="#" class='currentPage'>Home</a></li>
+			<li ><a href="index3.php" class='currentPage'>Home</a></li>
 			<li><a href="rainfall.php">Rainfall Monitoring</a></li>
 			<li><a href="waterlevel.php">Waterlevel Monitoring</a></li>
 			<li><a href="waterlevel2.php">Waterlevel Map</a></li>

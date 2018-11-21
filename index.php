@@ -1,4 +1,4 @@
-<?php header('Location: index3.php');?>
+<?php header('Location: index3.php'); die();?>
 <?php include_once 'lib/init.php' ?>
 <!DOCTYPE html>
 <html lang="en">

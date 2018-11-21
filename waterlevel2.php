@@ -1,3 +1,4 @@
+<?php header('Location: maintenance.php'); die();?>
 <?php include_once 'lib/init.php' ?>
 <html>
 
