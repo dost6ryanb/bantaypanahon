@@ -98,15 +98,21 @@ function isCacheExpired($filename, $life = 5) {
     $expirytime = (time() - 60 * $cache_life);
     if ($filetime > $expirytime) { // The cache file is fresh.
         return false;
-    } else { // The cache file is outdated.
+    } else { // The cache file is outdated. or does not exists
         return true;
     }
 }
 
 function putCache($key, $results) {
-   // $json = $results;
+    // $json = $results;
     $fqfname = getCacheFileName($key);
-    file_put_contents($fqfname, $results, LOCK_EX);
+
+    $fp = fopen($fqfname, "w");
+    if (flock($fp, LOCK_EX | LOCK_NB)) {
+        fwrite($fp, $results);
+        flock($fp, LOCK_UN);
+    }
+    fclose($fp);
 }
 
 function getCacheFileName($key) {
