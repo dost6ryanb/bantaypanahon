@@ -4,14 +4,13 @@ $sdate = $_POST['sdate'];
 $edate = $_POST['edate'];
 $type = $_POST['type'];
 
-
 if (!is_array($dev_ids) || count($dev_ids) == 0 ) return;
 if ($sdate == FALSE) $sdate = '';
 if ($edate == FALSE) $edate = $sdate;
 if ($type == FALSE) $type = 0;
 $hash = md5(serialize($dev_ids));
 
-$key = md5("$hash-$type-$sdate-$edate");
+$key = "$hash-$type-$sdate-$edate";
 header('Access-Control-Allow-Origin: *');
 header('Cache-Control: max-age=300, private');
 header('Content-Type: application/json');

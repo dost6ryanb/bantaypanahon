@@ -197,7 +197,8 @@ function initializeChartDivs(div) {
 
         chart_div.html('<div class="'+chart_header_class+'"><p>' + chart_title + '</p></div><div id="chart_' + cur['dev_id'] + '" class="chart"></div>');
 
-        if (cur['status'] != null && cur['status'] != 0) {
+        if (cur['status'] != null && cur['status'] != '0') {
+            chart_div.addClass('disabled');
             chart_div.children('.chart').each(function(id, el) {
                $(el).addClass('disabled');
             });
@@ -290,8 +291,11 @@ function onWaterlevelDataResponseSuccess(data) {
     var div = 'chart_' + device_id;
 
     if (!app.history) {
+        //console.log(chartdiv);
+        console.log($(document.getElementById(div)).hasClass( "disabled" ));
         if ($(document.getElementById(div)).hasClass( "disabled" )) return;
     }
+
 
     if (data.Data.length <= 1) {
         $(document.getElementById(div)).addClass('nodata');
@@ -307,6 +311,8 @@ function onRainfallDataResponseFail(dev_id) {
 
 
 function drawChartWaterlevel(chartdiv, json) {
+    var device = search(waterlevel_devices, "dev_id", json[0].station_id);
+
     if (app.history) {
         var newdata = $.grep(json.Data, function(n, i) {
             thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
@@ -328,9 +334,6 @@ function drawChartWaterlevel(chartdiv, json) {
     datatable.addColumn('number', 'Waterlevel Above Sensor'); //add column from index i
     datatable.addColumn('number', 'Waterlevel Possible Overflow'); //add column from index i
 
-    device = search(waterlevel_devices, "dev_id", json[0].station_id);
-
-    console.log(json);
     for (var j = 0; j < json.Data.length; j++) {
         var row = Array(5);
 
