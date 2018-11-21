@@ -3,13 +3,11 @@ $dev_id = $_POST['pattern'];
 $limit = $_POST['limit'];
 $sdate = $_POST['sdate'];
 $edate = $_POST['edate'];
-$docache = filter_var ($_POST['docache'], FILTER_VALIDATE_BOOLEAN);
 
 if ($dev_id == false) return;
 if ($limit == FALSE) $limit = '';
 if ($sdate == FALSE) $sdate = '';
 if ($edate == FALSE) $edate = '';
-if ($docache == FALSE) $docache = false;
 
 $key = md5("$dev_id-$limit-$sdate-$edate");
 header('Access-Control-Allow-Origin: *');

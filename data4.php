@@ -20,10 +20,9 @@ $cache = getCache($key);
 if ($cache) { //cache available
     if (isCacheExpired($cache)) { // outdated cache
         $response = getBulkData($dev_ids, $sdate, $edate);
-        if (is_array($response) || count($response) > 0 ) {
-            $response_json = json_encode($response);
-            echo $response_json;
-            putCache($key, $response_json);
+        if (!empty($response)) {
+            echo $response;
+            putCache($key, $response);
         } else {
             printCache($cache);
         }
@@ -32,25 +31,26 @@ if ($cache) { //cache available
     }
 } else { //no-cache
     $response = getBulkData($dev_ids, $sdate, $edate);
-    if (is_array($response) || count($response) > 0 ) {
-        $response_json = json_encode($response);
-        echo $response_json;
-        putCache($key, $response_json);
+    if (!empty($response)) {
+        echo $response;
+        putCache($key, $response);
     } else {
         echo '{"dev_ids":[{"dev_id":'.$dev_ids.'}],"count":0}';
     }
 }
 
 function getBulkData($dev_ids, $sdate, $edate) {
-    $response = array();
-    foreach($dev_ids as $dev_id) {
-        $tmp = json_decode(getFromPhilSensorsService($dev_id, $sdate, $edate));
+    $len = count($dev_ids);
+    $response = '[';
+    foreach($dev_ids as $i => $dev_id) {
+        $tmp = getFromPhilSensorsService($dev_id, $sdate, $edate);
         if ($tmp) {
-            $response[] = $tmp;
+            $response .= $tmp;
+            if ($i != $len - 1)  $response .= ', ';
         }
     }
 
-    return $response;
+    return $response . ']' ;
 
 }
 function getFromPhilSensorsService($dev_id, $sdate, $edate) {
