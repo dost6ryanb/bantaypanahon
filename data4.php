@@ -107,8 +107,9 @@ function putCache($key, $results) {
     // $json = $results;
     $fqfname = getCacheFileName($key);
 
-    $fp = fopen($fqfname, "w");
+    $fp = fopen($fqfname, "a");
     if (flock($fp, LOCK_EX | LOCK_NB)) {
+        ftruncate($fp, 0) ; // <-- this will erase the contents such as 'w+'
         fwrite($fp, $results);
         flock($fp, LOCK_UN);
     }
