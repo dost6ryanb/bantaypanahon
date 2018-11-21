@@ -852,7 +852,7 @@
 
                 var div = 'line-chart-marker_' + device['dev_id'];
                 if (device['status'] != null && device['status'] != 0) {
-                    $(document.getElementById(div)).css({'background': 'url(images/disabled.png)'});
+                    $(document.getElementById(div)).css({'background': 'url(images/disabled.png)'}).addClass('disabled');
                 }
             }
         }
@@ -962,6 +962,10 @@
             var dtr = $('tr[data-dev_id=\'' + device_id + '\'] td[data-col=\'dtr\']');
             var rv = $('tr[data-dev_id=\'' + device_id + '\'] td[data-col=\'rv\']');
             var cr = $('tr[data-dev_id=\'' + device_id + '\'] td[data-col=\'cr\']');
+
+            if (!HISTORY) {
+                if (dtr.hasClass( "disabled" )) return;
+            }
 
             if (dateTimeRead != null) dtr.html(dateTimeRead); else dtr.text('');
             if (rainvalue != null) rv.text(rainvalue); else rv.text('');
@@ -1226,6 +1230,9 @@
             var device_id = data[0]['station_id'];
             LAST_WTR_DEVID = device_id;
             var div = 'line-chart-marker_' + device_id;
+            if (!HISTORY) {
+                if ($(document.getElementById(div)).hasClass( "disabled" )) return;
+            }
             if (data.Data.length == 0) {
                 $(document.getElementById(div)).css({'background': 'url(images/nodata.png)'});
             } else {

@@ -289,8 +289,11 @@ function onWaterlevelDataResponseSuccess(data) {
     var device_id = data[0].station_id;
     var div = 'chart_' + device_id;
 
+    if (!app.history) {
+        if ($(document.getElementById(div)).hasClass( "disabled" )) return;
+    }
+
     if (data.Data.length <= 1) {
-        //$(document.getElementById(div)).hide();
         $(document.getElementById(div)).addClass('nodata');
     } else {
         $(document.getElementById(div)).removeClass('nodata disabled');
