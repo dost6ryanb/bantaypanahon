@@ -90,6 +90,7 @@
     </div>
     <script type="text/javascript">
         var waterlevel_devices = <?php echo json_encode(Devices::GetDevicesByParam('Waterlevel'));?>;
+        var waterlevel_device_ids = <?php echo json_encode(Devices::GetDeviceIdsByParam('Waterlevel'));?>;
     </script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script src="vendor/jquery/jquery-1.12.4.min.js"></script>

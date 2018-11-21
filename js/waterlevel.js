@@ -220,7 +220,10 @@ function updateChartsDiv(sizeclass) {
 
 function initFetchData(history) {
     if (history) app.history = true;
-    setTimeout(function () {
+
+    postGetDataBulk(waterlevel_device_ids, app.sdate, app.edate, 'waterlevel', onWaterlevelDataResponseSuccess);
+
+    /*setTimeout(function () {
 
         for (var i = 0; i < waterlevel_devices.length; i++) {
             var cur = waterlevel_devices[i];
@@ -233,7 +236,7 @@ function initFetchData(history) {
                 }
             }
         }
-    }, 200);
+    }, 200);*/
 }
 
 
@@ -256,6 +259,30 @@ function postGetData(dev_id, sdate, edate, limit, successcallback) {
         .fail(function (f, n) {
             onRainfallDataResponseFail(dev_id)
         });
+}
+
+function postGetDataBulk(dev_ids, sdate, edate, type, successcallback) {
+    $.ajax({
+        url: DOCUMENT_ROOT + 'data4.php',
+        type: "POST",
+        data: {
+            dev_ids: dev_ids,
+            sdate: sdate,
+            edate: edate,
+            type: type,
+        },
+        dataType: 'json',
+        tryCount: 0,
+        retry: 20
+    })
+        .done(function(d) {
+            d.forEach(function(e) {
+                successcallback(e);
+            })
+        });
+    /*.fail(function (f, n) {
+        onRainfallDataResponseFail(dev_id)
+    });*/
 }
 
 function onWaterlevelDataResponseSuccess(data) {
