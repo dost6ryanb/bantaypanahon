@@ -245,6 +245,10 @@
                     updateRainfallTable(device_id, hour12time, rv, rc, 'dataok');
                 }
 
+                if (!HISTORY && !(device['status'] == null || device['status'] == '0')) {
+                    return;
+                }
+
                 var marker_url;
                 for (var i = 0; i < key['marker'].length; i++) {
                     limit = key['marker'][i];

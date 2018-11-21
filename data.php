@@ -16,6 +16,9 @@ header('Access-Control-Allow-Origin: *');
 header('Cache-Control: max-age=300, private');
 header('Content-Type: application/json');
 
+echo json_encode(array('error'=>"Service unavailable"));
+die();
+
 $cache = getCache($key);
 
 if ($cache) { //cache available
