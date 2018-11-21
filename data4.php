@@ -24,7 +24,7 @@ if ($cache) { //cache available
         if (is_array($response) || count($response) > 0 ) {
             $response_json = json_encode($response);
             echo $response;
-            putCache($key, $response);
+            putCache($key, $response_json);
         } else {
             printCache($cache);
         }
@@ -51,45 +51,6 @@ function getBulkData($dev_ids, $sdate, $edate) {
     return $response;
 
 }
-
-//@return
-// on success - returns response (http 200)
-// on failure - returns null (http code is not 200)
-function getDataFromPredictService($dev_id, $limit, $sdate, $edate) {
-    $url = 'http://fmon.asti.dost.gov.ph/api/index.php/device/getData/'; //ASTI API
-    $data = array('start' => '0', 'limit' => $limit, 'sDate' => $sdate, 'eDate' => $edate, 'pattern' => $dev_id);
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_PROXY, '192.168.1.200:8888');
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-    $response = curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
-
-    if ($http_code == 200) {
-        return $response;
-    } else {
-        return null;
-    }
-
-}
-
-function getDataFromWeatherAstiService($dev_id, $limit, $sdate, $edate) {
-    $username = 'dostregion06';
-    $password = 'dost.reg06[1117]';
-    $url = 'http://weather.asti.dost.gov.ph/web-api/index.php/api/data/' . $dev_id . '/from/' . $sdate . '/to/' . $edate; //ASTI API
-    //$data = array('start' => '0', 'limit' => $limit, 'sDate' => $sdate, 'eDate' => $edate, 'pattern' => $dev_id);
-    $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_PROXY, 'http://192.168.1.239:8888');
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-    curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
-    //curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-    $response = curl_exec($ch);
-    curl_close($ch);
-    return $response;
-}
-
 function getFromPhilSensorsService($dev_id, $sdate, $edate) {
     $url = 'http://philsensors.asti.dost.gov.ph/php/dataduration.php?stationid=' . $dev_id . '&from=' . $sdate .'&to='. $edate;
     $ch = curl_init($url);
@@ -141,7 +102,7 @@ function isCacheExpired($filename, $life = 5) {
 }
 
 function putCache($key, $results) {
-    //$json = json_encode($results);
+   // $json = $results;
     $fqfname = getCacheFileName($key);
     file_put_contents($fqfname, $results, LOCK_EX);
 }
