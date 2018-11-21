@@ -23,7 +23,7 @@ if ($cache) { //cache available
         $response = getBulkData($dev_ids, $sdate, $edate);
         if (is_array($response) || count($response) > 0 ) {
             $response_json = json_encode($response);
-            echo $response;
+            echo $response_json;
             putCache($key, $response_json);
         } else {
             printCache($cache);
@@ -43,9 +43,12 @@ if ($cache) { //cache available
 }
 
 function getBulkData($dev_ids, $sdate, $edate) {
-    $response = [];
+    $response = array();
     foreach($dev_ids as $dev_id) {
-        $response[] = json_decode(getFromPhilSensorsService($dev_id, $sdate, $edate));
+        $tmp = json_decode(getFromPhilSensorsService($dev_id, $sdate, $edate));
+        if ($tmp) {
+            $response[] = $tmp;
+        }
     }
 
     return $response;
