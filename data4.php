@@ -1,17 +1,17 @@
 <?php
-$dev_id = $_POST['pattern'];
-$limit = $_POST['limit'];
+$dev_ids = $_POST['dev_ids'];
 $sdate = $_POST['sdate'];
 $edate = $_POST['edate'];
-$docache = filter_var ($_POST['docache'], FILTER_VALIDATE_BOOLEAN);
+$type = $_POST['type'];
 
-if ($dev_id == false) return;
-if ($limit == FALSE) $limit = '';
+
+if (!is_array($dev_ids) || count($dev_ids) == 0 ) return;
 if ($sdate == FALSE) $sdate = '';
-if ($edate == FALSE) $edate = '';
-if ($docache == FALSE) $docache = false;
+if ($edate == FALSE) $edate = $sdate;
+if ($type == FALSE) $type = 0;
+$hash = md5(serialize($dev_ids));
 
-$key = md5("$dev_id-$limit-$sdate-$edate");
+$key = md5("$hash-$type-$sdate-$edate");
 header('Access-Control-Allow-Origin: *');
 header('Cache-Control: max-age=300, private');
 header('Content-Type: application/json');
@@ -20,8 +20,9 @@ $cache = getCache($key);
 
 if ($cache) { //cache available
     if (isCacheExpired($cache)) { // outdated cache
-        $response = getDataFromPredictService($dev_id, $limit, $sdate, $edate);
-        if ($response) {
+        $response = getBulkData($dev_ids, $sdate, $edate);
+        if (is_array($response) || count($response) > 0 ) {
+            $response_json = json_encode($response);
             echo $response;
             putCache($key, $response);
         } else {
@@ -31,15 +32,25 @@ if ($cache) { //cache available
         printCache($cache);
     }
 } else { //no-cache
-    $response = getDataFromPredictService($dev_id, $limit, $sdate, $edate);
-    if ($response) {
-        echo $response;
-        putCache($key, $response);
+    $response = getBulkData($dev_ids, $sdate, $edate);
+    if (is_array($response) || count($response) > 0 ) {
+        $response_json = json_encode($response);
+        echo $response_json;
+        putCache($key, $response_json);
     } else {
-        echo '{"device":[{"dev_id":'.$dev_id.'}],"count":-1}';
+        echo '{"dev_ids":[{"dev_id":'.$dev_ids.'}],"count":0}';
     }
 }
 
+function getBulkData($dev_ids, $sdate, $edate) {
+    $response = [];
+    foreach($dev_ids as $dev_id) {
+        $response[] = json_decode(getFromPhilSensorsService($dev_id, $sdate, $edate));
+    }
+
+    return $response;
+
+}
 
 //@return
 // on success - returns response (http 200)
@@ -48,7 +59,7 @@ function getDataFromPredictService($dev_id, $limit, $sdate, $edate) {
     $url = 'http://fmon.asti.dost.gov.ph/api/index.php/device/getData/'; //ASTI API
     $data = array('start' => '0', 'limit' => $limit, 'sDate' => $sdate, 'eDate' => $edate, 'pattern' => $dev_id);
     $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_PROXY, 'http://192.168.1.94:8888');
+    //curl_setopt($ch, CURLOPT_PROXY, '192.168.1.200:8888');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
     $response = curl_exec($ch);
@@ -69,7 +80,7 @@ function getDataFromWeatherAstiService($dev_id, $limit, $sdate, $edate) {
     $url = 'http://weather.asti.dost.gov.ph/web-api/index.php/api/data/' . $dev_id . '/from/' . $sdate . '/to/' . $edate; //ASTI API
     //$data = array('start' => '0', 'limit' => $limit, 'sDate' => $sdate, 'eDate' => $edate, 'pattern' => $dev_id);
     $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_PROXY, 'http://192.168.1.94:8888');
+    //curl_setopt($ch, CURLOPT_PROXY, 'http://192.168.1.239:8888');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
     curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
@@ -77,6 +88,21 @@ function getDataFromWeatherAstiService($dev_id, $limit, $sdate, $edate) {
     $response = curl_exec($ch);
     curl_close($ch);
     return $response;
+}
+
+function getFromPhilSensorsService($dev_id, $sdate, $edate) {
+    $url = 'http://philsensors.asti.dost.gov.ph/php/dataduration.php?stationid=' . $dev_id . '&from=' . $sdate .'&to='. $edate;
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $response = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($http_code == 200) {
+        return $response;
+    } else {
+        return null;
+    }
 }
 
 //@return
@@ -123,4 +149,3 @@ function putCache($key, $results) {
 function getCacheFileName($key) {
     return "cache/$key.json";
 }
-?>

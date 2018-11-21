@@ -106,7 +106,13 @@
 
         function initFetchData(history) {
             if (history) HISTORY = true;
+
+            postGetDataBulk(rainfall_device_ids, key['sdate'], key['edate'], 'rainfall', onRainfallDataResponseSuccess );
+            postGetDataBulk(waterlevel_device_ids, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess);
+
+            /*
             setTimeout(function () {
+
                 var t = getIndexOfDevID(rainfall_devices, LAST_RAIN_DEVID);
                 console.log(t);
                 for (var i = t; i < rainfall_devices.length; i++) {
@@ -136,7 +142,7 @@
                     }
                 }
             }, 200);
-            /*
+
             setTimeout(function () {
                 var t = getIndexOfDevID(temperature_devices, LAST_AWS_DEVID);
                 for (var i = t; i < temperature_devices.length; i++) {
@@ -151,6 +157,7 @@
                 }
 
             }, 200);
+
             */
         }
 
@@ -172,6 +179,30 @@
                 .fail(function (f, n) {
                     onRainfallDataResponseFail(dev_id)
                 });
+        }
+
+        function postGetDataBulk(dev_ids, sdate, edate, type, successcallback) {
+            $.ajax({
+                url: DOCUMENT_ROOT + 'data4.php',
+                type: "POST",
+                data: {
+                    dev_ids: dev_ids,
+                    sdate: sdate,
+                    edate: edate,
+                    type: type,
+                 },
+                dataType: 'json',
+                tryCount: 0,
+                retry: 20
+            })
+                .done(function(d) {
+                    d.forEach(function(e) {
+                        successcallback(e);
+                    })
+                });
+                /*.fail(function (f, n) {
+                    onRainfallDataResponseFail(dev_id)
+                });*/
         }
 
         function onRainfallDataResponseSuccess(data) {
@@ -1381,6 +1412,9 @@
     var rainfall_devices = <?php echo json_encode(Devices::GetDevicesByParam('Rainfall'));?>;
     var waterlevel_devices = <?php echo json_encode(Devices::GetDevicesByParam('Waterlevel'));?>;
     var temperature_devices = <?php echo json_encode(Devices::GetDevicesByParam('Temperature'));?>;
+    var rainfall_device_ids = <?php echo json_encode(Devices::GetDeviceIdsByParam('Rainfall'));?>;
+    var waterlevel_device_ids = <?php echo json_encode(Devices::GetDeviceIdsByParam('Waterlevel'));?>;
+
 </script>
 <?php include_once("analyticstracking.php") ?>
 </html>
