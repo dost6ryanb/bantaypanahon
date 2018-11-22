@@ -20,20 +20,20 @@ if ($cache) { //cache available
     if (isCacheExpired($cache)) { // outdated cache
         $response = getFromPhilSensorsService($dev_id, $sdate, $edate);
         if ($response) {
-            echo $response;
             putCache($key, $response);
+            printCache($key);
         } else {
-            printCache($cache);
+            printCache($key);
         }
     } else {
-        printCache($cache);
+        printCache($key);
     }
 
 } else { //no-cache
     $response = getFromPhilSensorsService($dev_id, $sdate, $edate);
     if ($response) {
-        echo $response;
         putCache($key, $response);
+        printCache($key);
     } else {
         echo '{"device":[{"dev_id":'.$dev_id.'}],"count":-1}';
     }
@@ -107,8 +107,16 @@ function getCacheFqfName($key) {
 
 //@params
 // filename = fully qualified name
-function printCache($filename) {
-    readfile($filename);
+function printCache($key) {
+    $filename = getCacheFileName($key);
+    $fp = fopen($filename, "r");
+    if (flock($fp, LOCK_SH)) {
+        clearstatcache($filename);
+        $content = fread($fp, filesize($filename));
+        flock($fp, LOCK_UN);
+        if ($content !== false) echo $content;
+    }
+    fclose($fp);
 }
 
 //@params
@@ -129,10 +137,17 @@ function isCacheExpired($filename, $life = 5) {
 }
 
 function putCache($key, $results) {
-    //$json = json_encode($results);
     $fqfname = getCacheFileName($key);
-    file_put_contents($fqfname, $results, LOCK_EX);
+    $fp = fopen($fqfname, "c");
+    if (flock($fp, LOCK_EX | LOCK_NB)) {
+        //sleep(10);
+        ftruncate($fp, 0) ; // <-- this will erase the contents such as 'w+'
+        fwrite($fp, $results);
+        flock($fp, LOCK_UN);
+    }
+    fclose($fp);
 }
+
 
 function getCacheFileName($key) {
     return "cache/$key.json";
