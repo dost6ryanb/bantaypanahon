@@ -22,6 +22,7 @@ if ($cache) { //cache available
         $response = getBulkData($dev_ids, $sdate, $edate);
         if (!empty($response)) {
             putCache($key, $response);
+            unset($response);
             printCache($key);
         } else {
             printCache($key);
@@ -86,10 +87,14 @@ function printCache($key) {
     $filename = getCacheFileName($key);
     $fp = fopen($filename, "r");
     if (flock($fp, LOCK_SH)) {
+        //$content = '';
         clearstatcache($filename);
-        $content = fread($fp, filesize($filename));
+        //$ = fread($fp, filesize($filename));
+        while (!feof($fp)) {
+            echo fread($fp, 8192);
+        }
         flock($fp, LOCK_UN);
-        if ($content !== false) echo $content;
+        //if (!empty($content)) echo $content;
     }
     fclose($fp);
 }
