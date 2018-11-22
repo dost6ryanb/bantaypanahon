@@ -15,14 +15,14 @@ header('Access-Control-Allow-Origin: *');
 header('Cache-Control: max-age=300, private');
 header('Content-Type: application/json');
 
-$cache = getCache($key);
+$cache = getCacheFqfname($key);
 
 if ($cache) { //cache available
     if (isCacheExpired($cache)) { // outdated cache
         $response = getBulkData($dev_ids, $sdate, $edate);
         if (!empty($response)) {
-            echo $response;
-            putCache($key, $response);
+            putCache($cache, $response);
+            printCache($cache);
         } else {
             printCache($cache);
         }
@@ -32,8 +32,8 @@ if ($cache) { //cache available
 } else { //no-cache
     $response = getBulkData($dev_ids, $sdate, $edate);
     if (!empty($response)) {
-        echo $response;
-        putCache($key, $response);
+        putCache($cache, $response);
+        printCache($cache);
     } else {
         echo '{"dev_ids":[{"dev_id":'.$dev_ids.'}],"count":0}';
     }
@@ -71,7 +71,7 @@ function getFromPhilSensorsService($dev_id, $sdate, $edate) {
 //@return
 // on success - file is available, returns cache filename
 // on failure - no cache, returns null
-function getCache($key) {
+function getCacheFqfname($key) {
     $fqfname = getCacheFileName($key);
     if (file_exists($fqfname)) {
         return $fqfname;
@@ -83,7 +83,14 @@ function getCache($key) {
 //@params
 // filename = fully qualified name
 function printCache($filename) {
-    readfile($filename);
+    $fp = fopen($filename, "r+");
+    if (flock($fp, LOCK_SH)) {
+        clearstatcache($filename);
+        $content = fread($fp, filesize($filename));
+        flock($fp, LOCK_UN);
+        if ($content !== false) echo $content;
+    }
+    fclose($fp);
 }
 
 //@params
@@ -103,12 +110,10 @@ function isCacheExpired($filename, $life = 5) {
     }
 }
 
-function putCache($key, $results) {
-    // $json = $results;
-    $fqfname = getCacheFileName($key);
-
-    $fp = fopen($fqfname, "a");
+function putCache($fqfname, $results) {
+    $fp = fopen($fqfname, "r+");
     if (flock($fp, LOCK_EX | LOCK_NB)) {
+        //sleep(10);
         ftruncate($fp, 0) ; // <-- this will erase the contents such as 'w+'
         fwrite($fp, $results);
         flock($fp, LOCK_UN);
