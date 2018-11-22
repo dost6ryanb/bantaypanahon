@@ -17,7 +17,7 @@ header('Content-Type: application/json');
 echo json_encode(array('error'=>"Service unavailable"));
 die();
 
-$cache = getCache($key);
+$cache = getCacheFqfname($key);
 
 if ($cache) { //cache available
     if (isCacheExpired($cache)) { // outdated cache
