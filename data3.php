@@ -28,6 +28,7 @@ if ($cache) { //cache available
     } else {
         printCache($cache);
     }
+
 } else { //no-cache
     $response = getFromPhilSensorsService($dev_id, $sdate, $edate);
     if ($response) {
