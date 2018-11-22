@@ -28,6 +28,7 @@ if ($cache) { //cache available
     } else {
         printCache($cache);
     }
+
 } else { //no-cache
     $response = getFromPhilSensorsService($dev_id, $sdate, $edate);
     if ($response) {
@@ -95,7 +96,7 @@ function getFromPhilSensorsService($dev_id, $sdate, $edate) {
 //@return
 // on success - file is available, returns cache filename
 // on failure - no cache, returns null
-function getCache($key) {
+function getCacheFqfName($key) {
     $fqfname = getCacheFileName($key);
     if (file_exists($fqfname)) {
         return $fqfname;
