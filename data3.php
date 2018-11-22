@@ -142,6 +142,7 @@ function putCache($key, $results) {
     if (flock($fp, LOCK_EX | LOCK_NB)) {
         //sleep(10);
         ftruncate($fp, 0) ; // <-- this will erase the contents such as 'w+'
+        rewind($fp);
         fwrite($fp, $results);
         flock($fp, LOCK_UN);
     }

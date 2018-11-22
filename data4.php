@@ -120,8 +120,9 @@ function putCache($key, $results) {
     $fqfname = getCacheFileName($key);
     $fp = fopen($fqfname, "c");
     if (flock($fp, LOCK_EX | LOCK_NB)) {
-        //sleep(10);
+        sleep(5);
         ftruncate($fp, 0) ; // <-- this will erase the contents such as 'w+'
+        rewind($fp);
         fwrite($fp, $results);
         flock($fp, LOCK_UN);
     }
