@@ -21,19 +21,19 @@ if ($cache) { //cache available
     if (isCacheExpired($cache)) { // outdated cache
         $response = getBulkData($dev_ids, $sdate, $edate);
         if (!empty($response)) {
-            putCache($cache, $response);
-            printCache($cache);
+            putCache($key, $response);
+            printCache($key);
         } else {
-            printCache($cache);
+            printCache($key);
         }
     } else {
-        printCache($cache);
+        printCache($key);
     }
 } else { //no-cache
     $response = getBulkData($dev_ids, $sdate, $edate);
     if (!empty($response)) {
-        putCache($cache, $response);
-        printCache($cache);
+        putCache($key, $response);
+        printCache($key);
     } else {
         echo '{"dev_ids":[{"dev_id":'.$dev_ids.'}],"count":0}';
     }
@@ -82,8 +82,9 @@ function getCacheFqfname($key) {
 
 //@params
 // filename = fully qualified name
-function printCache($filename) {
-    $fp = fopen($filename, "r+");
+function printCache($key) {
+    $filename = getCacheFileName($key);
+    $fp = fopen($filename, "r");
     if (flock($fp, LOCK_SH)) {
         clearstatcache($filename);
         $content = fread($fp, filesize($filename));
@@ -110,8 +111,9 @@ function isCacheExpired($filename, $life = 5) {
     }
 }
 
-function putCache($fqfname, $results) {
-    $fp = fopen($fqfname, "r+");
+function putCache($key, $results) {
+    $fqfname = getCacheFileName($key);
+    $fp = fopen($fqfname, "c");
     if (flock($fp, LOCK_EX | LOCK_NB)) {
         //sleep(10);
         ftruncate($fp, 0) ; // <-- this will erase the contents such as 'w+'
