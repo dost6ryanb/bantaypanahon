@@ -43,13 +43,11 @@ if ($cache) { //cache available
         printCache($key);
     }
 } else { //no-cache
-    $response = $cb();
-    if (!empty($response)) {
-        putCache($key, $response);
-        printCache($key);
-    } else {
-        echo "{'error':'Cannot reach api'}";
+    if (createLock($key, $lockCreated, $lockFile)) { // create lock to update cache
+        putCache($key, $cb);
+        releaseLock($lockFile, $lockCreated);
     }
+    printCache($key);
 }
 
 
@@ -172,29 +170,46 @@ function renewCache($key, $cb) {
 
         flock($fp, LOCK_UN);
 
-    }/* else {
-        if ($wb) {
-            echo "File locked...";
-        } else {
-            echo 'Cannot Open file';
-        }
-    }*/
+    }
+
     fclose($fp);
 
     return $success;
 }
 
-function putCache($key, $results) {
+function putCache($key, $cb) {
     $fqfname = getCacheFileName($key);
-    $fp = fopen($fqfname, "c");
-    if (flock($fp, LOCK_EX | LOCK_NB)) {
-        ftruncate($fp, 0) ; // <-- this will erase the contents such as 'w+'
-        rewind($fp);
-        fwrite($fp, $results);
+    $fp = false;
+
+    $success = false;
+    do {
+        $fp = fopen($fqfname, "c");
+        if ($fp) {
+            $success = true;
+        } else { //someone is updating the cache
+            usleep(rand(300, 1000));
+        }
+    } while (!$success);
+
+    if ($fp && flock($fp, LOCK_EX)) {
+        do {
+            $response = $cb();
+            if ($response != null) {
+                ftruncate($fp, 0); // <-- this will erase the contents such as 'w+'
+                rewind($fp);
+                fwrite($fp, $response);
+                $success = true;
+            } else {
+                usleep ( rand ( 300, 1000));
+            }
+        } while (!$success);
+
         flock($fp, LOCK_UN);
     }
 
     fclose($fp);
+
+    return $success;
 }
 
 function getCacheFileName($key) {
@@ -221,6 +236,7 @@ function releaseLock($dir, &$status) {
 }
 function isExistLock($key) {
     $lockdir = getLockname($key);
+    clearstatcache();
     return is_dir($lockdir);
 }
 
