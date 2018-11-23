@@ -121,17 +121,17 @@ function getCacheFqfName($key) {
 //@params
 // filename = fully qualified name
 function printCache($key) {
+    $filename = getCacheFileName($key);
+    $fp = false;
     $success = false;
     do {
-        if (!isExistLock($key)) { //check lock
+        $fp = fopen($filename, "r");
+        if ($fp) {
             $success = true;
         } else { //someone is updating the cache
             usleep ( rand ( 300, 1000));
         }
     } while (!$success);
-
-    $filename = getCacheFileName($key);
-    $fp = fopen($filename, "r");
 
     while (!feof($fp)) {
         echo fread($fp, 8192);

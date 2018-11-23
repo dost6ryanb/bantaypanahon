@@ -33,11 +33,12 @@ $shutdown = function() use(&$lockCreated, &$lockFile) {
 register_shutdown_function($shutdown);
 
 if ($cache) { //cache available
-    //if (true) { //debug
+    //if (false) { //debug
     if (!isCacheExpired($cache)) { //cache still fresh
         printCache($key);
     } else { //cache outdated
         if (createLock($key, $lockCreated, $lockFile)) { // create lock to update cache
+            sleep(10);
             renewCache($key, $cb); //cache renewed
             releaseLock($lockFile, $lockCreated);
         }
@@ -98,17 +99,17 @@ function getCacheFqfname($key) {
 //@params
 // filename = fully qualified name
 function printCache($key) {
+    $filename = getCacheFileName($key);
+    $fp = false;
     $success = false;
     do {
-        if (!isExistLock($key)) { //check lock
+        $fp = fopen($filename, "r");
+        if ($fp) {
             $success = true;
         } else { //someone is updating the cache
             usleep ( rand ( 300, 1000));
         }
     } while (!$success);
-
-    $filename = getCacheFileName($key);
-    $fp = fopen($filename, "r");
 
     while (!feof($fp)) {
         echo fread($fp, 8192);
