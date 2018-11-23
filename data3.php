@@ -31,8 +31,8 @@ $shutdown = function() use(&$lockCreated, &$lockFile) {
 register_shutdown_function($shutdown);
 
 if ($cache) { //cache available
-    if (true) { //cache still fresh
-        //if (!isCacheExpired($cache)) { //cache still fresh
+    //if (true) { //cache still fresh
+    if (!isCacheExpired($cache)) { //cache still fresh
         printCache($key);
     } else { //cache outdated
         if (createLock($key, $lockCreated, $lockFile)) { // create lock to update cache
