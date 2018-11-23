@@ -38,7 +38,7 @@ if ($cache) { //cache available
         printCache($key);
     } else { //cache outdated
         if (createLock($key, $lockCreated, $lockFile)) { // create lock to update cache
-            sleep(10);
+            //sleep(10);
             renewCache($key, $cb); //cache renewed
             releaseLock($lockFile, $lockCreated);
         }
