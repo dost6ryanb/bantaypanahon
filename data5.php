@@ -11,7 +11,7 @@ if ($type == FALSE) $type = 0;
 
 header('Access-Control-Allow-Origin: *');
 header('Cache-Control: max-age=300, private');
-//header('Content-Type: application/json');
+header('Content-Type: application/json');
 
 
 $responseCount = 0;
@@ -48,12 +48,8 @@ foreach ($dev_ids as $i => $dev_id) {
         if ($i != $len - 1) $response .= ', ';
     }
 }
-
 $response .= ']';
-
 echo $response;
-die();
-
 //trigger_error("Oops!", E_USER_ERROR);
 
 function shutdown($lockDir)
@@ -62,20 +58,6 @@ function shutdown($lockDir)
 }
 
 set_time_limit(60);
-
-if ($cache) { //cache available
-//if (false) { //debug
-    if (!isCacheExpired($cache)) { //cache still fresh
-        printCache($key, $lockDir);
-    } else { //cache outdated
-        renewCache($key, $cb, $lockDir);
-        //print cache if everthing was good
-        printCache($key, $lockDir);
-    }
-} else { //no-cache
-    renewCache($key, $cb, $lockDir);
-    printCache($key, $lockDir);
-}
 
 function getBulkData($dev_ids, $sdate, $edate)
 {
