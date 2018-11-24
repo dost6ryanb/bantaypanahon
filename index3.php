@@ -17,6 +17,7 @@
     <script type="text/javascript" src='js/jquery.easy-ticker.min.js'></script>
     <script type="text/javascript" src='js/heat-index.js'></script>
     <script type="text/javascript" src="js/tytrack_pagasa.js"></script>
+    <script type="text/javascript" src="vendor/gasparesganga-jquery-loading-overlay-2.1.6/loadingoverlay.min.js"></script>
     <script type="text/javascript"
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4yau_nw40dWy2TwW4OdUq4OJKbFs1EOc&sensor=false"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -104,6 +105,12 @@
 
         google.charts.setOnLoadCallback(function () {
             $(document).ready(function () {
+                $(document).ajaxStart(function(){
+                    $.LoadingOverlay("show");
+                });
+                $(document).ajaxStop(function(){
+                    $.LoadingOverlay("hide");
+                });
                 initMap("map-canvas");
                 initControls();
                 initRainfallTable("rainfall-canvas");
@@ -908,18 +915,7 @@
 
         }
         function drawChartWaterlevel(chartdiv, json) {
-            if (HISTORY) {
-                var newdata = $.grep(json.Data, function(n, i) {
-                    thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
-                    result = thisdate.between(key['startDateTime'], key['endDateTime']);
-                    //if (result) console.log(thisdate.toString() + " - " + result);
-                    return result;
-                });
-                json.Data = newdata;
-                json.Data.length = newdata.length;
-            }
-
-            var last = json.Data.length - 1;
+             var last = json.Data.length - 1;
             var datatable = new google.visualization.DataTable();
             datatable.addColumn('datetime', 'DateTimeRead');
             datatable.addColumn('number', 'Waterlevel'); //add column from index i
@@ -1254,6 +1250,17 @@
             if (!HISTORY) {
                 if ($(document.getElementById(div)).hasClass( "disabled" )) return;
             }
+            if (HISTORY) {
+                var newdata = $.grep(data.Data, function(n, i) {
+                    thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+                    result = thisdate.between(key['startDateTime'], key['endDateTime']);
+                    //if (result) console.log(thisdate.toString() + " - " + result);
+                    return result;
+                });
+                data.Data = newdata;
+                data.Data.length = newdata.length;
+            }
+
             if (data.Data.length == 0) {
                 $(document.getElementById(div)).css({'background': 'url(images/nodata.png)'});
             } else {

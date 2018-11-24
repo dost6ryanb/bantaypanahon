@@ -15,6 +15,12 @@ google.charts.load('current', {packages: ['corechart']});
 
 google.charts.setOnLoadCallback(function () {
     $(document).ready(function () {
+        $(document).ajaxStart(function(){
+            $.LoadingOverlay("show");
+        });
+        $(document).ajaxStop(function(){
+            $.LoadingOverlay("hide");
+        });
         var string_date = moment(SDATE, 'YYYY-MM-DD').format('MMMM DD, YYYY');
         updateTitle('as of ' + string_date);
         initializeChartDivs('charts_div_container');
@@ -30,7 +36,7 @@ function updateTitle(text) {
 }
 
 function initializeDateTimePickers(e1, e2) {
-    var maxDate = moment(SDATE, 'MM/DD/YYYY').toDate();
+    var maxDate = moment(SDATE, 'YYYY-MM-DD').toDate();
     var from = $(document.getElementById(e1))
             .datepicker({
                 defaultDate: "+1w",
@@ -292,8 +298,19 @@ function onWaterlevelDataResponseSuccess(data) {
 
     if (!app.history) {
         //console.log(chartdiv);
-        console.log($(document.getElementById(div)).hasClass( "disabled" ));
+       // console.log($(document.getElementById(div)).hasClass( "disabled" ));
         if ($(document.getElementById(div)).hasClass( "disabled" )) return;
+    }
+
+    if (app.history) {
+        var newdata = $.grep(data.Data, function(n, i) {
+            thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+            result = thisdate.between(app.startDateTime, app.endDateTime);
+            return result;
+        });
+        var len = newdata.length;
+        data.Data = newdata;
+        data.Data.length = len;
     }
 
 
@@ -312,18 +329,6 @@ function onRainfallDataResponseFail(dev_id) {
 
 function drawChartWaterlevel(chartdiv, json) {
     var device = search(waterlevel_devices, "dev_id", json[0].station_id);
-
-    if (app.history) {
-        var newdata = $.grep(json.Data, function(n, i) {
-            thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
-            result = thisdate.between(app.startDateTime, app.endDateTime);
-            return result;
-        });
-        var len = newdata.length;
-        json.Data = newdata;
-        json.Data.length = len;
-    }
-
 
     var datatable = new google.visualization.DataTable();
     datatable.addColumn('datetime', 'DateTimeRead');
