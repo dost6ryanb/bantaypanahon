@@ -264,7 +264,7 @@ function postGetData(dev_id, sdate, edate, limit, successcallback) {
 
 function postGetDataBulk(dev_ids, sdate, edate, type, successcallback) {
     $.ajax({
-        url: DOCUMENT_ROOT + 'data4.php',
+        url: DOCUMENT_ROOT + 'data5.php',
         type: "POST",
         data: {
             dev_ids: dev_ids,
