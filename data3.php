@@ -159,9 +159,14 @@ function isCacheExpired($filename, $life = 5) {
     }
 }
 
-function putCache($key, $cb) {
+function putCache($key, $cb, $lockDir)
+{
     $fqfname = getCacheFileName($key);
     $fp = false;
+
+    if (isLockExpired($lockDir)) {
+        releaseLock($lockDir);
+    }
 
     $success = false;
     do {
@@ -197,7 +202,7 @@ function putCache($key, $cb) {
 function renewCache($key, $cb, $lockDir)
 {
     if (createLock($lockDir)) { // create lock to update cache
-        putCache($key, $cb); //cache renewed
+        putCache($key, $cb, $lockDir); //cache renewed
         releaseLock($lockDir);
     } else {
         return false;

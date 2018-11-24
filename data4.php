@@ -149,10 +149,14 @@ function isCacheExpired($filepath, $life = 5)
     }
 }
 
-function putCache($key, $cb)
+function putCache($key, $cb, $lockDir)
 {
     $fqfname = getCacheFileName($key);
     $fp = false;
+    //sleep(10);
+    if (isLockExpired($lockDir)) {
+        releaseLock($lockDir);
+    }
 
     $success = false;
     do {
@@ -188,7 +192,7 @@ function putCache($key, $cb)
 function renewCache($key, $cb, $lockDir)
 {
     if (createLock($lockDir)) { // create lock to update cache
-        putCache($key, $cb); //cache renewed
+        putCache($key, $cb, $lockDir); //cache renewed
         releaseLock($lockDir);
     } else {
         return false;
@@ -209,7 +213,7 @@ function getLockname($key)
 
 function createLock($lockDir)
 {
-    if (@mkdir($lockDir, 0700)) {
+     if (@mkdir($lockDir, 0700)) {
         register_shutdown_function('shutdown', $lockDir);
         return true;
     }
@@ -231,7 +235,7 @@ function isLockExist($lockDir)
     return is_dir($lockDir);
 }
 
-function isLockExpired($lockDir, $life = 1) {
+function isLockExpired($lockDir, $life = 2) {
     if (isLockExist($lockDir)) {
         $filetime = filemtime($lockDir);
         $cache_life = intval($life); // minutes
