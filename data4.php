@@ -16,41 +16,32 @@ header('Cache-Control: max-age=300, private');
 header('Content-Type: application/json');
 
 $cache = getCacheFqfname($key);
-$lockCreated = false;
-$lockFile = '';
 $cb = function () use ($dev_ids, $sdate, $edate) {
     return getBulkData($dev_ids, $sdate, $edate);
 };
 //trigger_error("Oops!", E_USER_ERROR);
 
-$shutdown = function () use (&$lockCreated, &$lockFile) {
-    echo $lockCreated;
-    if ($lockCreated) {
-        releaseLock($lockFile, $lockCreated);
-        //echo "removed $lockFile";
-    }
-};
-register_shutdown_function($shutdown);
+function shutdown($lockDir)
+{
+    releaseLock($lockDir);
+}
+
+$lockDir = getLockname($key);
+
+set_time_limit(60);
 
 if ($cache) { //cache available
 //if (false) { //debug
     if (!isCacheExpired($cache)) { //cache still fresh
-        printCache($key);
+        printCache($key, $lockDir);
     } else { //cache outdated
-        if (createLock($key, $lockCreated, $lockFile)) { // create lock to update cache
-            //sleep(10);
-            putCache($key, $cb); //cache renewed
-            releaseLock($lockFile, $lockCreated);
-        }
+        renewCache($key, $cb, $lockDir);
         //print cache if everthing was good
-        printCache($key);
+        printCache($key, $lockDir);
     }
 } else { //no-cache
-    if (createLock($key, $lockCreated, $lockFile)) { // create lock to update cache
-        putCache($key, $cb);
-        releaseLock($lockFile, $lockCreated);
-    }
-    printCache($key);
+    renewCache($key, $cb, $lockDir);
+    printCache($key, $lockDir);
 }
 
 function getBulkData($dev_ids, $sdate, $edate)
@@ -106,16 +97,19 @@ function getCacheFqfname($key)
 
 //@params
 // filename = fully qualified name
-function printCache($key)
+function printCache($key, $lockDir)
 {
     $filename = getCacheFileName($key);
     $fp = false;
 
     $success = false;
     do {
-        if(isExistLock($key)) {
+        if (isLockExist($lockDir)) {
+            if (isLockExpired($lockDir)) {
+                releaseLock($lockDir);
+            }
             usleep(rand(300, 1000));
-        } else {
+        }else {
             $success = true;
         }
     } while (!$success);
@@ -143,9 +137,9 @@ function printCache($key)
 //@return
 // true - meanings file age is older than cache life
 // false - not true duh!
-function isCacheExpired($filename, $life = 5)
+function isCacheExpired($filepath, $life = 5)
 {
-    $filetime = filemtime($filename);
+    $filetime = filemtime($filepath);
     $cache_life = intval($life); // minutes
     $expirytime = (time() - 60 * $cache_life);
     if ($filetime > $expirytime) { // The cache file is fresh.
@@ -157,8 +151,6 @@ function isCacheExpired($filename, $life = 5)
 
 function putCache($key, $cb)
 {
-    //sleep(10);
-
     $fqfname = getCacheFileName($key);
     $fp = false;
 
@@ -181,7 +173,7 @@ function putCache($key, $cb)
                 fwrite($fp, $response);
                 $success = true;
             } else {
-                    usleep ( rand ( 300, 1000));
+                usleep(rand(300, 1000));
             }
         } while (!$success);
 
@@ -193,6 +185,17 @@ function putCache($key, $cb)
     return $success;
 }
 
+function renewCache($key, $cb, $lockDir)
+{
+    if (createLock($lockDir)) { // create lock to update cache
+        putCache($key, $cb); //cache renewed
+        releaseLock($lockDir);
+    } else {
+        return false;
+    }
+
+    return true;
+}
 
 function getCacheFileName($key)
 {
@@ -204,28 +207,39 @@ function getLockname($key)
     return __DIR__ . DIRECTORY_SEPARATOR . "cache/tmp-$key.lock";
 }
 
-function createLock($key, &$status, &$dir)
+function createLock($lockDir)
 {
-    $dir = getLockname($key);
-    if (@mkdir($dir, 0700)) {
-        $status = true;
+    if (@mkdir($lockDir, 0700)) {
+        register_shutdown_function('shutdown', $lockDir);
         return true;
     }
     return false;
 }
 
-function releaseLock($dir, &$status)
+function releaseLock($lockDir)
 {
-    if (rmdir($dir)) {
-        $status = false;
-        return true;
-    }
-    return false;
-}
-
-function isExistLock($key)
-{
-    $lockdir = getLockname($key);
     clearstatcache();
-    return is_dir($lockdir);
+    if (is_dir($lockDir) && rmdir($lockDir)) {
+        return true;
+    }
+    return false;
+}
+
+function isLockExist($lockDir)
+{
+    clearstatcache();
+    return is_dir($lockDir);
+}
+
+function isLockExpired($lockDir, $life = 1) {
+    if (isLockExist($lockDir)) {
+        $filetime = filemtime($lockDir);
+        $cache_life = intval($life); // minutes
+        $expirytime = (time() - 60 * $cache_life);
+        if ($filetime > $expirytime) { // The lock file is fresh.
+            return false;
+        }
+    }
+
+    return true;
 }
