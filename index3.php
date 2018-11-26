@@ -106,10 +106,10 @@
         google.charts.setOnLoadCallback(function () {
             $(document).ready(function () {
                 $(document).ajaxStart(function(){
-                    $.LoadingOverlay("show");
+                    //$("#rainfall-canvas").LoadingOverlay("show");
                 });
                 $(document).ajaxStop(function(){
-                    $.LoadingOverlay("hide");
+                   // $("#rainfall-canvas").LoadingOverlay("hide");
                 });
                 initMap("map-canvas");
                 initControls();
@@ -130,9 +130,8 @@
 
         function initFetchData(history) {
             if (history) HISTORY = true;
-
-            postGetDataBulk(rainfall_device_ids, key['sdate'], key['edate'], 'rainfall', onRainfallDataResponseSuccess );
-            postGetDataBulk(waterlevel_device_ids, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess);
+            postGetDataBulk(rainfall_device_ids, key['sdate'], key['edate'], 'rainfall', onRainfallDataResponseSuccess , 'map-canvas');
+            postGetDataBulk(waterlevel_device_ids, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, 'charts_div_container');
 
             /*
             setTimeout(function () {
@@ -205,8 +204,14 @@
                 });
         }
 
-        function postGetDataBulk(dev_ids, sdate, edate, type, successcallback) {
+        function postGetDataBulk(dev_ids, sdate, edate, type, successcallback, div) {
             $.ajax({
+                beforeSend: function(){
+                    $("#"+div).LoadingOverlay("show");
+                },
+                complete: function(){
+                    $("#"+div).LoadingOverlay("hide");
+                },
                 url: DOCUMENT_ROOT + 'data5.php',
                 type: "POST",
                 data: {
