@@ -15,12 +15,6 @@ google.charts.load('current', {packages: ['corechart']});
 
 google.charts.setOnLoadCallback(function () {
     $(document).ready(function () {
-        $(document).ajaxStart(function(){
-            $.LoadingOverlay("show");
-        });
-        $(document).ajaxStop(function(){
-            $.LoadingOverlay("hide");
-        });
         var string_date = moment(SDATE, 'YYYY-MM-DD').format('MMMM DD, YYYY');
         updateTitle('as of ' + string_date);
         initializeChartDivs('charts_div_container');
@@ -228,7 +222,7 @@ function updateChartsDiv(sizeclass) {
 function initFetchData(history) {
     if (history) app.history = true;
 
-    postGetDataBulk(waterlevel_device_ids, app.sdate, app.edate, 'waterlevel', onWaterlevelDataResponseSuccess);
+    postGetDataBulk(waterlevel_device_ids, app.sdate, app.edate, 'waterlevel', onWaterlevelDataResponseSuccess, 'charts_div_container');
 
     /*setTimeout(function () {
 
@@ -268,8 +262,14 @@ function postGetData(dev_id, sdate, edate, limit, successcallback) {
         });
 }
 
-function postGetDataBulk(dev_ids, sdate, edate, type, successcallback) {
+function postGetDataBulk(dev_ids, sdate, edate, type, successcallback, div) {
     $.ajax({
+        beforeSend: function(){
+            $("#"+div).LoadingOverlay("show");
+        },
+        complete: function(){
+            $("#"+div).LoadingOverlay("hide");
+        },
         url: DOCUMENT_ROOT + 'data5.php',
         type: "POST",
         data: {
