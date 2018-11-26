@@ -59,33 +59,15 @@ function shutdown($lockDir)
 
 set_time_limit(60);
 
-function getBulkData($dev_ids, $sdate, $edate)
-{
-    $len = count($dev_ids);
-    $count = 0;
-    $response = '[';
-    foreach ($dev_ids as $i => $dev_id) {
-        $tmp = getFromPhilSensorsService($dev_id, $sdate, $edate);
-        if ($tmp) {
-            $count++;
-            $response .= $tmp;
-            if ($i != $len - 1) $response .= ', ';
-        }
-    }
-
-    if ($count > 0) {
-        return $response . ']';
-    } else {
-        return null;
-    }
-
-}
-
 function getFromPhilSensorsService($dev_id, $sdate, $edate)
 {
     $url = 'http://philsensors.asti.dost.gov.ph/php/dataduration.php?stationid=' . $dev_id . '&from=' . $sdate . '&to=' . $edate;
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4 );
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 4);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -108,42 +90,6 @@ function getCacheFqfname($key)
     } else {
         return null;
     }
-}
-
-//@params
-// filename = fully qualified name
-function printCache($key, $lockDir)
-{
-    $filename = getCacheFileName($key);
-    $fp = false;
-
-    $success = false;
-    do {
-        if (isLockExist($lockDir)) {
-            if (isLockExpired($lockDir)) {
-                releaseLock($lockDir);
-            }
-            usleep(rand(300, 1000));
-        }else {
-            $success = true;
-        }
-    } while (!$success);
-
-    $success = false;
-    do {
-        $fp = fopen($filename, "r");
-        if ($fp) {
-            $success = true;
-        } else { //someone is updating the cache
-            usleep(rand(300, 1000));
-        }
-    } while (!$success);
-
-    while (!feof($fp)) {
-        echo fread($fp, 8192);
-    }
-
-    fclose($fp);
 }
 
 //@params
@@ -183,6 +129,8 @@ function putCache($key, $cb, $lockDir)
         }
     } while (!$success);
 
+    $maxTry = 3;
+    $try = 1;
     if ($fp && flock($fp, LOCK_EX)) {
         do {
             $response = $cb();
@@ -192,7 +140,9 @@ function putCache($key, $cb, $lockDir)
                 fwrite($fp, $response);
                 $success = true;
             } else {
-                usleep(rand(300, 1000));
+                if ($try++ > $maxTry) {
+                    $success = true;
+                }
             }
         } while (!$success);
 
@@ -224,13 +174,11 @@ function readCache($key, $lockDir)
 
     $success = false;
     do {
-        if (isLockExist($lockDir)) {
-            if (isLockExpired($lockDir)) {
+        if (isLockExpired($lockDir)) {
                 releaseLock($lockDir);
-            }
-            usleep(rand(300, 1000));
-        }else {
-            $success = true;
+                $success = true;
+        } else {
+                usleep(rand(300, 1000));
         }
     } while (!$success);
 
