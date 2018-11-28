@@ -129,9 +129,21 @@
         }
 
         function initFetchData(history) {
-            if (history) HISTORY = true;
-            postGetDataBulk(rainfall_device_ids, key['sdate'], key['edate'], 'rainfall', onRainfallDataResponseSuccess , 'map-canvas');
-            postGetDataBulk(waterlevel_device_ids, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, 'charts_div_container');
+            if (history) {
+                HISTORY = true;
+
+                postGetDataBulk(rainfall_device_ids_enabled, key['sdate'], key['edate'], 'rainfall', onRainfallDataResponseSuccess , 'map-canvas', function() {
+                    postGetDataBulk(rainfall_device_ids_disabled, key['sdate'], key['edate'], 'rainfall', onRainfallDataResponseSuccess, '');
+                });
+                postGetDataBulk(waterlevel_device_ids_enabled, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, 'charts_div_container', function() {
+                    postGetDataBulk(waterlevel_device_ids_disabled, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, '');
+                });
+
+            } else {
+                postGetDataBulk(rainfall_device_ids_enabled, key['sdate'], key['edate'], 'rainfall', onRainfallDataResponseSuccess , 'map-canvas');
+                postGetDataBulk(waterlevel_device_ids_enabled, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, 'charts_div_container');
+
+            }
 
             /*
             setTimeout(function () {
@@ -204,13 +216,17 @@
                 });
         }
 
-        function postGetDataBulk(dev_ids, sdate, edate, type, successcallback, div) {
+        function postGetDataBulk(dev_ids, sdate, edate, type, successcallback, div, cba) {
             $.ajax({
                 beforeSend: function(){
-                    $("#"+div).LoadingOverlay("show");
+                    if (div != '') {
+                        $("#"+div).LoadingOverlay("show");
+                    }
                 },
                 complete: function(){
-                    $("#"+div).LoadingOverlay("hide");
+                    if (div != '') {
+                        $("#"+div).LoadingOverlay("hide");
+                    }
                 },
                 url: DOCUMENT_ROOT + 'data5.php',
                 type: "POST",
@@ -225,6 +241,9 @@
                 retry: 20
             })
                 .done(function(d) {
+                    if (cba !== 'undefined' && typeof  cba === 'function') {
+                        cba();
+                    }
                     d.forEach(function(e) {
                         successcallback(e);
                     })
@@ -1452,8 +1471,10 @@
     var rainfall_devices = <?php echo json_encode(Devices::GetDevicesByParam('Rainfall'));?>;
     var waterlevel_devices = <?php echo json_encode(Devices::GetDevicesByParam('Waterlevel'));?>;
     var temperature_devices = <?php echo json_encode(Devices::GetDevicesByParam('Temperature'));?>;
-    var rainfall_device_ids = <?php echo json_encode(Devices::GetDeviceIdsByParam('Rainfall'));?>;
-    var waterlevel_device_ids = <?php echo json_encode(Devices::GetDeviceIdsByParam('Waterlevel'));?>;
+    var rainfall_device_ids_enabled = <?php echo json_encode(Devices::GetEnabledDeviceIdsByParam('Rainfall'));?>;
+    var rainfall_device_ids_disabled = <?php echo json_encode(Devices::GetDisabledDeviceIdsByParam('Rainfall'));?>;
+    var waterlevel_device_ids_enabled = <?php echo json_encode(Devices::GetEnabledDeviceIdsByParam('Waterlevel'));?>;
+    var waterlevel_device_ids_disabled = <?php echo json_encode(Devices::GetDisabledDeviceIdsByParam('Waterlevel'));?>;
 
 </script>
 <?php include_once("analyticstracking.php") ?>

@@ -104,6 +104,70 @@ class Devices {
 
         return $connection->query($query)->fetchAll(PDO::FETCH_COLUMN, 0);
     }
+    public static function GetEnabledDeviceIdsByParam($param) {
+        $connection = new PDO("sqlite:database/sqlite.db");
+
+        $query = 'select v.dev_id from v_devices v ';
+        $query_status = 'v.status <> "1" ';
+
+        switch ($param) {
+            case 'Waterlevel' :
+                $types ="'Waterlevel', 'Waterlevel & Rain 2'";
+
+                $query .= 'left outer join waterlevelinfo w on v.dev_id = w.devices_dev_id '.
+                    "where v.type in ($types) AND $query_status".
+                    'order by v.province, w.riverindex IS NULL, w.riverindex ASC';
+                break;
+            case 'Rainfall' :
+                $types  = "'VAISALA', 'Rain1', 'Rain2', 'Waterlevel & Rain 2', 'UAAWS', 'BSWM_Lufft', 'Davis'";
+
+                $query .= "where v.type in ($types) AND $query_status".
+                    'order by v.province, v.district, v.municipality ASC';
+                break;
+            case 'Temperature' :
+                $types  = "'VAISALA', 'UAAWS', 'BSWM_Lufft', 'Davis'";
+
+                $query .= "where v.type in ($types) AND $query_status".
+                    'order by v.province, v.district, v.municipality ASC';
+                break;
+            default :
+                $query .= 'where $query_status order by province, district, municipality ASC';
+        }
+
+        return $connection->query($query)->fetchAll(PDO::FETCH_COLUMN, 0);
+    }
+    public static function GetDisabledDeviceIdsByParam($param) {
+        $connection = new PDO("sqlite:database/sqlite.db");
+
+        $query = 'select v.dev_id from v_devices v ';
+        $query_status = 'v.status == "1" ';
+
+        switch ($param) {
+            case 'Waterlevel' :
+                $types ="'Waterlevel', 'Waterlevel & Rain 2'";
+
+                $query .= 'left outer join waterlevelinfo w on v.dev_id = w.devices_dev_id '.
+                    "where v.type in ($types) AND $query_status".
+                    'order by v.province, w.riverindex IS NULL, w.riverindex ASC';
+                break;
+            case 'Rainfall' :
+                $types  = "'VAISALA', 'Rain1', 'Rain2', 'Waterlevel & Rain 2', 'UAAWS', 'BSWM_Lufft', 'Davis'";
+
+                $query .= "where v.type in ($types) AND $query_status".
+                    'order by v.province, v.district, v.municipality ASC';
+                break;
+            case 'Temperature' :
+                $types  = "'VAISALA', 'UAAWS', 'BSWM_Lufft', 'Davis'";
+
+                $query .= "where v.type in ($types) AND $query_status".
+                    'order by v.province, v.district, v.municipality ASC';
+                break;
+            default :
+                $query .= 'where $query_status order by province, district, municipality ASC';
+        }
+
+        return $connection->query($query)->fetchAll(PDO::FETCH_COLUMN, 0);
+    }
 
 	public static function updateStatusId($dev_id, $status_id) {
 		$connection = new PDO("sqlite:database/sqlite.db");

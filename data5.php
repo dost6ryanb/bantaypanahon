@@ -9,6 +9,8 @@ if ($sdate == FALSE) $sdate = '';
 if ($edate == FALSE) $edate = $sdate;
 if ($type == FALSE) $type = 0;
 
+set_time_limit(60);
+
 header('Access-Control-Allow-Origin: *');
 header('Cache-Control: max-age=300, private');
 header('Content-Type: application/json');
@@ -56,8 +58,6 @@ function shutdown($lockDir)
 {
     releaseLock($lockDir);
 }
-
-set_time_limit(60);
 
 function getFromPhilSensorsService($dev_id, $sdate, $edate)
 {
