@@ -220,9 +220,16 @@ function updateChartsDiv(sizeclass) {
 }
 
 function initFetchData(history) {
-    if (history) app.history = true;
+    if (history) {
+        app.history = true;
+        postGetDataBulk(waterlevel_device_ids_enabled, app.sdate, app.edate, 'waterlevel', onWaterlevelDataResponseSuccess, 'charts_div_container', function() {
+            postGetDataBulk(waterlevel_device_ids_disabled, app.sdate, app.edate, 'waterlevel', onWaterlevelDataResponseSuccess, '');
+        });
 
-    postGetDataBulk(waterlevel_device_ids, app.sdate, app.edate, 'waterlevel', onWaterlevelDataResponseSuccess, 'charts_div_container');
+    } else {
+        postGetDataBulk(waterlevel_device_ids_enabled, app.sdate, app.edate, 'waterlevel', onWaterlevelDataResponseSuccess, 'charts_div_container');
+    }
+
 
     /*setTimeout(function () {
 
@@ -262,13 +269,17 @@ function postGetData(dev_id, sdate, edate, limit, successcallback) {
         });
 }
 
-function postGetDataBulk(dev_ids, sdate, edate, type, successcallback, div) {
+function postGetDataBulk(dev_ids, sdate, edate, type, successcallback, div, cba) {
     $.ajax({
         beforeSend: function(){
-            $("#"+div).LoadingOverlay("show");
+            if (div != '') {
+                $("#"+div).LoadingOverlay("show");
+            }
         },
         complete: function(){
-            $("#"+div).LoadingOverlay("hide");
+            if (div != '') {
+                $("#"+div).LoadingOverlay("hide");
+            }
         },
         url: DOCUMENT_ROOT + 'data5.php',
         type: "POST",
@@ -283,6 +294,9 @@ function postGetDataBulk(dev_ids, sdate, edate, type, successcallback, div) {
         retry: 20
     })
         .done(function(d) {
+            if (cba !== 'undefined' && typeof  cba === 'function') {
+                cba();
+            }
             d.forEach(function(e) {
                 successcallback(e);
             })
