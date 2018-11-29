@@ -14,8 +14,8 @@ header('Access-Control-Allow-Origin: *');
 header('Cache-Control: max-age=300, private');
 header('Content-Type: application/json');
 
-echo json_encode(array('error'=>"Service unavailable"));
-die();
+//echo json_encode(array('error'=>"Service unavailable"));
+//die();
 
 $cache = getCacheFqfname($key);
 
@@ -83,7 +83,7 @@ function getDataFromWeatherAstiService($dev_id, $limit, $sdate, $edate) {
 //@return
 // on success - file is available, returns cache filename
 // on failure - no cache, returns null
-function getCache($key) {
+function getCacheFqfname($key) {
     $fqfname = getCacheFileName($key);
     if (file_exists($fqfname)) {
         return $fqfname;
