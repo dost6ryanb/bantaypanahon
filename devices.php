@@ -263,7 +263,7 @@
                     row[0] = Date.parseExact(data.Data[j]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
                     row[1] = {
                         v: rainCumulative, //cumulative rain
-                        f: rainCumulative + ' mm'
+                        f: rainCumulative.toFixed(2) + ' mm'
                     };
                     row[2] = {
                         v: rainValue, //rain value
@@ -287,7 +287,7 @@
                 var options = {
                     title: 'Rainfall Reading from ' + title_startdatetime + ' to ' + title_enddatetime,
                     hAxis: {
-                        title: 'Rainfall Cumulative: ' + rain_cumulative_tmp + " mm",
+                        title: 'Rainfall Cumulative: ' + rainCumulative.toFixed(2) + " mm",
                         viewWindow: {
                             min: d,
                             max: d2
