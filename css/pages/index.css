@@ -12,6 +12,7 @@
     height: 520px;
     width: 30%;
     overflow: scroll;
+    position: relative;
 }
 
 #rainfall-canvas table {
@@ -192,6 +193,13 @@
 
 .btn-group button:hover {
     background-color: #e5e5e5;
+}
+
+#chooser {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    z-index: 99;
 }
 
 .custom-ctrl form {
