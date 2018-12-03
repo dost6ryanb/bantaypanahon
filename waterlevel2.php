@@ -1,5 +1,4 @@
-<?php header('Location: maintenance.php'); die();?>
-<?php include_once 'lib/init.php' ?>
+<?php include_once 'lib/init3.php' ?>
 <html>
 
 <head>
@@ -19,6 +18,7 @@
     <script type="text/javascript"
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4yau_nw40dWy2TwW4OdUq4OJKbFs1EOc&sensor=false"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="vendor/gasparesganga-jquery-loading-overlay-2.1.6/loadingoverlay.min.js"></script>
     <script type="text/javascript">
         setTimeout(function () {
             window.location.href = window.location.href;
@@ -28,14 +28,19 @@
         var key = {
             'serverdate': '<?php echo date("m/d/Y");?>',
             'servertime': '<?php echo date("H:i");?>',
-            'sdate': '<?php echo $sdate;?>',
+            'sdate': SDATE,
+            'edate': EDATE,
             'numwaterleveldevices': 0,
             'loadedwaterleveldevices': 0
         };
 
+        key['startDateTime'] = Date.parseExact(key['sdate'] + ' 08:00:00', 'yyyy-MM-dd HH:mm:ss');
+        key['endDateTime'] = Date.parseExact(key['edate'] + ' 07:59:59', 'yyyy-MM-dd HH:mm:ss');
+
         var waterlevel_map;
         var waterlevel_map_markers = [];
         var lastValidCenter;
+        var HISTORY = false;
 
         google.charts.load('current', {
             packages: ['corechart']
@@ -64,7 +69,6 @@
         google.charts.setOnLoadCallback(function () {
             $(document).ready(function () {
                 initMap("map-canvas");
-                initRiverBasinTool('riverbasins');
                 initWaterlevelTable("waterlevel-table");
                 initChartDivs('charts_div_container');
                 initFetchData();
@@ -72,77 +76,96 @@
         });
 
         function initFetchData(history) {
-            setTimeout(function () {
-
-                for (var i = 0; i < waterlevel_devices.length; i++) {
-                    var cur = waterlevel_devices[i];
-                    if (history) {
-                        postGetData(cur['dev_id'], key['sdate'], key['sdate'], "144", onWaterlevelDataResponseSuccess);
-                    } else {
-                        if (cur['status'] == null || cur['status'] == '0') {
-                            postGetData(cur['dev_id'], key['sdate'], "", "", onWaterlevelDataResponseSuccess);
-                        }
-                    }
-                }
-            }, 200);
+            if (history) {
+                HISTORY = true;
+                postGetDataBulk(waterlevel_device_ids_enabled, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, 'map-canvas', function() {
+                    postGetDataBulk(waterlevel_device_ids_disabled, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, '');
+                });
+            } else {
+                postGetDataBulk(waterlevel_device_ids_enabled, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, 'map-canvas');
+            }
         }
 
-        function postGetData(dev_id, sdate, edate, limit, successcallback) {
+        function postGetDataBulk(dev_ids, sdate, edate, type, successcallback, div, cba) {
             $.ajax({
-                url: DOCUMENT_ROOT + 'data.php',
+                beforeSend: function(){
+                    if (div != '') {
+                        $("#"+div).LoadingOverlay("show", {
+                            zIndex: 50
+                        });
+                    }
+                },
+                complete: function(){
+                    if (div != '') {
+                        $("#"+div).LoadingOverlay("hide");
+                    }
+                },
+                url: DOCUMENT_ROOT + 'data5.php',
                 type: "POST",
                 data: {
-                    start: 0,
-                    limit: limit,
+                    dev_ids: dev_ids,
                     sdate: sdate,
                     edate: edate,
-                    pattern: dev_id,
+                    type: type,
                 },
                 dataType: 'json',
                 tryCount: 0,
                 retry: 20
             })
-                .done(successcallback)
-                .fail(function (f, n) {
-                    onWaterlevelDataResponseFail(dev_id)
+                .done(function(d) {
+                    if (cba !== 'undefined' && typeof  cba === 'function') {
+                        cba();
+                    }
+                    d.forEach(function(e) {
+                        successcallback(e);
+                    })
                 });
         }
 
         function onWaterlevelDataResponseSuccess(data) {
+            if (HISTORY) {
+                var newdata = $.grep(data.Data, function(n, i) {
+                    thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+                    result = thisdate.between(key['startDateTime'], key['endDateTime']);
+                    //if (result) console.log(thisdate.toString() + " - " + result);
+                    return result;
+                });
+                data.Data = newdata;
+                data.Data.length = newdata.length;
+            }
+
             setTimeout(function () {
                 updateWaterlevelChart(data);
             }, 200);
-            var device_id = data.device[0].dev_id;
+
+            var device_id = data[0]['station_id'];
 
             $('#loadedwaterleveldevices').text(++key['loadedwaterleveldevices']);
 
-            if (data.count == -1) { // cannot reach predict
-                onWaterlevelDataResponseFail(device_id);
-            } else if (data.count == 0 || // sensor no reading according to fmon.predict
-                data.data.length == 0
-            /*|| // predict reports that it has reading but actually doesnt have
-              data.data[0].waterlevel == null || data.data[0].waterlevel=='' // errouneous readings*/
-            ) {
+            var last = data.Data.length - 1;
+            if (data.Data.length == 0 || (typeof  data.Data[last]['Waterlevel'] == 'undefined') ||  (typeof data.Data[last - 1]['Waterlevel'] == 'undefined')) {
                 updateWaterlevelTable(device_id, '[NO DATA]', '', '', 'nodata');
             } else {
-                var device = search(waterlevel_devices, 'dev_id', device_id);
-                var timeread = data.data[0].dateTimeRead.substring(10).substring(0, 6);
-                var devicedtr = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-                var serverdtr = Date.parseExact(key['serverdate'] + ' ' + key['servertime'] + ':00', 'MM/dd/yyyy HH:mm:ss');
+                 var device = search(waterlevel_devices, 'dev_id', device_id);
+                var devicedtr = Date.parseExact(data.Data[last]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+                var serverdtr = Date.parseExact(key['serverdate'] + ' ' + key['servertime'] + ':00', 'yyyy-MM-dd HH:mm:ss');
 
                 var hour12time = devicedtr.toString("h:mm tt");
-                var deviation = data.data[0].waterlevel - data.data[1].waterlevel;
+                var wtrlvl = parseFloat(data.Data[last]['Waterlevel']).toFixed(2);
+                var wl0 = wtrlvl;
+                var wl1 = parseFloat(data.Data[last - 1]['Waterlevel']).toFixed(2);
+                var deviation = parseFloat(wl0 - wl1).toFixed(2);
+
                 if (key['sdate'] == key['serverdate'] && devicedtr.add({
                     minutes: 15
                 }).compareTo(serverdtr) == -1) { //late
-                    updateWaterlevelTable(device_id, hour12time, data.data[0].waterlevel / 100, deviation / 100, 'latedata');
+                    updateWaterlevelTable(device_id, hour12time, wtrlvl, deviation, 'latedata');
                 } else {
-                    updateWaterlevelTable(device_id, hour12time, data.data[0].waterlevel / 100, deviation / 100, 'dataok');
+                    updateWaterlevelTable(device_id, hour12time, wtrlvl, deviation, 'dataok');
                 }
 
 
-                var wl0 = parseFloat(data.data[0].waterlevel);
-                var wl1 = parseFloat(data.data[1].waterlevel);
+
 
                 var marker_url;
                 if (wl0 > wl1) {
@@ -169,15 +192,6 @@
             updateWaterlevelTable(dev_id, '', '', '', '');
         }
 
-        // function onWaterlevelDataResponseSuccess(data) {
-        // 	updateWaterlevelChart(data)
-        // }
-
-        var onGetDataSuccess2 = function (data) {
-            updateWaterlevelChart(data);
-
-        }
-
         function initMap(divcanvas) {
             var DOST_CENTER = new google.maps.LatLng(10.712317, 122.562362); //DOST CENTER
 
@@ -188,6 +202,11 @@
                 maxZoom: null,
                 center: DOST_CENTER,
                 disableDefaultUI: true,
+                zoomControl: true,
+                zoomControlOptions: {
+                    style: google.maps.ZoomControlStyle.LARGE,
+                    position: google.maps.ControlPosition.RIGHT_CENTER
+                },
                 mapTypeId: 'mapbox',
                 draggableCursor: 'crosshair'
             };
@@ -302,7 +321,15 @@
             $('#dtpicker2').datepicker({
                 onSelect: function (data) {
                     sdate.find('a').text(data);
-                    key['sdate'] = data;
+                    newsdate = Date.parseExact(data, 'MM/dd/yyyy');
+                    newedate= Date.parseExact(data, 'MM/dd/yyyy');
+                    newedate = newedate.addDays(1);
+                    key['sdate'] = newsdate.toString('yyyy-MM-dd');
+                    key['edate'] = newedate.toString('yyyy-MM-dd');
+                    startDateTime = Date.parseExact(key['sdate'] + ' 08:00:00', 'yyyy-MM-dd HH:mm:ss');
+                    endDateTime = Date.parseExact(key['edate'] + ' 07:59:59', 'yyyy-MM-dd HH:mm:ss');
+                    key['startDateTime'] = startDateTime;
+                    key['endDateTime'] = endDateTime;
                     key['numwaterleveldevices'] = 0;
                     key['loadedwaterleveldevices'] = 0;
                     $.xhrPool.abortAll();
@@ -388,28 +415,26 @@
         }
 
         function drawChartWaterlevel(chartdiv, json) {
+            var last = json.Data.length - 1;
             var datatable = new google.visualization.DataTable();
             datatable.addColumn('datetime', 'DateTimeRead');
             datatable.addColumn('number', 'Waterlevel'); //add column from index i
 
-
-            //j - index of data
-            // i - index of column
-            for (var j = 0; j < json.data.length; j++) {
+            for (var j = 0; j < json.Data.length; j++) {
                 var row = Array(2);
-                row[0] = Date.parseExact(json.data[j].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-
-                if (json.data[j].waterlevel != null) {
+                row[0] = Date.parseExact(json.Data[j]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+                waterlevel = json.Data[j]['Waterlevel'];
+                if (waterlevel != null) {
                     row[1] = {
-                        v: parseFloat(json.data[j].waterlevel / 100),
-                        f: (json.data[j].waterlevel / 100) + ' m'
+                        v: parseFloat(waterlevel),
+                        f: waterlevel + ' m'
                     };
                 }
                 datatable.addRow(row);
             }
 
-            var d = Date.parseExact(json.data[json.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-            var d2 = Date.parseExact(json.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+            var d = Date.parseExact(json.Data[0]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+            var d2 = Date.parseExact(json.Data[last]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
 
             //var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); //from last data
             var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); // from 8:00 AM
@@ -419,7 +444,7 @@
                 title: title_enddatetime,
 
                 hAxis: {
-                    title: 'Waterlevel: ' + (json.data[0].waterlevel / 100) + ' m',
+                    title: 'Waterlevel: ' + json.Data[0]['Waterlevel'] + ' m',
                     format: 'LLL d h:mm:ss a',
                     viewWindow: {min: d, max: d2},
                     gridlines: {color: 'none'},
@@ -445,7 +470,6 @@
 
             var chart = new google.visualization.ComboChart(document.getElementById(chartdiv));
             chart.draw(datatable, options);
-            //$('<div/>').text('Waterlevel: '+json.data[0].waterlevel+ ' cm').css({'height':'20px'}).appendTo('#'+chartdiv);
         }
 
         function updateWaterlevelTable(device_id, dateTimeRead, waterlevel, waterleveldeviation, dataclass) {
@@ -540,15 +564,10 @@
         }
 
         function updateWaterlevelChart(data) {
-            var device_id = data.device[0].dev_id;
+            var device_id = data[0]['station_id'];
             var div = 'line-chart-marker_' + device_id;
 
-            if (data.count == -1 || // fmon.predict 404
-                data.count == 0 || // sensor no reading according to fmon.predict
-                data.data.length == 0
-            /*|| // predict reports that it has reading but actually doesnt have
-                  data.data[0].waterlevel == null || data.data[0].waterlevel=='' // errouneous readings*/
-            ) {
+            if (data.Data.length == 0) {
                 $(document.getElementById(div)).css({
                     'background': 'url(images/nodata.png)'
                 });
@@ -558,9 +577,6 @@
 
         }
 
-        function initRiverBasinTool(el) {
-            waterlevel_map.controls[google.maps.ControlPosition.RIGHT_TOP].push(document.getElementById(el));
-        }
 
         function addTicker1(text) {
             $('<li/>').text(text).appendTo($('#ticker1list'));
@@ -599,6 +615,15 @@
 
 </div>
 <div id='content'>
+    <div id="riverbasins"  class="custom-ctrl">
+        <b>River Basin Map</b>
+        <ul>
+            <li><a href="riverbasin.php?q=1">Aklan River Basin</a></li>
+            <li><a href="riverbasin.php?q=2">Panay River Basin</a></li>
+            <li><a href="riverbasin.php?q=3">Tigum-Aganan River Basin</a></li>
+            <li><a href="riverbasin.php?q=4">Ilog-Hilabangan River Basin</a></li>
+        </ul>
+    </div>
     <div id='map-canvas'>
     </div>
     <div id='waterlevel-table'>
@@ -609,15 +634,6 @@
                 <img src="images/waterlevel_down.png">
                 <img src="images/waterlevel_up.png">
             </div>
-        </div>
-        <div id="riverbasins"  class="custom-ctrl">
-            <b>River Basin Map</b>
-            <ul>
-                <li><a href="riverbasin.php?q=1">Aklan River Basin</a></li>
-                <li><a href="riverbasin.php?q=2">Panay River Basin</a></li>
-                <li><a href="riverbasin.php?q=3">Tigum-Aganan River Basin</a></li>
-                <li><a href="riverbasin.php?q=4">Ilog-Hilabangan River Basin</a></li>
-            </ul>
         </div>
     </div>
 
@@ -675,6 +691,8 @@
 </body>
 <script type="text/javascript">
     var waterlevel_devices = <?php echo json_encode(Devices::GetDevicesByParam('Waterlevel'));?>;
+    var waterlevel_device_ids_enabled = <?php echo json_encode(Devices::GetEnabledDeviceIdsByParam('Waterlevel'));?>;
+    var waterlevel_device_ids_disabled = <?php echo json_encode(Devices::GetDisabledDeviceIdsByParam('Waterlevel'));?>;
 </script>
 <?php //include_once("analyticstracking.php") ?>
 

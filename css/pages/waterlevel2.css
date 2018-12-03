@@ -95,6 +95,11 @@
 #riverbasins {
 	text-align: left;
 	font-size: small;
+	position: absolute;
+	left: 10px;
+	top: 10px;
+	z-index: 99;
+	width: 200px;
 }
 
 #riverbasins ul {

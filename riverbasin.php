@@ -1,5 +1,4 @@
-<?php header('Location: maintenance.php'); die();?>
-<?php include_once 'lib/init.php' ?>
+<?php include_once 'lib/init3.php' ?>
 <?php
 if (!empty($_GET['q'])) {
     $q = $_GET['q'];
@@ -54,6 +53,8 @@ switch ($q) {
     <script type="text/javascript" src='js/jquery.easy-ticker.min.js'></script>
     <script type="text/javascript" src='js/heat-index.js'></script>
     <script type="text/javascript"
+            src="vendor/gasparesganga-jquery-loading-overlay-2.1.6/loadingoverlay.min.js"></script>
+    <script type="text/javascript"
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4yau_nw40dWy2TwW4OdUq4OJKbFs1EOc&sensor=false"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 
@@ -62,8 +63,10 @@ switch ($q) {
             window.location.reload(true);
         }, 900000); // refresh 15 minutes
         var key = {
-            'sdate': '<?php echo $sdate;?>', 'numraindevices': 0, 'loadedraindevices': 0,
-            'serverdate': '<?php echo date("m/d/Y");?>', 'servertime': '<?php echo date("H:i");?>',
+            'sdate': SDATE, 'edate': EDATE, 'numraindevices': 0, 'loadedraindevices': 0,
+            'serverdate': '<?php echo date("Y-m-d");?>', 'servertime': '<?php echo date("H:i");?>',
+            'startDateTime': '',
+            'endDateTime': '',
             'marker': [
                 {'min': 0.01, 'max': 5, 'name': 'lighter', 'src': 'images/rain-lighter'},
                 {'min': 5, 'max': 25, 'name': 'light', 'src': 'images/rain-light'},
@@ -72,12 +75,15 @@ switch ($q) {
                 {'min': 75, 'max': 100, 'name': 'intense', 'src': 'images/rain-intense'},
                 {'min': 100, 'max': 999, 'name': 'torrential', 'src': 'images/rain-torrential'}
             ]
-
         };
+
+        key['startDateTime'] = Date.parseExact(key['sdate'] + ' 08:00:00', 'yyyy-MM-dd HH:mm:ss');
+        key['endDateTime'] = Date.parseExact(key['edate'] + ' 07:59:59', 'yyyy-MM-dd HH:mm:ss');
 
         var cumulative_rainfall_map;
         var cumulative_rainfall_map_markers = [];
         var lastValidCenter;
+        var HISTORY = false;
 
         google.charts.load('current', {packages: ['corechart']});
 
@@ -106,8 +112,8 @@ switch ($q) {
                 initMap("map-canvas");
                 initMapLegends('legends');
                 initRainfallTable("rainfall-canvas");
-                initTicker('ticker--1');
-                initTicker('ticker--2');
+                //initTicker('ticker--1');
+                //initTicker('ticker--2');
                 initChartDivs('charts_div_container');
                 initFetchData();
             });
@@ -115,36 +121,21 @@ switch ($q) {
 
 
         function initFetchData(history) {
-            setTimeout(function () {
-                for (var i = 0; i < rainfall_devices.length; i++) {
-                    var cur = rainfall_devices[i];
-                    if (history) {
-                        postGetData(cur['dev_id'], key['sdate'], key['sdate'], 1, onRainfallDataResponseSuccess);
-                    } else {
-                        if (cur['status'] == null || cur['status'] == '0') {
-                            postGetData(cur['dev_id'], key['sdate'], "", 1, onRainfallDataResponseSuccess);
-                        } // else SKIP
-                    }
+            if (history) {
+                HISTORY = true;
 
-                }
+                postGetDataBulk(rainfall_device_ids_enabled, key['sdate'], key['edate'], 'rainfall', onRainfallDataResponseSuccess , 'map-canvas', function() {
+                    postGetDataBulk(rainfall_device_ids_disabled, key['sdate'], key['edate'], 'rainfall', onRainfallDataResponseSuccess, '');
+                });
+                postGetDataBulk(waterlevel_device_ids_enabled, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, 'charts_div_container', function() {
+                    postGetDataBulk(waterlevel_device_ids_disabled, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, '');
+                });
+            } else {
+                postGetDataBulk(rainfall_device_ids_enabled, key['sdate'], key['edate'], 'rainfall', onRainfallDataResponseSuccess , 'map-canvas');
+                postGetDataBulk(waterlevel_device_ids_enabled, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, 'charts_div_container');
+            }
 
-            }, 200);
-
-            setTimeout(function () {
-
-                for (var i = 0; i < waterlevel_devices.length; i++) {
-                    var cur = waterlevel_devices[i];
-                    if (history) {
-                        postGetData(cur['dev_id'], key['sdate'], key['sdate'], "144", onWaterlevelDataResponseSuccess);
-                    } else {
-                        if (cur['status'] == null || cur['status'] == '0') {
-                            postGetData(cur['dev_id'], key['sdate'], "", "", onWaterlevelDataResponseSuccess);
-                        }
-                    }
-                }
-            }, 200);
-
-            setTimeout(function () {
+            /*setTimeout(function () {
                 for (var i = 0; i < temperature_devices.length; i++) {
                     var cur = temperature_devices[i];
                     // if (history) {
@@ -156,7 +147,7 @@ switch ($q) {
                     // }
                 }
 
-            }, 200);
+            }, 200);*/
         }
 
         function postGetData(dev_id, sdate, edate, limit, successcallback) {
@@ -181,39 +172,79 @@ switch ($q) {
                 });
         }
 
+        function postGetDataBulk(dev_ids, sdate, edate, type, successcallback, div, cba) {
+            $.ajax({
+                beforeSend: function(){
+                    if (div != '') {
+                        $("#"+div).LoadingOverlay("show", {
+                            zIndex: 50
+                        });
+                    }
+                },
+                complete: function(){
+                    if (div != '') {
+                        $("#"+div).LoadingOverlay("hide");
+                    }
+                },
+                url: DOCUMENT_ROOT + 'data5.php',
+                type: "POST",
+                data: {
+                    dev_ids: dev_ids,
+                    sdate: sdate,
+                    edate: edate,
+                    type: type,
+                },
+                dataType: 'json',
+                tryCount: 0,
+                retry: 20
+            })
+                .done(function(d) {
+                    if (cba !== 'undefined' && typeof  cba === 'function') {
+                        cba();
+                    }
+                    d.forEach(function(e) {
+                        successcallback(e);
+                    })
+                });
+            /*.fail(function (f, n) {
+                onRainfallDataResponseFail(dev_id)
+            });*/
+        }
+
         function onRainfallDataResponseSuccess(data) {
-            var device_id = data.device[0].dev_id;
+            var device_id = data[0].station_id;
 
             $('#loadedraindevices').text(++key['loadedraindevices']);
 
-            if (data.count == -1) {// cannot reach predict
-                //TODO either add retry or initiate retry;
-            } else if (data.count == 0 ||// sensor no reading according to fmon.predict
-                data.data.length == 0 || // predict reports that it has reading but actually doesnt have
-                data.data[0].rain_cumulative == null || data.data[0].rain_cumulative == '' // errouneous readings
-            ) {
+            var newdata = $.grep(data.Data, function (n, i) {
+                thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+                result = thisdate.between(key['startDateTime'], key['endDateTime']);
+                //if (result) console.log(thisdate.toString() + " - " + result);
+                return result;
+            });
+            var len = newdata.length;
+            data.Data = newdata;
+            data.Data.length = len;
+
+            if (data.Data.length == 0) {
                 updateRainfallTable(device_id, '[NO DATA]', '', '', 'nodata');
             } else {
+                var last = data.Data.length - 1;
                 var device = search(rainfall_devices, 'dev_id', device_id);
                 //var timeread = data.data[0].dateTimeRead.substring(10).substring(0, 6);
-                var devicedtr = Date.parseExact(data.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-                //<#-- ASTI BSWM_Lufft not ISO STANDARD dateTimeRead FIX -_-
-                if (!devicedtr) {
-                    var datefixed = data.data[0].dateTimeRead.substring(0, 19);
-//				console.log(datefixed);
-                    devicedtr = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
-                }//--#>
-                var serverdtr = Date.parseExact(key['serverdate'] + ' ' + key['servertime'] + ':00', 'MM/dd/yyyy HH:mm:ss');
+                var devicedtr = Date.parseExact(data.Data[last]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+                var serverdtr = Date.parseExact(key['serverdate'] + ' ' + key['servertime'] + ':00', 'yyyy-MM-dd HH:mm:ss');
                 var hour12time = devicedtr.toString("h:mm tt");
 
+                var rc = getRainCumulative(data.Data);
+                var rv = parseFloat(data.Data[last]['Rainfall Amount']).toFixed(2);
+
                 if (key['sdate'] == key['serverdate'] && devicedtr.add({minutes: 15}).compareTo(serverdtr) == -1) { //late
-                    updateRainfallTable(device_id, hour12time, data.data[0].rain_value, data.data[0].rain_cumulative, 'latedata');
+                    updateRainfallTable(device_id, hour12time, rv, rc, 'latedata');
                 } else {
-                    updateRainfallTable(device_id, hour12time, data.data[0].rain_value, data.data[0].rain_cumulative, 'dataok');
+                    updateRainfallTable(device_id, hour12time, rv, rc, 'dataok');
                 }
 
-                var rc = parseFloat(data.data[0].rain_cumulative);
-                var rv = parseFloat(data.data[0].rain_value);
                 var marker_url;
                 for (var i = 0; i < key['marker'].length; i++) {
                     limit = key['marker'][i];
@@ -224,13 +255,22 @@ switch ($q) {
                             marker_url = limit['src'] + '.png';
                         }
                         addMarker(device['dev_id'], device['posx'], device['posy'], device['municipality'] + ' - ' + device['location'], device['type'], marker_url);
-                        var text = "[Cumulative Rainfall] " + device['municipality'] + ' - ' + device['location'] + ' : ' + data.data[0].rain_cumulative + ' mm';
+                        var text = "[Cumulative Rainfall] " + device['municipality'] + ' - ' + device['location'] + ' : ' + rc + ' mm';
                         addTicker(text, 'ticker--1__list');
 
                         break;
                     }
                 }
             }
+        }
+
+        function getRainCumulative(data) {
+            var total = 0;
+            $.each(data, function () {
+                var rn = parseFloat(this['Rainfall Amount']);
+                total += rn;
+            });
+            return total.toFixed(2);
         }
 
         function onRainfallDataResponseFail(dev_id) {
@@ -360,7 +400,15 @@ switch ($q) {
             $('#dtpicker2').datepicker({
                 onSelect: function (data) {
                     sdate.find('a').text(data);
-                    key['sdate'] = data;
+                    newsdate = Date.parseExact(data, 'MM/dd/yyyy');
+                    newedate = Date.parseExact(data, 'MM/dd/yyyy');
+                    newedate = newedate.addDays(1);
+                    key['sdate'] = newsdate.toString('yyyy-MM-dd');
+                    key['edate'] = newedate.toString('yyyy-MM-dd');
+                    startDateTime = Date.parseExact(key['sdate'] + ' 08:00:00', 'yyyy-MM-dd HH:mm:ss');
+                    endDateTime = Date.parseExact(key['edate'] + ' 07:59:59', 'yyyy-MM-dd HH:mm:ss');
+                    key['startDateTime'] = startDateTime;
+                    key['endDateTime'] = endDateTime;
                     key['numraindevices'] = 0;
                     key['loadedraindevices'] = 0;
                     $.xhrPool.abortAll();
@@ -430,37 +478,37 @@ switch ($q) {
         }
 
         function drawChartWaterlevel(chartdiv, json) {
-            //console.log(json.device[0].dev_id + " " + json.device[0].location);
+            var last = json.Data.length - 1;
             var datatable = new google.visualization.DataTable();
             datatable.addColumn('datetime', 'DateTimeRead');
             datatable.addColumn('number', 'Waterlevel'); //add column from index i
 
-            for (var j = 0; j < json.data.length; j++) {
+            for (var j = 0; j < json.Data.length; j++) {
                 var row = Array(2);
-                row[0] = Date.parseExact(json.data[j].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-
-                if (json.data[j].waterlevel != null) {
+                row[0] = Date.parseExact(json.Data[j]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+                waterlevel = json.Data[j]['Waterlevel'];
+                if (waterlevel != null) {
                     row[1] = {
-                        v: parseFloat(json.data[j].waterlevel / 100),
-                        f: (json.data[j].waterlevel / 100) + ' m'
+                        v: parseFloat(waterlevel),
+                        f: waterlevel + ' m'
                     };
                 }
                 datatable.addRow(row);
-                //console.log(json.data[j].waterlevel + " " + typeof json.data[j].waterlevel);
             }
 
-            var d = Date.parseExact(json.data[json.data.length - 1].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
-            var d2 = Date.parseExact(json.data[0].dateTimeRead, 'yyyy-MM-dd HH:mm:ss');
+            var d = Date.parseExact(json.Data[0]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+            var d2 = Date.parseExact(json.Data[last]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
 
             //var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); //from last data
             var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); // from 8:00 AM
             var title_enddatetime = d2.toString('MMMM d yyyy h:mm:ss tt');
 
+
             var options = {
                 title: title_enddatetime,
 
                 hAxis: {
-                    title: 'Waterlevel: ' + (json.data[0].waterlevel / 100 ) + ' m',
+                    title: 'Waterlevel: ' + json.Data[0]['Waterlevel'] + ' m',
                     format: 'LLL d h:mm:ss a',
                     viewWindow: {min: d, max: d2},
                     gridlines: {color: 'none'},
@@ -577,13 +625,21 @@ switch ($q) {
         }
 
         function updateWaterlevelChart(data) {
-            var device_id = data.device[0].dev_id;
+            var device_id = data[0]['station_id'];
             var div = 'line-chart-marker_' + device_id;
-            if (data.count == -1 || // fmon.predict 404
-                data.count == 0 || // sensor no reading according to fmon.predict
-                data.data.length == 0 /*|| // predict reports that it has reading but actually doesnt have
-             data.data[0].waterlevel == null || data.data[0].waterlevel == '' // errouneous readings*/
-            ) {
+
+            if (HISTORY) {
+                var newdata = $.grep(data.Data, function (n, i) {
+                    thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+                    result = thisdate.between(key['startDateTime'], key['endDateTime']);
+                    //if (result) console.log(thisdate.toString() + " - " + result);
+                    return result;
+                });
+                data.Data = newdata;
+                data.Data.length = newdata.length;
+            }
+
+            if (data.Data.length == 0) {
                 $(document.getElementById(div)).css({'background': 'url(images/nodata.png)'});
             } else {
                 drawChartWaterlevel(div, data);
@@ -771,6 +827,11 @@ switch ($q) {
     var rainfall_devices = <?php echo json_encode(Devices::GetRainFallDeviceFromBasin($riverbasin));?>;
     var waterlevel_devices = <?php echo json_encode(Devices::GetWaterDeviceFromBasin($riverbasin));?>;
     var temperature_devices = <?php echo json_encode(Devices::GetTempDeviceFromBasin($riverbasin));?>;
+    var rainfall_device_ids_enabled = <?php echo json_encode(Devices::GetEnabledRainfallDeviceFromBasin($riverbasin));?>;
+    var rainfall_device_ids_disabled = <?php echo json_encode(Devices::GetDisabledRainfallDeviceFromBasin($riverbasin));?>;
+    var waterlevel_device_ids_enabled = <?php echo json_encode(Devices::GetEnabledWaterDeviceFromBasin($riverbasin));?>;
+    var waterlevel_device_ids_disabled = <?php echo json_encode(Devices::GetDisabledWaterDeviceFromBasin($riverbasin));?>;
+
 </script>
 <?php //include_once("analyticstracking.php") ?>
 </html>

@@ -17,7 +17,8 @@
     <script type="text/javascript" src='js/jquery.easy-ticker.min.js'></script>
     <script type="text/javascript" src='js/heat-index.js'></script>
     <script type="text/javascript" src="js/tytrack_pagasa.js"></script>
-    <script type="text/javascript" src="vendor/gasparesganga-jquery-loading-overlay-2.1.6/loadingoverlay.min.js"></script>
+    <script type="text/javascript"
+            src="vendor/gasparesganga-jquery-loading-overlay-2.1.6/loadingoverlay.min.js"></script>
     <script type="text/javascript"
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4yau_nw40dWy2TwW4OdUq4OJKbFs1EOc&sensor=false"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -84,23 +85,23 @@
                     $.xhrPool.splice(index, 1);
                 }
             },
-            error: function(jqXHR, exception) {
-            if (jqXHR.status === 0) {
-                console.log('Not connect.\n Verify Network.');
-            } else if (jqXHR.status == 404) {
-                console.log('Requested page not found. [404]');
-            } else if (jqXHR.status == 500) {
-                console.log('Internal Server Error [500].');
-            } else if (exception === 'parsererror') {
-                console.log('Requested JSON parse failed.');
-            } else if (exception === 'timeout') {
-                console.log('Time out error.');
-            } else if (exception === 'abort') {
-                console.log('Ajax request aborted.');
-            } else {
-                console.log('Uncaught Error.\n' + jqXHR.responseText);
+            error: function (jqXHR, exception) {
+                if (jqXHR.status === 0) {
+                    console.log('Not connect.\n Verify Network.');
+                } else if (jqXHR.status == 404) {
+                    console.log('Requested page not found. [404]');
+                } else if (jqXHR.status == 500) {
+                    console.log('Internal Server Error [500].');
+                } else if (exception === 'parsererror') {
+                    console.log('Requested JSON parse failed.');
+                } else if (exception === 'timeout') {
+                    console.log('Time out error.');
+                } else if (exception === 'abort') {
+                    console.log('Ajax request aborted.');
+                } else {
+                    console.log('Uncaught Error.\n' + jqXHR.responseText);
+                }
             }
-        }
         });
 
         google.charts.setOnLoadCallback(function () {
@@ -126,17 +127,15 @@
             if (history) {
                 HISTORY = true;
 
-                postGetDataBulk(rainfall_device_ids_enabled, key['sdate'], key['edate'], 'rainfall', onRainfallDataResponseSuccess , 'map-canvas', function() {
+                postGetDataBulk(rainfall_device_ids_enabled, key['sdate'], key['edate'], 'rainfall', onRainfallDataResponseSuccess, 'map-canvas', function () {
                     postGetDataBulk(rainfall_device_ids_disabled, key['sdate'], key['edate'], 'rainfall', onRainfallDataResponseSuccess, '');
                 });
-                postGetDataBulk(waterlevel_device_ids_enabled, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, 'charts_div_container', function() {
+                postGetDataBulk(waterlevel_device_ids_enabled, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, 'charts_div_container', function () {
                     postGetDataBulk(waterlevel_device_ids_disabled, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, '');
                 });
-
             } else {
-                postGetDataBulk(rainfall_device_ids_enabled, key['sdate'], key['edate'], 'rainfall', onRainfallDataResponseSuccess , 'map-canvas');
+                postGetDataBulk(rainfall_device_ids_enabled, key['sdate'], key['edate'], 'rainfall', onRainfallDataResponseSuccess, 'map-canvas');
                 postGetDataBulk(waterlevel_device_ids_enabled, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, 'charts_div_container');
-
             }
 
             /*
@@ -212,16 +211,16 @@
 
         function postGetDataBulk(dev_ids, sdate, edate, type, successcallback, div, cba) {
             $.ajax({
-                beforeSend: function(){
+                beforeSend: function () {
                     if (div != '') {
-                        $("#"+div).LoadingOverlay("show", {
+                        $("#" + div).LoadingOverlay("show", {
                             zIndex: 50
                         });
                     }
                 },
-                complete: function(){
+                complete: function () {
                     if (div != '') {
-                        $("#"+div).LoadingOverlay("hide");
+                        $("#" + div).LoadingOverlay("hide");
                     }
                 },
                 url: DOCUMENT_ROOT + 'data5.php',
@@ -231,22 +230,22 @@
                     sdate: sdate,
                     edate: edate,
                     type: type,
-                 },
+                },
                 dataType: 'json',
                 tryCount: 0,
                 retry: 20
             })
-                .done(function(d) {
+                .done(function (d) {
                     if (cba !== 'undefined' && typeof  cba === 'function') {
                         cba();
                     }
-                    d.forEach(function(e) {
+                    d.forEach(function (e) {
                         successcallback(e);
                     })
                 });
-                /*.fail(function (f, n) {
-                    onRainfallDataResponseFail(dev_id)
-                });*/
+            /*.fail(function (f, n) {
+                onRainfallDataResponseFail(dev_id)
+            });*/
         }
 
         function onRainfallDataResponseSuccess(data) {
@@ -254,23 +253,21 @@
             LAST_RAIN_DEVID = device_id;
             $('#loadedraindevices').text(++key['loadedraindevices']);
 
-            var newdata = $.grep(data.Data, function(n, i) {
-               thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
-               result = thisdate.between(key['startDateTime'], key['endDateTime']);
-               //if (result) console.log(thisdate.toString() + " - " + result);
+            var newdata = $.grep(data.Data, function (n, i) {
+                thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+                result = thisdate.between(key['startDateTime'], key['endDateTime']);
+                //if (result) console.log(thisdate.toString() + " - " + result);
                 return result;
             });
             var len = newdata.length;
             data.Data = newdata;
             data.Data.length = len;
-            //console.log(data);
 
             if (data.Data.length == 0) {
                 updateRainfallTable(device_id, '[NO DATA]', '', '', 'nodata');
             } else {
                 var last = data.Data.length - 1;
                 var device = search(rainfall_devices, 'dev_id', device_id);
-                //var timeread = data.data[0].dateTimeRead.substring(10).substring(0, 6);
                 var devicedtr = Date.parseExact(data.Data[last]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
                 //<#-- ASTI BSWM_Lufft not ISO STANDARD dateTimeRead FIX -_-
                 if (!devicedtr) {
@@ -314,7 +311,7 @@
 
         function getRainCumulative(data) {
             var total = 0;
-            $.each(data,function() {
+            $.each(data, function () {
                 var rn = parseFloat(this['Rainfall Amount']);
                 total += rn;
             });
@@ -393,7 +390,10 @@
             };
 
             var line = new google.maps.Polyline({
-                path: [{lat: 25, lng: 120}, {lat: 25, lng: 135}, {lat: 5, lng: 135}, {lat: 5, lng: 115}, {lat: 15, lng: 115}, {lat: 21, lng: 120}, {lat: 25, lng: 120}],
+                path: [{lat: 25, lng: 120}, {lat: 25, lng: 135}, {lat: 5, lng: 135}, {lat: 5, lng: 115}, {
+                    lat: 15,
+                    lng: 115
+                }, {lat: 21, lng: 120}, {lat: 25, lng: 120}],
                 strokeOpacity: 0,
                 icons: [{
                     icon: lineSymbol,
@@ -510,7 +510,7 @@
                 $('#charts_div_container').hide();
                 console.log('fullscreen');
                 WV_MAP.setZoom(6);
-              }
+            }
 
             function classicMode() {
                 $('#rainfall-canvas').css({width: '30%'}).show();
@@ -519,7 +519,7 @@
                 console.log('classic');
                 WV_MAP.panTo(DOST_CENTER);
                 WV_MAP.setZoom(8);
-             }
+            }
 
             function hideCurrentAndShowNewUI(state, newState) {
                 $.xhrPool.abortAll();
@@ -529,7 +529,7 @@
                         setMarkersVisibility(false);
                         break;
                     case 'doppler':
-                        if (WV_BOUNDARIES )WV_BOUNDARIES.setMap(null);
+                        if (WV_BOUNDARIES) WV_BOUNDARIES.setMap(null);
                         if (CURRENT_OVERLAY) CURRENT_OVERLAY.setMap(null);
                         hideDopplerUI();
                         break;
@@ -594,29 +594,34 @@
                     var time = v['time_mosaic'],
                         overlay_image = v['output_image_transparent_on_www'],
                         doppler_overlay = new google.maps.GroundOverlay(overlay_image, bounds, {clickable: false});
-                     // if (time) {
-                        $('<button/>', {id: k, name: k, text: time}).appendTo($dopplertime)
-                            .on('click', function () {
-                                swapCurrentOverlay(doppler_overlay);
-                                $dopplertime.children('button').removeClass('active');
-                                $(this).addClass('active');
-                            });
-                     /*} else {
-                        $('<button/>', {id: k, name: k, text: "Animated", class: 'active'}).prependTo($dopplertime)
-                            .on('click', function() {
-                                swapCurrentOverlay(doppler_overlay);
-                                $dopplertime.children('button').removeClass('active');
-                                $(this).addClass('active');
-                            });
+                    // if (time) {
+                    $('<button/>', {id: k, name: k, text: time}).appendTo($dopplertime)
+                        .on('click', function () {
+                            swapCurrentOverlay(doppler_overlay);
+                            $dopplertime.children('button').removeClass('active');
+                            $(this).addClass('active');
+                        });
+                    /*} else {
+                       $('<button/>', {id: k, name: k, text: "Animated", class: 'active'}).prependTo($dopplertime)
+                           .on('click', function() {
+                               swapCurrentOverlay(doppler_overlay);
+                               $dopplertime.children('button').removeClass('active');
+                               $(this).addClass('active');
+                           });
 
-                        swapCurrentOverlay(doppler_overlay);
-                     }*/
+                       swapCurrentOverlay(doppler_overlay);
+                    }*/
                 });
                 var overlay_image = result["gif"],
                     doppler_overlay = new google.maps.GroundOverlay(overlay_image, bounds, {clickable: false});
 
-                $('<button/>', {id: "AnimatedDoppler", name: "AnimatedDoppler", text: "Animated", class: 'active'}).prependTo($dopplertime)
-                    .on('click', function() {
+                $('<button/>', {
+                    id: "AnimatedDoppler",
+                    name: "AnimatedDoppler",
+                    text: "Animated",
+                    class: 'active'
+                }).prependTo($dopplertime)
+                    .on('click', function () {
                         swapCurrentOverlay(doppler_overlay);
                         $dopplertime.children('button').removeClass('active');
                         $(this).addClass('active');
@@ -638,7 +643,7 @@
                 strokeWeight: 1
             });
 
-            google.maps.event.addListener(WV_MAP, 'zoom_changed', function() {
+            google.maps.event.addListener(WV_MAP, 'zoom_changed', function () {
                 zoomLevel = WV_MAP.getZoom();
                 console.log(zoomLevel);
                 if (zoomLevel >= 8) {
@@ -673,7 +678,7 @@
 
         function initTyphoonTrack() {
             $.getJSON('meteo_proxy.php', {rq: 'cyclone-track'})
-                .done(function(d){
+                .done(function (d) {
                     var tracks = d['result'];
                     var value = "hourly";
 
@@ -691,7 +696,8 @@
                     }
 
                     for (var key in tracks) {
-                        var data = tracks[key], cycloneName = data.cyclone_name, cycloneInfos = data.info, lastPoint, lastTrack = null, forecastTrack = [], cyclonePath_LatLng = [];
+                        var data = tracks[key], cycloneName = data.cyclone_name, cycloneInfos = data.info, lastPoint,
+                            lastTrack = null, forecastTrack = [], cyclonePath_LatLng = [];
 
                         for (var key in cycloneInfos) {
                             var cycloneInfo = cycloneInfos[key];
@@ -824,7 +830,7 @@
                 onSelect: function (data) {
                     sdate.find('a').text(data);
                     newsdate = Date.parseExact(data, 'MM/dd/yyyy');
-                    newedate= Date.parseExact(data, 'MM/dd/yyyy');
+                    newedate = Date.parseExact(data, 'MM/dd/yyyy');
                     newedate = newedate.addDays(1);
                     key['sdate'] = newsdate.toString('yyyy-MM-dd');
                     key['edate'] = newedate.toString('yyyy-MM-dd');
@@ -929,13 +935,14 @@
             });
 
             $("#regionalweather").dialog({
-                autoOpen:false,
+                autoOpen: false,
                 width: 600
             });
 
         }
+
         function drawChartWaterlevel(chartdiv, json) {
-             var last = json.Data.length - 1;
+            var last = json.Data.length - 1;
             var datatable = new google.visualization.DataTable();
             datatable.addColumn('datetime', 'DateTimeRead');
             datatable.addColumn('number', 'Waterlevel'); //add column from index i
@@ -951,7 +958,6 @@
                     };
                 }
                 datatable.addRow(row);
-                //console.log(json.data[j].waterlevel + " " + typeof json.data[j].waterlevel);
             }
 
             var d = Date.parseExact(json.Data[0]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
@@ -1001,7 +1007,7 @@
             var cr = $('tr[data-dev_id=\'' + device_id + '\'] td[data-col=\'cr\']');
 
             if (!HISTORY) {
-                if (dtr.hasClass( "disabled" )) return;
+                if (dtr.hasClass("disabled")) return;
             }
 
             if (dateTimeRead != null) dtr.html(dateTimeRead); else dtr.text('');
@@ -1074,7 +1080,7 @@
             var base_options = {
                 position: new google.maps.LatLng(options.lat, options.lng),
                 map: null
-            }, marker_options =  extend_object(base_options, options);
+            }, marker_options = extend_object(base_options, options);
 
             delete marker_options.lat;
             delete marker_options.lng;
@@ -1086,7 +1092,7 @@
             if (options.infoWindow) {
                 marker.infoWindow = new google.maps.InfoWindow(options.infoWindow);
 
-                marker.addListener('click', function() {
+                marker.addListener('click', function () {
                     marker.infoWindow.open(map, marker);
                 });
             }
@@ -1127,9 +1133,8 @@
         }
 
 
-
         function drawCircle(options, map) {
-            options =  extend_object({
+            options = extend_object({
                 map: map,
                 center: new google.maps.LatLng(options.lat, options.lng)
             }, options);
@@ -1160,7 +1165,7 @@
             return polygon;
         }
 
-        var arrayToLatLng = function(coords) {
+        var arrayToLatLng = function (coords) {
             var i;
 
             for (i = 0; i < coords.length; i++) {
@@ -1177,21 +1182,21 @@
             return coords;
         };
 
-        var coordsToLatLngs = function(coords) {
+        var coordsToLatLngs = function (coords) {
             var first_coord = coords[0],
                 second_coord = coords[1];
 
             return new google.maps.LatLng(first_coord, second_coord);
         };
 
-        var array_map = function(array, callback) {
+        var array_map = function (array, callback) {
             var original_callback_params = Array.prototype.slice.call(arguments, 2),
                 array_return = [],
                 array_length = array.length,
                 i;
 
             if (Array.prototype.map && array.map === Array.prototype.map) {
-                array_return = Array.prototype.map.call(array, function(item) {
+                array_return = Array.prototype.map.call(array, function (item) {
                     var callback_params = original_callback_params.slice(0);
                     callback_params.splice(0, 0, item);
 
@@ -1209,7 +1214,7 @@
             return array_return;
         };
 
-        var array_flat = function(array) {
+        var array_flat = function (array) {
             var new_array = [],
                 i;
 
@@ -1262,16 +1267,15 @@
         }
 
 
-
         function updateWaterlevelChart(data) {
             var device_id = data[0]['station_id'];
             LAST_WTR_DEVID = device_id;
             var div = 'line-chart-marker_' + device_id;
             if (!HISTORY) {
-                if ($(document.getElementById(div)).hasClass( "disabled" )) return;
+                if ($(document.getElementById(div)).hasClass("disabled")) return;
             }
             if (HISTORY) {
-                var newdata = $.grep(data.Data, function(n, i) {
+                var newdata = $.grep(data.Data, function (n, i) {
                     thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
                     result = thisdate.between(key['startDateTime'], key['endDateTime']);
                     //if (result) console.log(thisdate.toString() + " - " + result);
@@ -1362,8 +1366,8 @@
         function getIndexOfDevID(o, dev_id) {
             if (dev_id == 0) return 0;
             for (var i = 0; i < o.length; i++) {
-                if(o[i]['dev_id'] == dev_id) {
-                    return i-1;
+                if (o[i]['dev_id'] == dev_id) {
+                    return i - 1;
                 }
             }
         }
@@ -1391,11 +1395,17 @@
     <div id='chooser' class="custom-ctrl btn-group">
         <button id="toggleLayers"><img src="images/layers.png"/></button>
         <form id="layersform" style="display: none">
-            <input id="toggleRainfallMap" type="radio" name="chooser_c" value="toggleRainfallMap" checked><label for="toggleRainfallMap">Rainfall</label> <br>
-            <input id="toggleDoppler" type="radio" name="chooser_c" value="toggleDoppler"><label for="toggleDoppler">Doppler</label> <br>
-            <input id="toggleTyphoonTrack" type="radio" name="chooser_c" value="toggleTyphoonTrack"><label for="toggleTyphoonTrack">Typhoon Track</label> <br>
-            <input id="toggleSatellite" type="radio" name="chooser_c" value="toggleSatellite"><label for="toggleSatellite">Satellite</label> <br>
-            <ul><li id="toggleWeatherForecast">Weather Forecast</li></ul>
+            <input id="toggleRainfallMap" type="radio" name="chooser_c" value="toggleRainfallMap" checked><label
+                    for="toggleRainfallMap">Rainfall</label> <br>
+            <input id="toggleDoppler" type="radio" name="chooser_c" value="toggleDoppler"><label for="toggleDoppler">Doppler</label>
+            <br>
+            <input id="toggleTyphoonTrack" type="radio" name="chooser_c" value="toggleTyphoonTrack"><label
+                    for="toggleTyphoonTrack">Typhoon Track</label> <br>
+            <input id="toggleSatellite" type="radio" name="chooser_c" value="toggleSatellite"><label
+                    for="toggleSatellite">Satellite</label> <br>
+            <ul>
+                <li id="toggleWeatherForecast">Weather Forecast</li>
+            </ul>
         </form>
     </div>
     <div id='map-canvas'>
@@ -1444,7 +1454,7 @@
     <div id="charts_div_container">
     </div>
     <div id="feeds">
-         <div id="regionalweather" style="display:none" class="feedcontainer">
+        <div id="regionalweather" style="display:none" class="feedcontainer">
             <h1>REGIONAL WEATHER FORECAST</h1>
             <span>Visayas Weather forecast</span>
             <h2>Issued at</h2>

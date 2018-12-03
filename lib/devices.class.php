@@ -196,16 +196,62 @@ class Devices {
         return $connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public static function GetEnabledRainfallDeviceFromBasin($basin) {
+        $connection = new PDO("sqlite:database/sqlite.db");
+        $types  = "'VAISALA', 'Rain1', 'Rain2', 'Waterlevel & Rain 2', 'UAAWS', 'BSWM_Lufft', 'Davis'";
+
+        $query = 'select v.dev_id from v_devices v '.
+            'where v.type in ('. $types .') AND v.basin = "'. $basin .'" AND v.status <> "1"'.
+            'order by v.province, v.district, v.municipality ASC';
+
+        return $connection->query($query)->fetchAll(PDO::FETCH_COLUMN, 0);
+    }
+
+    public static function GetDisabledRainfallDeviceFromBasin($basin) {
+        $connection = new PDO("sqlite:database/sqlite.db");
+        $types  = "'VAISALA', 'Rain1', 'Rain2', 'Waterlevel & Rain 2', 'UAAWS', 'BSWM_Lufft', 'Davis'";
+
+        $query = 'select v.dev_id from v_devices v '.
+            'where v.type in ('. $types .') AND v.basin = "'. $basin .'" AND v.status == "1" '.
+            'order by v.province, v.district, v.municipality ASC';
+
+        return $connection->query($query)->fetchAll(PDO::FETCH_COLUMN, 0);
+    }
+
     public static function GetWaterDeviceFromBasin($basin) {
         $connection = new PDO("sqlite:database/sqlite.db");
         $types ="'Waterlevel', 'Waterlevel & Rain 2'";
 
         $query = 'select v.*, riverindex from v_devices v '.
             'left outer join waterlevelinfo w on v.dev_id = w.devices_dev_id '.
-            'where v.type in ('. $types .') AND v.basin = "'. $basin .'"'.
+            'where v.type in ('. $types .') AND v.basin = "'. $basin .'" '.
             'order by v.province, w.riverindex IS NULL, w.riverindex ASC';
 
         return $connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function GetEnabledWaterDeviceFromBasin($basin) {
+        $connection = new PDO("sqlite:database/sqlite.db");
+        $types ="'Waterlevel', 'Waterlevel & Rain 2'";
+
+        $query = 'select v.dev_id, riverindex from v_devices v '.
+            'left outer join waterlevelinfo w on v.dev_id = w.devices_dev_id '.
+            'where v.type in ('. $types .') AND v.basin = "'. $basin .'" AND v.status <> "1" '.
+            'order by v.province, w.riverindex IS NULL, w.riverindex ASC';
+
+        return $connection->query($query)->fetchAll(PDO::FETCH_COLUMN, 0);
+    }
+
+    public static function GetDisabledWaterDeviceFromBasin($basin) {
+        $connection = new PDO("sqlite:database/sqlite.db");
+        $types ="'Waterlevel', 'Waterlevel & Rain 2'";
+
+        $query = 'select v.dev_id, riverindex from v_devices v '.
+            'left outer join waterlevelinfo w on v.dev_id = w.devices_dev_id '.
+            'where v.type in ('. $types .') AND v.basin = "'. $basin .'" AND v.status == "1" '.
+            'order by v.province, w.riverindex IS NULL, w.riverindex ASC';
+
+        return $connection->query($query)->fetchAll(PDO::FETCH_COLUMN, 0);
     }
 
     public static function GetTempDeviceFromBasin($basin) {
