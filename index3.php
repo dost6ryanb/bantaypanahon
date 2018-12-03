@@ -105,12 +105,6 @@
 
         google.charts.setOnLoadCallback(function () {
             $(document).ready(function () {
-                $(document).ajaxStart(function(){
-                    //$("#rainfall-canvas").LoadingOverlay("show");
-                });
-                $(document).ajaxStop(function(){
-                   // $("#rainfall-canvas").LoadingOverlay("hide");
-                });
                 initMap("map-canvas");
                 initControls();
                 initRainfallTable("rainfall-canvas");
@@ -220,7 +214,9 @@
             $.ajax({
                 beforeSend: function(){
                     if (div != '') {
-                        $("#"+div).LoadingOverlay("show");
+                        $("#"+div).LoadingOverlay("show", {
+                            zIndex: 50
+                        });
                     }
                 },
                 complete: function(){
@@ -421,7 +417,7 @@
 
         function initMapChooser(container) {
             choosercontainer = $(document.getElementById(container));
-            WV_MAP.controls[google.maps.ControlPosition.TOP_RIGHT].push(document.getElementById(container));
+            //WV_MAP.controls[google.maps.ControlPosition.TOP_RIGHT].push(document.getElementById(container));
 
             $("#toggleLayers").on('click', function () {
                 $(this).hide();
@@ -1392,7 +1388,18 @@
 
 </div>
 <div id='content'>
+    <div id='chooser' class="custom-ctrl btn-group">
+        <button id="toggleLayers"><img src="images/layers.png"/></button>
+        <form id="layersform" style="display: none">
+            <input id="toggleRainfallMap" type="radio" name="chooser_c" value="toggleRainfallMap" checked><label for="toggleRainfallMap">Rainfall</label> <br>
+            <input id="toggleDoppler" type="radio" name="chooser_c" value="toggleDoppler"><label for="toggleDoppler">Doppler</label> <br>
+            <input id="toggleTyphoonTrack" type="radio" name="chooser_c" value="toggleTyphoonTrack"><label for="toggleTyphoonTrack">Typhoon Track</label> <br>
+            <input id="toggleSatellite" type="radio" name="chooser_c" value="toggleSatellite"><label for="toggleSatellite">Satellite</label> <br>
+            <ul><li id="toggleWeatherForecast">Weather Forecast</li></ul>
+        </form>
+    </div>
     <div id='map-canvas'>
+
     </div>
     <div id='rainfall-canvas'>
     </div>
@@ -1419,16 +1426,7 @@
             <div class="legend"><img src="images/rain-torrential.png"/><span>100mm or more</span></div>
             <div class="legend"><img src="images/overlay_now.png"/><span>currently raining</span></div>
         </div>
-        <div id='chooser' class="custom-ctrl btn-group">
-            <button id="toggleLayers"><img src="images/layers.png"/></button>
-            <form id="layersform" style="display: none">
-                <input id="toggleRainfallMap" type="radio" name="chooser_c" value="toggleRainfallMap" checked><label for="toggleRainfallMap">Rainfall</label> <br>
-                <input id="toggleDoppler" type="radio" name="chooser_c" value="toggleDoppler"><label for="toggleDoppler">Doppler</label> <br>
-                <input id="toggleTyphoonTrack" type="radio" name="chooser_c" value="toggleTyphoonTrack"><label for="toggleTyphoonTrack">Typhoon Track</label> <br>
-                <input id="toggleSatellite" type="radio" name="chooser_c" value="toggleSatellite"><label for="toggleSatellite">Satellite</label> <br>
-                <ul><li id="toggleWeatherForecast">Weather Forecast</li></ul>
-            </form>
-        </div>
+
         <div id="dopplertime" class="custom-ctrl btn-group" style="display: none">
 
         </div>
