@@ -429,6 +429,11 @@
                 $("#toggleLayers").show();
             });
 
+            $("#layersform").on('mouseleave', function () {
+                $("#layersform").hide();
+                $("#toggleLayers").show();
+            });
+
             $("#toggleRainfallMap").on('click', function () {
                 if (ACTIVE_UI == 'rainfall') return; else hideCurrentAndShowNewUI(ACTIVE_UI, 'rainfall');
 
