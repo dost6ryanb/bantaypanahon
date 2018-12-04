@@ -4,13 +4,13 @@
 <head>
     <meta charset="utf-8">
     <title>DOST VI DRRMU - Waterlevel Map</title>
-    <script type="text/javascript" src='js/jquery-1.11.1.min.js'></script>
-    <script type="text/javascript" src='js/jquery-ui.min.js'></script>
-    <script type="text/javascript" src='js/date-en-US.js'></script>
+    <script type="text/javascript" src='vendor/jquery/jquery-1.12.4.min.js'></script>
+    <script type="text/javascript" src='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.js'></script>
+    <script type="text/javascript" src='vendor/datejs/date.js'></script>
     <script type="text/javascript" src='js/jquery.scrollTo.min.js'></script>
-    <link rel="stylesheet" href='css/jquery-ui.min.css'>
-    <link rel="stylesheet" href='css/jquery-ui.theme.min.css'>
-    <link rel="stylesheet" href='css/jquery-ui.structure.min.css'>
+    <link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.css'/>
+    <link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.theme.min.css'/>
+    <link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.structure.min.css'/>
     <link rel="stylesheet" type="text/css" href='css/style.css'/>
     <link rel="stylesheet" type="text/css" href='css/screen.css'/>
     <link rel="stylesheet" type="text/css" href='css/pages/waterlevel2.css'/>
