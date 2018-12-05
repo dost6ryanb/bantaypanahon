@@ -15,6 +15,7 @@ google.charts.load('current', {packages: ['corechart']});
 
 google.charts.setOnLoadCallback(function () {
     $(document).ready(function () {
+        $.LoadingOverlaySetup({zIndex: 50,fade: false});
         var string_date = moment(SDATE, 'YYYY-MM-DD').format('MMMM DD, YYYY');
         updateTitle('as of ' + string_date);
         initializeChartDivs('charts_div_container');
@@ -41,8 +42,8 @@ function initializeDateTimePickers(e1, e2) {
                 numberOfMonths: 2,
                 maxDate: maxDate
             })
-            .on( "change", function() {
-                to.datepicker( "option", "minDate", getDate( this ) );
+            .on("change", function () {
+                to.datepicker("option", "minDate", getDate(this));
 
                 //processDateRange(getDate(this), getDate(document.getElementById(e2)));
             }),
@@ -52,19 +53,20 @@ function initializeDateTimePickers(e1, e2) {
             numberOfMonths: 2,
             maxDate: maxDate
         })
-            .on( "change", function() {
-                from.datepicker( "option", "maxDate", getDate( this ) );
+            .on("change", function () {
+                from.datepicker("option", "maxDate", getDate(this));
 
                 //processDateRange(getDate(document.getElementById(e1)), getDate(this));
             });
 
 }
-function getDate( element ) {
+
+function getDate(element) {
     var dateFormat = "mm/dd/yy",
         date;
     try {
-        date = $.datepicker.parseDate( dateFormat, element.value );
-    } catch( error ) {
+        date = $.datepicker.parseDate(dateFormat, element.value);
+    } catch (error) {
         date = null;
     }
 
@@ -82,7 +84,7 @@ function processDateRange(d1, d2) {
 
         if (sdate.isSame(edate)) {
             updateTitle('for ' + sdate.format("MMMM DD, YYYY"));
-        } else if (sdate.isSame(edate, 'month')){
+        } else if (sdate.isSame(edate, 'month')) {
             updateTitle('for ' + sdate.format("MMMM DD") + " - " + edate.format("DD, YYYY"));
         } else {
             updateTitle('from ' + sdate.format("MMMM DD, YYYY") + " to " + edate.format("MMMM DD, YYYY"));
@@ -146,7 +148,7 @@ function initializeGoButton(el) {
     var $btn = $(document.getElementById(el));
     $btn.button();
 
-    $btn.on('click', function() {
+    $btn.on('click', function () {
         var d1 = getDate(document.getElementById('date_picker1'));
         var d2 = getDate(document.getElementById('date_picker2'));
 
@@ -198,12 +200,12 @@ function initializeChartDivs(div) {
             chart_header_class += ' connected';
         }
 
-        chart_div.html('<div class="'+chart_header_class+'"><p>' + chart_title + '</p></div><div id="chart_' + cur['dev_id'] + '" class="chart"></div>');
+        chart_div.html('<div class="' + chart_header_class + '"><p>' + chart_title + '</p></div><div id="chart_' + cur['dev_id'] + '" class="chart"></div>');
 
         if (cur['status'] != null && cur['status'] != '0') {
             chart_div.addClass('disabled');
-            chart_div.children('.chart').each(function(id, el) {
-               $(el).addClass('disabled');
+            chart_div.children('.chart').each(function (id, el) {
+                $(el).addClass('disabled');
             });
         }
 
@@ -212,10 +214,10 @@ function initializeChartDivs(div) {
 
 function updateChartsDiv(sizeclass) {
     var charts_container = $('#charts_div_container');
-    charts_container.find('.chart').each(function(id, el) {
+    charts_container.find('.chart').each(function (id, el) {
         $(el).html('');
     });
-    charts_container.find('.chart_div').each(function(id, el) {
+    charts_container.find('.chart_div').each(function (id, el) {
         $(el).removeClass('sm md lg xl xxl').addClass(sizeclass);
     });
 
@@ -225,7 +227,7 @@ function updateChartsDiv(sizeclass) {
 function initFetchData(history) {
     if (history) {
         app.history = true;
-        postGetDataBulk(waterlevel_device_ids_enabled, app.sdate, app.edate, 'waterlevel', onWaterlevelDataResponseSuccess, 'charts_div_container', function() {
+        postGetDataBulk(waterlevel_device_ids_enabled, app.sdate, app.edate, 'waterlevel', onWaterlevelDataResponseSuccess, 'charts_div_container', function () {
             postGetDataBulk(waterlevel_device_ids_disabled, app.sdate, app.edate, 'waterlevel', onWaterlevelDataResponseSuccess, '');
         });
 
@@ -233,57 +235,13 @@ function initFetchData(history) {
         postGetDataBulk(waterlevel_device_ids_enabled, app.sdate, app.edate, 'waterlevel', onWaterlevelDataResponseSuccess, 'charts_div_container');
     }
 
-
-    /*setTimeout(function () {
-
-        for (var i = 0; i < waterlevel_devices.length; i++) {
-            var cur = waterlevel_devices[i];
-
-            if (history) {
-                postGetData(cur['dev_id'], app.sdate, app.edate, "", onWaterlevelDataResponseSuccess);
-            } else {
-                if (cur['status'] == null || cur['status'] == '0') {
-                    postGetData(cur['dev_id'], app.sdate, app.edate, 144, onWaterlevelDataResponseSuccess);
-                }
-            }
-        }
-    }, 200);*/
-}
-
-
-function postGetData(dev_id, sdate, edate, limit, successcallback) {
-    $.ajax({
-        url: DOCUMENT_ROOT + 'data3.php',
-        type: "POST",
-        data: {
-            start: 0,
-            limit: limit,
-            sdate: sdate,
-            edate: edate,
-            pattern: dev_id,
-        },
-        dataType: 'json',
-        tryCount: 0,
-        retry: 20
-    })
-        .done(successcallback)
-        .fail(function (f, n) {
-            onRainfallDataResponseFail(dev_id)
-        });
 }
 
 function postGetDataBulk(dev_ids, sdate, edate, type, successcallback, div, cba) {
+    if (div != '') {
+        $("#" + div).LoadingOverlay("show");
+    }
     $.ajax({
-        beforeSend: function(){
-            if (div != '') {
-                $("#"+div).LoadingOverlay("show");
-            }
-        },
-        complete: function(){
-            if (div != '') {
-                $("#"+div).LoadingOverlay("hide");
-            }
-        },
         url: DOCUMENT_ROOT + 'data5.php',
         type: "POST",
         data: {
@@ -295,18 +253,21 @@ function postGetDataBulk(dev_ids, sdate, edate, type, successcallback, div, cba)
         dataType: 'json',
         tryCount: 0,
         retry: 20
-    })
-        .done(function(d) {
-            if (cba !== 'undefined' && typeof  cba === 'function') {
-                cba();
-            }
-            d.forEach(function(e) {
-                successcallback(e);
-            })
-        });
-    /*.fail(function (f, n) {
-        onRainfallDataResponseFail(dev_id)
-    });*/
+    }).done(function (d) {
+        if (div != '') {
+            $("#" + div).LoadingOverlay("hide");
+        }
+        if (cba !== 'undefined' && typeof  cba === 'function') {
+            cba();
+        }
+        d.forEach(function (e) {
+            successcallback(e);
+        })
+    }).fail(function (f, n) {
+        if (div != '') {
+            $("#" + div).LoadingOverlay("hide");
+        }
+    });
 }
 
 function onWaterlevelDataResponseSuccess(data) {
@@ -315,12 +276,12 @@ function onWaterlevelDataResponseSuccess(data) {
 
     if (!app.history) {
         //console.log(chartdiv);
-       // console.log($(document.getElementById(div)).hasClass( "disabled" ));
-        if ($(document.getElementById(div)).hasClass( "disabled" )) return;
+        // console.log($(document.getElementById(div)).hasClass( "disabled" ));
+        if ($(document.getElementById(div)).hasClass("disabled")) return;
     }
 
     if (app.history) {
-        var newdata = $.grep(data.Data, function(n, i) {
+        var newdata = $.grep(data.Data, function (n, i) {
             thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
             result = thisdate.between(app.startDateTime, app.endDateTime);
             return result;

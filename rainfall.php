@@ -193,17 +193,10 @@
         };
 
         var fetchDataBulk = function (dev_ids, sdate, edate, type, divloading, cba) {
+            if (divloading != '') {
+                $("#" + divloading).LoadingOverlay("show");
+            }
             $.ajax({
-                beforeSend: function () {
-                    if (divloading != '') {
-                        $("#" + divloading).LoadingOverlay("show");
-                    }
-                },
-                complete: function () {
-                    if (divloading != '') {
-                        $("#" + divloading).LoadingOverlay("hide");
-                    }
-                },
                 url: DOCUMENT_ROOT + 'data5.php',
                 type: "POST",
                 data: {
@@ -214,6 +207,9 @@
                 },
                 dataType: 'json',
             }).done(function (data) {
+                if (divloading != '') {
+                    $("#" + divloading).LoadingOverlay("hide");
+                }
                 if (cba !== 'undefined' && typeof  cba === 'function') {
                     cba();
                 }
@@ -222,6 +218,9 @@
                 });
 
             }).fail(function (f, n) {
+                if (divloading != '') {
+                    $("#" + divloading).LoadingOverlay("hide");
+                }
                 dev_ids.forEach(function (dev_id) {
                     putRetryOnTD(dev_id);
                 });

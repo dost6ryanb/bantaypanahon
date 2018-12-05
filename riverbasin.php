@@ -109,11 +109,10 @@ switch ($q) {
 
         google.charts.setOnLoadCallback(function () {
             $(document).ready(function () {
+                $.LoadingOverlaySetup({zIndex: 50, fade: false});
                 initMap("map-canvas");
                 initMapLegends('legends');
                 initRainfallTable("rainfall-canvas");
-                //initTicker('ticker--1');
-                //initTicker('ticker--2');
                 initChartDivs('charts_div_container');
                 initFetchData();
             });
@@ -134,20 +133,6 @@ switch ($q) {
                 postGetDataBulk(rainfall_device_ids_enabled, key['sdate'], key['edate'], 'rainfall', onRainfallDataResponseSuccess, 'map-canvas');
                 postGetDataBulk(waterlevel_device_ids_enabled, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, 'charts_div_container');
             }
-
-            /*setTimeout(function () {
-                for (var i = 0; i < temperature_devices.length; i++) {
-                    var cur = temperature_devices[i];
-                    // if (history) {
-                    postGetData(cur.dev_id, key['sdate'], key['sdate'], 96, onTemperatureDataResponseSuccess);
-                    // } else {
-                    // 	if (cur['status'] == null || cur['status'] == '0') {
-                    // 		postGetData(cur.dev_id, key['sdate'], "", "", onTemperatureDataResponseSuccess);
-                    // 	}
-                    // }
-                }
-
-            }, 200);*/
         }
 
         function postGetData(dev_id, sdate, edate, limit, successcallback) {
@@ -176,9 +161,7 @@ switch ($q) {
             $.ajax({
                 beforeSend: function () {
                     if (div != '') {
-                        $("#" + div).LoadingOverlay("show", {
-                            zIndex: 50
-                        });
+                        $("#" + div).LoadingOverlay("show");
                     }
                 },
                 complete: function () {
@@ -197,18 +180,18 @@ switch ($q) {
                 dataType: 'json',
                 tryCount: 0,
                 retry: 20
-            })
-                .done(function (d) {
-                    if (cba !== 'undefined' && typeof  cba === 'function') {
-                        cba();
-                    }
-                    d.forEach(function (e) {
-                        successcallback(e);
-                    })
-                });
-            /*.fail(function (f, n) {
-                onRainfallDataResponseFail(dev_id)
-            });*/
+            }).done(function (d) {
+                if (cba !== 'undefined' && typeof  cba === 'function') {
+                    cba();
+                }
+                d.forEach(function (e) {
+                    successcallback(e);
+                })
+            }).fail(function (f, n) {
+                if (div != '') {
+                    $("#" + div).LoadingOverlay("hide");
+                }
+            });
         }
 
         function onRainfallDataResponseSuccess(data) {
@@ -779,7 +762,7 @@ switch ($q) {
     </div>
 </div>
 <div id='footer'>
-    <p>Contact Bantay Panahon on <a href="https://www.facebook.com/bantaypanahonph/" target="_blank">Facebook</a> </p>
+    <p>Contact Bantay Panahon on <a href="https://www.facebook.com/bantaypanahonph/" target="_blank">Facebook</a></p>
     <p>DRRM Unit - Department of Science and Technology Regional Office No. VI</p>
 </div>
 <script type="text/javascript">
