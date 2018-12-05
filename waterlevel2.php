@@ -1,7 +1,7 @@
-<?php include_once 'lib/init3.php' ?>
-<html>
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <?php include_once 'lib/init3.php' ?>
     <meta charset="utf-8">
     <title>DOST VI DRRMU - Waterlevel Map</title>
     <script type="text/javascript" src='vendor/jquery/jquery-1.12.4.min.js'></script>
@@ -18,7 +18,8 @@
     <script type="text/javascript"
             src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA4yau_nw40dWy2TwW4OdUq4OJKbFs1EOc&sensor=false"></script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <script type="text/javascript" src="vendor/gasparesganga-jquery-loading-overlay-2.1.6/loadingoverlay.min.js"></script>
+    <script type="text/javascript"
+            src="vendor/gasparesganga-jquery-loading-overlay-2.1.6/loadingoverlay.min.js"></script>
     <script type="text/javascript">
         setTimeout(function () {
             window.location.href = window.location.href;
@@ -78,7 +79,7 @@
         function initFetchData(history) {
             if (history) {
                 HISTORY = true;
-                postGetDataBulk(waterlevel_device_ids_enabled, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, 'map-canvas', function() {
+                postGetDataBulk(waterlevel_device_ids_enabled, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, 'map-canvas', function () {
                     postGetDataBulk(waterlevel_device_ids_disabled, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, '');
                 });
             } else {
@@ -88,16 +89,16 @@
 
         function postGetDataBulk(dev_ids, sdate, edate, type, successcallback, div, cba) {
             $.ajax({
-                beforeSend: function(){
+                beforeSend: function () {
                     if (div != '') {
-                        $("#"+div).LoadingOverlay("show", {
+                        $("#" + div).LoadingOverlay("show", {
                             zIndex: 50
                         });
                     }
                 },
-                complete: function(){
+                complete: function () {
                     if (div != '') {
-                        $("#"+div).LoadingOverlay("hide");
+                        $("#" + div).LoadingOverlay("hide");
                     }
                 },
                 url: DOCUMENT_ROOT + 'data5.php',
@@ -112,11 +113,11 @@
                 tryCount: 0,
                 retry: 20
             })
-                .done(function(d) {
+                .done(function (d) {
                     if (cba !== 'undefined' && typeof  cba === 'function') {
                         cba();
                     }
-                    d.forEach(function(e) {
+                    d.forEach(function (e) {
                         successcallback(e);
                     })
                 });
@@ -124,7 +125,7 @@
 
         function onWaterlevelDataResponseSuccess(data) {
             if (HISTORY) {
-                var newdata = $.grep(data.Data, function(n, i) {
+                var newdata = $.grep(data.Data, function (n, i) {
                     thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
                     result = thisdate.between(key['startDateTime'], key['endDateTime']);
                     //if (result) console.log(thisdate.toString() + " - " + result);
@@ -143,10 +144,10 @@
             $('#loadedwaterleveldevices').text(++key['loadedwaterleveldevices']);
 
             var last = data.Data.length - 1;
-            if (data.Data.length == 0 || (typeof  data.Data[last]['Waterlevel'] == 'undefined') ||  (typeof data.Data[last - 1]['Waterlevel'] == 'undefined')) {
+            if (data.Data.length == 0 || (typeof  data.Data[last]['Waterlevel'] == 'undefined') || (typeof data.Data[last - 1]['Waterlevel'] == 'undefined')) {
                 updateWaterlevelTable(device_id, '[NO DATA]', '', '', 'nodata');
             } else {
-                 var device = search(waterlevel_devices, 'dev_id', device_id);
+                var device = search(waterlevel_devices, 'dev_id', device_id);
                 var devicedtr = Date.parseExact(data.Data[last]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
                 var serverdtr = Date.parseExact(key['serverdate'] + ' ' + key['servertime'] + ':00', 'yyyy-MM-dd HH:mm:ss');
 
@@ -163,8 +164,6 @@
                 } else {
                     updateWaterlevelTable(device_id, hour12time, wtrlvl, deviation, 'dataok');
                 }
-
-
 
 
                 var marker_url;
@@ -322,7 +321,7 @@
                 onSelect: function (data) {
                     sdate.find('a').text(data);
                     newsdate = Date.parseExact(data, 'MM/dd/yyyy');
-                    newedate= Date.parseExact(data, 'MM/dd/yyyy');
+                    newedate = Date.parseExact(data, 'MM/dd/yyyy');
                     newedate = newedate.addDays(1);
                     key['sdate'] = newsdate.toString('yyyy-MM-dd');
                     key['edate'] = newedate.toString('yyyy-MM-dd');
@@ -611,11 +610,9 @@
             </ul>
         </div>
     </div>
-
-
 </div>
 <div id='content'>
-    <div id="riverbasins"  class="custom-ctrl">
+    <div id="riverbasins" class="custom-ctrl">
         <b>River Basin Map</b>
         <ul>
             <li><a href="riverbasin.php?q=1">Aklan River Basin</a></li>
@@ -628,6 +625,8 @@
     </div>
     <div id='waterlevel-table'>
     </div>
+    <div id="charts_div_container">
+    </div>
     <div style="display: none">
         <div id='legends'>
             <div style="display: none">
@@ -639,61 +638,14 @@
 
 </div>
 <div id='footer'>
-    <div id="ticker1">
-        <ul id='ticker1list'>
-        </ul>
-    </div>
-    <div id="charts_div_container">
-    </div>
-    <div id='contactus'>
-        <div class='contact'>
-            <p class='contactname'>Department of Science and Technology Regional Office No. VI</p>
-            <p class='contactaddress'>Magsaysay Village La paz, Iloilo 5000</p>
-            <p class='contactnumber'>(033) 508-6739 / 320-0908 (Telefax)</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Aklan Provincial Science & Technology Center</p>
-            <p class='contactaddress'>Capitol Compound, Kalibo, Aklan</p>
-            <p class='contactnumber'>(036) 500-7550 (Telefax)</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Antique Provincial Science & Technology Center</p>
-            <p class='contactaddress'>San Jose de Buenevista, Antique</p>
-            <p class='contactnumber'>(036) 540-8025</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Capiz Provincial Science & Technology Center</p>
-            <p class='contactaddress'>CapSU, Roxas City, Capiz</p>
-            <p class='contactnumber'>(036) 522-1044</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Guimaras Provincial Science & Technology Center</p>
-            <p class='contactaddress'>PSHS Research Center, Jordan, Guimaras</p>
-            <p class='contactnumber'>(033) 396-1765</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Iloilo Provincial Science & Technology Center</p>
-            <p class='contactaddress'>DOST VI Compound, Iloilo City, Iloilo</p>
-            <p class='contactnumber'>(033) 508-7183</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Negros Occidental Provincial Science & Technology Center</p>
-            <p class='contactaddress'>Cottage Road, Bacolod City</p>
-            <p class='contactnumber'>(034) 707-0170</p>
-        </div>
-    </div>
-    <div id='footerbanner' class='centeralign'>
-        Disaster Risk Reduction and Management Unit<br>
-        Department of Science and Technology Regional Office No. VI<br>
-        Copyright 2014
-    </div>
+    <p>Contact Bantay Panahon on <a href="https://www.facebook.com/bantaypanahonph/" target="_blank">Facebook</a></p>
+    <p>DRRM Unit - Department of Science and Technology Regional Office No. VI</p>
 </div>
-</body>
 <script type="text/javascript">
     var waterlevel_devices = <?php echo json_encode(Devices::GetDevicesByParam('Waterlevel'));?>;
     var waterlevel_device_ids_enabled = <?php echo json_encode(Devices::GetEnabledDeviceIdsByParam('Waterlevel'));?>;
     var waterlevel_device_ids_disabled = <?php echo json_encode(Devices::GetDisabledDeviceIdsByParam('Waterlevel'));?>;
 </script>
 <?php //include_once("analyticstracking.php") ?>
-
+</body>
 </html>

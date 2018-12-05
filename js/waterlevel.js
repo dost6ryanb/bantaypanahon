@@ -21,6 +21,9 @@ google.charts.setOnLoadCallback(function () {
         initializeDateTimePickers('date_picker1', 'date_picker2');
         initializeGoButton('go');
         initFetchData();
+        $('#beta-info').one('click', function () {
+            $(this).hide();
+        });
     });
 });
 

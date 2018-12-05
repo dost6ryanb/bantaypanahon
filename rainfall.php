@@ -1,7 +1,9 @@
-<?php include_once 'lib/init3.php' ?>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>DOST VI - DRRMU - Rainfall Monitoring</title>
+    <?php include_once 'lib/init3.php' ?>
+    <meta charset="utf-8">
+    <title>DOST VI DRRMU - Home</title>
     <link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.css'/>
     <link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.theme.min.css'/>
     <link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.structure.min.css'/>
@@ -77,51 +79,10 @@
         </script>
     </div>
 </div>
-<div id="footer">
-    <div id='contactus'>
-        <div class='contact'>
-            <p class='contactname'>Department of Science and Technology Regional Office No. VI</p>
-            <p class='contactaddress'>Magsaysay Village La paz, Iloilo 5000</p>
-            <p class='contactnumber'>(033) 508-6739 / 320-0908 (Telefax)</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Aklan Provincial Science & Technology Center</p>
-            <p class='contactaddress'>Capitol Compound, Kalibo, Aklan</p>
-            <p class='contactnumber'>(036) 500-7550 (Telefax)</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Antique Provincial Science & Technology Center</p>
-            <p class='contactaddress'>San Jose de Buenevista, Antique</p>
-            <p class='contactnumber'>(036) 540-8025</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Capiz Provincial Science & Technology Center</p>
-            <p class='contactaddress'>CapSU, Roxas City, Capiz</p>
-            <p class='contactnumber'>(036) 522-1044</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Guimaras Provincial Science & Technology Center</p>
-            <p class='contactaddress'>PSHS Research Center, Jordan, Guimaras</p>
-            <p class='contactnumber'>(033) 396-1765</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Iloilo Provincial Science & Technology Center</p>
-            <p class='contactaddress'>DOST VI Compound, Iloilo City, Iloilo</p>
-            <p class='contactnumber'>(033) 508-7183</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Negros Occidental Provincial Science & Technology Center</p>
-            <p class='contactaddress'>Cottage Road, Bacolod City</p>
-            <p class='contactnumber'>(034) 707-0170</p>
-        </div>
-    </div>
-    <div id='footerbanner' class='centeralign'>
-        Disaster Risk Reduction and Management Unit</br>
-        Department of Science and Technology Regional Office No. VI</br>
-        Copyright 2014
-    </div>
+<div id='footer'>
+    <p>Contact Bantay Panahon on <a href="https://www.facebook.com/bantaypanahonph/" target="_blank">Facebook</a></p>
+    <p>DRRM Unit - Department of Science and Technology Regional Office No. VI</p>
 </div>
-</body>
 <script type="text/javascript" src='vendor/jquery/jquery-1.12.4.min.js'></script>
 <script type="text/javascript" src='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.js'></script>
 <script type="text/javascript" src='vendor/datejs/date.js'></script>
@@ -231,49 +192,48 @@
                 });
         };
 
-        var fetchDataBulk = function(dev_ids, sdate, edate, type, divloading, cba) {
-          $.ajax({
-              beforeSend: function(){
-                  if (divloading != '') {
-                      $("#"+divloading).LoadingOverlay("show");
-                  }
-              },
-              complete: function(){
-                  if (divloading != '') {
-                      $("#"+divloading).LoadingOverlay("hide");
-                  }
-              },
-              url: DOCUMENT_ROOT + 'data5.php',
-              type: "POST",
-              data: {
-                  dev_ids: dev_ids,
-                  sdate: sdate,
-                  edate: edate,
-                  type: type,
-              },
-              dataType: 'json',
-          }).done(function(data) {
-              if (cba !== 'undefined' && typeof  cba === 'function') {
-                  cba();
-              }
-              data.forEach(function(datum) {
-                  onDataArrive(datum);
-              });
+        var fetchDataBulk = function (dev_ids, sdate, edate, type, divloading, cba) {
+            $.ajax({
+                beforeSend: function () {
+                    if (divloading != '') {
+                        $("#" + divloading).LoadingOverlay("show");
+                    }
+                },
+                complete: function () {
+                    if (divloading != '') {
+                        $("#" + divloading).LoadingOverlay("hide");
+                    }
+                },
+                url: DOCUMENT_ROOT + 'data5.php',
+                type: "POST",
+                data: {
+                    dev_ids: dev_ids,
+                    sdate: sdate,
+                    edate: edate,
+                    type: type,
+                },
+                dataType: 'json',
+            }).done(function (data) {
+                if (cba !== 'undefined' && typeof  cba === 'function') {
+                    cba();
+                }
+                data.forEach(function (datum) {
+                    onDataArrive(datum);
+                });
 
-          }).fail(function(f, n) {
-              dev_ids.forEach(function(dev_id) {
-                  putRetryOnTD(dev_id);
-              });
+            }).fail(function (f, n) {
+                dev_ids.forEach(function (dev_id) {
+                    putRetryOnTD(dev_id);
+                });
 
-          });
+            });
         };
-
 
 
         var onDataArrive = function (data) {
             var dev_id = data[0].station_id;
 
-            var newdata = $.grep(data.Data, function(n, i) {
+            var newdata = $.grep(data.Data, function (n, i) {
                 thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
                 result = thisdate.between(MyApp.startDateTime, MyApp.endDateTime);
                 //if (result) console.log(thisdate.toString() + " - " + result);
@@ -346,9 +306,9 @@
                 MyApp.sdate = yesterdayDateText;
                 MyApp.edate = baseDateText;
                 //if (MyApp.SERVER_DATE != baseDateText) { //realtime
-                    futureDate.add({days: 1});
-                    var futureDateText = futureDate.toString("yyyy-MM-dd");
-                    MyApp.edate = futureDateText;
+                futureDate.add({days: 1});
+                var futureDateText = futureDate.toString("yyyy-MM-dd");
+                MyApp.edate = futureDateText;
                 //}
 
                 MyApp.startDateTime = Date.parseExact(MyApp.sdate + ' 08:00:00', 'yyyy-MM-dd HH:mm:ss');
@@ -388,18 +348,18 @@
                     fnOnClickCallBack(htmlID);
                 });
 
-                var rainfall_device_ids_enabled = _.map(_.where(selectedDevices, {status: '0'}), function(d){
+                var rainfall_device_ids_enabled = _.map(_.where(selectedDevices, {status: '0'}), function (d) {
                     return d['dev_id'];
                 });
 
-                var rainfall_device_ids_disabled = _.map(_.filter(selectedDevices, _.negate(_.matches({status: '0'}))), function(d){
+                var rainfall_device_ids_disabled = _.map(_.filter(selectedDevices, _.negate(_.matches({status: '0'}))), function (d) {
                     return d['dev_id'];
                 });
 
                 if (MyApp.SERVER_DATE == baseDateText) {
                     fetchDataBulk(rainfall_device_ids_enabled, MyApp.sdate, MyApp.edate, 'rainfall', htmlID);
                 } else {
-                    fetchDataBulk(rainfall_device_ids_enabled, MyApp.sdate, MyApp.edate, 'rainfall', htmlID, function() {
+                    fetchDataBulk(rainfall_device_ids_enabled, MyApp.sdate, MyApp.edate, 'rainfall', htmlID, function () {
                         fetchDataBulk(rainfall_device_ids_disabled, MyApp.sdate, MyApp.edate, 'rainfall', '');
                     });
                 }
@@ -455,7 +415,7 @@
 
         //Some info
         $('#info-refresh').one('click', function () {
-            $(this).fadeOut("fast");
+            $(this).hide();
         });
     }
 
@@ -550,5 +510,6 @@
     }
 
 </script>
-<?php include_once("analyticstracking.php") ?>
+<?php //include_once("analyticstracking.php") ?>
+</body>
 </html>

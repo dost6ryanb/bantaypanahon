@@ -72,13 +72,15 @@
 }
 
 .overlay {
-	color:white;
-       height: 6px;
-       z-index: 1;
-       left: 60px;
-       top: 60px;
-	   font-size:8pt;
-	   background:#2869E1;
+	color: white;
+	height: 20px;
+	z-index: 1;
+	left: 60px;
+	top: 60px;
+	font-size: 8pt;
+	background: #2869E1;
+	margin: 0px;
+	padding: 3px 5px 0;
 }
 
 .divrowwrapper {

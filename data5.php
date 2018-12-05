@@ -45,9 +45,10 @@ foreach ($dev_ids as $i => $dev_id) {
     }
 
     if (!empty($read)) {
+        if ($i != 0) $response .= ' ,';
         $response .= $read;
         $responseCount++;
-        if ($i != $len - 1) $response .= ', ';
+
     }
 }
 $response .= ']';
