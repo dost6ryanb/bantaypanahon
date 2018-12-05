@@ -69,6 +69,7 @@
 
         google.charts.setOnLoadCallback(function () {
             $(document).ready(function () {
+                $.LoadingOverlaySetup({zIndex: 50,fade: false});
                 initMap("map-canvas");
                 initWaterlevelTable("waterlevel-table");
                 initChartDivs('charts_div_container');
@@ -88,19 +89,10 @@
         }
 
         function postGetDataBulk(dev_ids, sdate, edate, type, successcallback, div, cba) {
+            if (div != '') {
+                $("#" + div).LoadingOverlay("show");
+            }
             $.ajax({
-                beforeSend: function () {
-                    if (div != '') {
-                        $("#" + div).LoadingOverlay("show", {
-                            zIndex: 50
-                        });
-                    }
-                },
-                complete: function () {
-                    if (div != '') {
-                        $("#" + div).LoadingOverlay("hide");
-                    }
-                },
                 url: DOCUMENT_ROOT + 'data5.php',
                 type: "POST",
                 data: {
@@ -112,15 +104,21 @@
                 dataType: 'json',
                 tryCount: 0,
                 retry: 20
-            })
-                .done(function (d) {
-                    if (cba !== 'undefined' && typeof  cba === 'function') {
-                        cba();
-                    }
-                    d.forEach(function (e) {
-                        successcallback(e);
-                    })
-                });
+            }).done(function (d) {
+                if (div != '') {
+                    $("#" + div).LoadingOverlay("hide");
+                }
+                if (cba !== 'undefined' && typeof  cba === 'function') {
+                    cba();
+                }
+                d.forEach(function (e) {
+                    successcallback(e);
+                })
+            }).fail(function (f, n) {
+                if (div != '') {
+                    $("#" + div).LoadingOverlay("hide");
+                }
+            });
         }
 
         function onWaterlevelDataResponseSuccess(data) {

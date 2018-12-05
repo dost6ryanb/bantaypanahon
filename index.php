@@ -70,6 +70,7 @@
         $.xhrPool = [];
         $.xhrPool.abortAll = function () {
             $(this).each(function (idx, jqXHR) {
+                console.log('abort ajax');
                 jqXHR.abort();
             });
             $.xhrPool.length = 0
@@ -77,6 +78,7 @@
 
         $.ajaxSetup({
             beforeSend: function (jqXHR) {
+                console.log('push ajax');
                 $.xhrPool.push(jqXHR);
             },
             complete: function (jqXHR) {
@@ -84,7 +86,7 @@
                 if (index > -1) {
                     $.xhrPool.splice(index, 1);
                 }
-            },
+            }/*,
             error: function (jqXHR, exception) {
                 if (jqXHR.status === 0) {
                     console.log('Not connect.\n Verify Network.');
@@ -101,16 +103,15 @@
                 } else {
                     console.log('Uncaught Error.\n' + jqXHR.responseText);
                 }
-            }
+            }*/
         });
 
         google.charts.setOnLoadCallback(function () {
             $(document).ready(function () {
+                $.LoadingOverlaySetup({zIndex: 50,fade: false});
                 initMap("map-canvas");
                 initControls();
                 initRainfallTable("rainfall-canvas");
-                //initTicker('ticker--1');
-                //initTicker('ticker--2');
                 initChartDivs('charts_div_container');
                 initFetchData();
                 initFeedee();
@@ -210,19 +211,10 @@
         }
 
         function postGetDataBulk(dev_ids, sdate, edate, type, successcallback, div, cba) {
+            if (div != '') {
+                $("#" + div).LoadingOverlay("show");
+            }
             $.ajax({
-                beforeSend: function () {
-                    if (div != '') {
-                        $("#" + div).LoadingOverlay("show", {
-                            zIndex: 50
-                        });
-                    }
-                },
-                complete: function () {
-                    if (div != '') {
-                        $("#" + div).LoadingOverlay("hide");
-                    }
-                },
                 url: DOCUMENT_ROOT + 'data5.php',
                 type: "POST",
                 data: {
@@ -234,18 +226,21 @@
                 dataType: 'json',
                 tryCount: 0,
                 retry: 20
-            })
-                .done(function (d) {
-                    if (cba !== 'undefined' && typeof  cba === 'function') {
-                        cba();
-                    }
-                    d.forEach(function (e) {
-                        successcallback(e);
-                    })
-                });
-            /*.fail(function (f, n) {
-                onRainfallDataResponseFail(dev_id)
-            });*/
+            }).done(function (d) {
+                if (div != '') {
+                    $("#" + div).LoadingOverlay("hide");
+                }
+                if (cba !== 'undefined' && typeof  cba === 'function') {
+                    cba();
+                }
+                d.forEach(function (e) {
+                    successcallback(e);
+                })
+            }).fail(function (f, n) {
+                if (div != '') {
+                    $("#" + div).LoadingOverlay("hide");
+                }
+            });
         }
 
         function onRainfallDataResponseSuccess(data) {
@@ -1477,7 +1472,7 @@
     </div>
 </div>
 <div id='footer'>
-    <p>Contact Bantay Panahon on <a href="https://www.facebook.com/bantaypanahonph/" target="_blank">Facebook</a> </p>
+    <p>Contact Bantay Panahon on <a href="https://www.facebook.com/bantaypanahonph/" target="_blank">Facebook</a></p>
     <p>DRRM Unit - Department of Science and Technology Regional Office No. VI</p>
 </div>
 <script type="text/javascript">
