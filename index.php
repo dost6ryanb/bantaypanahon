@@ -1,7 +1,7 @@
-<?php include_once 'lib/init3.php' ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <?php include_once 'lib/init3.php' ?>
     <meta charset="utf-8">
     <title>DOST VI DRRMU - Home</title>
     <link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.css'/>
@@ -1477,9 +1477,9 @@
     </div>
 </div>
 <div id='footer'>
-
+    <p>Contact Bantay Panahon on <a href="https://www.facebook.com/bantaypanahonph/" target="_blank">Facebook</a> </p>
+    <p>DRRM Unit - Department of Science and Technology Regional Office No. VI</p>
 </div>
-</body>
 <script type="text/javascript">
     var rainfall_devices = <?php echo json_encode(Devices::GetDevicesByParam('Rainfall'));?>;
     var waterlevel_devices = <?php echo json_encode(Devices::GetDevicesByParam('Waterlevel'));?>;
@@ -1491,4 +1491,5 @@
 
 </script>
 <?php //include_once("analyticstracking.php") ?>
+</body>
 </html>

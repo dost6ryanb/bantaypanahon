@@ -1,4 +1,3 @@
-<?php include_once 'lib/init3.php' ?>
 <?php
 if (!empty($_GET['q'])) {
     $q = $_GET['q'];
@@ -38,6 +37,7 @@ switch ($q) {
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <?php include_once 'lib/init3.php' ?>
     <meta charset="utf-8">
     <title>DOST VI DRRMU - River Basin Map</title>
     <link rel="stylesheet" href='vendor/jquery-ui-1.12.0.custom/jquery-ui.min.css'/>
@@ -124,14 +124,14 @@ switch ($q) {
             if (history) {
                 HISTORY = true;
 
-                postGetDataBulk(rainfall_device_ids_enabled, key['sdate'], key['edate'], 'rainfall', onRainfallDataResponseSuccess , 'map-canvas', function() {
+                postGetDataBulk(rainfall_device_ids_enabled, key['sdate'], key['edate'], 'rainfall', onRainfallDataResponseSuccess, 'map-canvas', function () {
                     postGetDataBulk(rainfall_device_ids_disabled, key['sdate'], key['edate'], 'rainfall', onRainfallDataResponseSuccess, '');
                 });
-                postGetDataBulk(waterlevel_device_ids_enabled, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, 'charts_div_container', function() {
+                postGetDataBulk(waterlevel_device_ids_enabled, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, 'charts_div_container', function () {
                     postGetDataBulk(waterlevel_device_ids_disabled, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, '');
                 });
             } else {
-                postGetDataBulk(rainfall_device_ids_enabled, key['sdate'], key['edate'], 'rainfall', onRainfallDataResponseSuccess , 'map-canvas');
+                postGetDataBulk(rainfall_device_ids_enabled, key['sdate'], key['edate'], 'rainfall', onRainfallDataResponseSuccess, 'map-canvas');
                 postGetDataBulk(waterlevel_device_ids_enabled, key['sdate'], key['edate'], 'waterlevel', onWaterlevelDataResponseSuccess, 'charts_div_container');
             }
 
@@ -174,16 +174,16 @@ switch ($q) {
 
         function postGetDataBulk(dev_ids, sdate, edate, type, successcallback, div, cba) {
             $.ajax({
-                beforeSend: function(){
+                beforeSend: function () {
                     if (div != '') {
-                        $("#"+div).LoadingOverlay("show", {
+                        $("#" + div).LoadingOverlay("show", {
                             zIndex: 50
                         });
                     }
                 },
-                complete: function(){
+                complete: function () {
                     if (div != '') {
-                        $("#"+div).LoadingOverlay("hide");
+                        $("#" + div).LoadingOverlay("hide");
                     }
                 },
                 url: DOCUMENT_ROOT + 'data5.php',
@@ -198,11 +198,11 @@ switch ($q) {
                 tryCount: 0,
                 retry: 20
             })
-                .done(function(d) {
+                .done(function (d) {
                     if (cba !== 'undefined' && typeof  cba === 'function') {
                         cba();
                     }
-                    d.forEach(function(e) {
+                    d.forEach(function (e) {
                         successcallback(e);
                     })
                 });
@@ -779,50 +779,9 @@ switch ($q) {
     </div>
 </div>
 <div id='footer'>
-    <div id='contactus'>
-        <div class='contact'>
-            <p class='contactname'>Department of Science and Technology Regional Office No. VI</p>
-            <p class='contactaddress'>Magsaysay Village La paz, Iloilo 5000</p>
-            <p class='contactnumber'>(033) 508-6739 / 320-0908 (Telefax)</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Aklan Provincial Science & Technology Center</p>
-            <p class='contactaddress'>Capitol Compound, Kalibo, Aklan</p>
-            <p class='contactnumber'>(036) 500-7550 (Telefax)</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Antique Provincial Science & Technology Center</p>
-            <p class='contactaddress'>San Jose de Buenevista, Antique</p>
-            <p class='contactnumber'>(036) 540-8025</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Capiz Provincial Science & Technology Center</p>
-            <p class='contactaddress'>CapSU, Roxas City, Capiz</p>
-            <p class='contactnumber'>(036) 522-1044</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Guimaras Provincial Science & Technology Center</p>
-            <p class='contactaddress'>PSHS Research Center, Jordan, Guimaras</p>
-            <p class='contactnumber'>(033) 396-1765</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Iloilo Provincial Science & Technology Center</p>
-            <p class='contactaddress'>DOST VI Compound, Iloilo City, Iloilo</p>
-            <p class='contactnumber'>(033) 508-7183</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Negros Occidental Provincial Science & Technology Center</p>
-            <p class='contactaddress'>Cottage Road, Bacolod City</p>
-            <p class='contactnumber'>(034) 707-0170</p>
-        </div>
-    </div>
-    <div id='footerbanner' class='centeralign'>
-        Disaster Risk Reduction and Management Unit</br>
-        Department of Science and Technology Regional Office No. VI</br>
-        Copyright 2014
-    </div>
+    <p>Contact Bantay Panahon on <a href="https://www.facebook.com/bantaypanahonph/" target="_blank">Facebook</a> </p>
+    <p>DRRM Unit - Department of Science and Technology Regional Office No. VI</p>
 </div>
-</body>
 <script type="text/javascript">
     var rainfall_devices = <?php echo json_encode(Devices::GetRainFallDeviceFromBasin($riverbasin));?>;
     var waterlevel_devices = <?php echo json_encode(Devices::GetWaterDeviceFromBasin($riverbasin));?>;
@@ -831,7 +790,7 @@ switch ($q) {
     var rainfall_device_ids_disabled = <?php echo json_encode(Devices::GetDisabledRainfallDeviceFromBasin($riverbasin));?>;
     var waterlevel_device_ids_enabled = <?php echo json_encode(Devices::GetEnabledWaterDeviceFromBasin($riverbasin));?>;
     var waterlevel_device_ids_disabled = <?php echo json_encode(Devices::GetDisabledWaterDeviceFromBasin($riverbasin));?>;
-
 </script>
 <?php //include_once("analyticstracking.php") ?>
+</body>
 </html>

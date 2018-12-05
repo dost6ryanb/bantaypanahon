@@ -22,7 +22,7 @@ google.charts.setOnLoadCallback(function () {
         initializeGoButton('go');
         initFetchData();
         $('#beta-info').one('click', function () {
-            $(this).fadeOut("fast");
+            $(this).hide();
         });
     });
 });
