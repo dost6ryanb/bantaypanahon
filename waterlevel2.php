@@ -646,6 +646,6 @@
     var waterlevel_device_ids_enabled = <?php echo json_encode(Devices::GetEnabledDeviceIdsByParam('Waterlevel'));?>;
     var waterlevel_device_ids_disabled = <?php echo json_encode(Devices::GetDisabledDeviceIdsByParam('Waterlevel'));?>;
 </script>
-<?php //include_once("analyticstracking.php") ?>
+<?php include_once("analyticstracking.php") ?>
 </body>
 </html>

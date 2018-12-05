@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <?php include_once 'lib/init3.php' ?>
@@ -1490,6 +1490,6 @@
     var waterlevel_device_ids_disabled = <?php echo json_encode(Devices::GetDisabledDeviceIdsByParam('Waterlevel'));?>;
 
 </script>
-<?php //include_once("analyticstracking.php") ?>
+<?php include_once("analyticstracking.php") ?>
 </body>
 </html>
