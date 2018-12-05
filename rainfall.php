@@ -345,11 +345,11 @@
 
                 MyApp.sdate = yesterdayDateText;
                 MyApp.edate = baseDateText;
-                if (MyApp.SERVER_DATE != baseDateText) { //realtime
+                //if (MyApp.SERVER_DATE != baseDateText) { //realtime
                     futureDate.add({days: 1});
                     var futureDateText = futureDate.toString("yyyy-MM-dd");
                     MyApp.edate = futureDateText;
-                }
+                //}
 
                 MyApp.startDateTime = Date.parseExact(MyApp.sdate + ' 08:00:00', 'yyyy-MM-dd HH:mm:ss');
                 MyApp.endDateTime = Date.parseExact(MyApp.edate + ' 07:59:59', 'yyyy-MM-dd HH:mm:ss');
