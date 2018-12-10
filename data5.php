@@ -19,9 +19,66 @@ header('Content-Type: application/json');
 $responseCount = 0;
 $response = '[';
 
-$len = count($dev_ids);
+//$len = count($dev_ids);
+$done = false;
+$responseInitid = false;
+$taskQueue = $dev_ids;
+$nextTaskQueue = [];
 
-foreach ($dev_ids as $i => $dev_id) {
+do {
+    $nextTaskQueue = [];
+    //error_log("size of taskQueue: " . sizeof($taskQueue));
+    foreach ($taskQueue as $dev_id) {
+        $key = md5("$dev_id")."-$sdate-$edate-device";
+        $cache = getCacheFqfname($key);
+        $lockDir = getLockname($key);
+        $lockExists = isLockExist($lockDir);
+        $read ='';
+
+        $cb = function () use ($dev_id, $sdate, $edate) {
+            return getFromApiMulti($dev_id, $sdate, $edate);
+        };
+
+        if ($cache && !$lockExists) {
+            if (!isCacheExpired($cache)) {
+                $read = readCache($key, $lockDir);
+            } else {
+                renewCache($key, $cb, $lockDir);
+                $nextTaskQueue[] = $dev_id;
+            }
+        } elseif ($cache && $lockExists) {
+            if (isLockExpired($lockDir)) {
+                releaseLock($lockDir);
+            }
+            $nextTaskQueue[] = $dev_id;
+        } elseif (!$cache && $lockExists) {
+            if (isLockExpired($lockDir)) {
+                releaseLock($lockDir);
+            }
+            $nextTaskQueue[] = $dev_id;
+        } else {
+            renewCache($key, $cb, $lockDir);
+            $nextTaskQueue[] = $dev_id;
+        }
+
+        if (!empty($read)) {
+            if ($responseInitid) $response .= ' ,';
+            $response .= $read;
+            if (!$responseInitid) $responseInitid = true;
+        }
+    }
+
+    //error_log("size of nextTaskQueue: " . sizeof($nextTaskQueue));
+
+    if (!empty($nextTaskQueue)) {
+        $taskQueue = $nextTaskQueue;
+    } else {
+        $done = true;
+    }
+
+} while (!$done);
+
+/*foreach ($dev_ids as $i => $dev_id) {
     $key = md5("$dev_id")."-$sdate-$edate-device";
     $cache = getCacheFqfname($key);
     $lockDir = getLockname($key);
@@ -48,9 +105,8 @@ foreach ($dev_ids as $i => $dev_id) {
         if ($i != 0) $response .= ' ,';
         $response .= $read;
         $responseCount++;
-
     }
-}
+}*/
 $response .= ']';
 echo $response;
 //trigger_error("Oops!", E_USER_ERROR);
@@ -66,6 +122,24 @@ function getFromPhilSensorsService($dev_id, $sdate, $edate)
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     //curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4 );
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 4);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+    $response = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($http_code == 200) {
+        return $response;
+    } else {
+        return null;
+    }
+}
+
+function getFromApiMulti($dev_id, $sdate, $edate) {
+    $url = 'http://philsensors.asti.dost.gov.ph/php/dataduration.php?stationid=' . $dev_id . '&from=' . $sdate . '&to=' . $edate;
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4 );
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 4);
     curl_setopt($ch, CURLOPT_TIMEOUT, 15);
@@ -166,6 +240,7 @@ function renewCache($key, $cb, $lockDir)
 
     return true;
 }
+
 
 function readCache($key, $lockDir)
 {

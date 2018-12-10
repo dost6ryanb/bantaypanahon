@@ -86,24 +86,7 @@
                 if (index > -1) {
                     $.xhrPool.splice(index, 1);
                 }
-            }/*,
-            error: function (jqXHR, exception) {
-                if (jqXHR.status === 0) {
-                    console.log('Not connect.\n Verify Network.');
-                } else if (jqXHR.status == 404) {
-                    console.log('Requested page not found. [404]');
-                } else if (jqXHR.status == 500) {
-                    console.log('Internal Server Error [500].');
-                } else if (exception === 'parsererror') {
-                    console.log('Requested JSON parse failed.');
-                } else if (exception === 'timeout') {
-                    console.log('Time out error.');
-                } else if (exception === 'abort') {
-                    console.log('Ajax request aborted.');
-                } else {
-                    console.log('Uncaught Error.\n' + jqXHR.responseText);
-                }
-            }*/
+            }
         });
 
         google.charts.setOnLoadCallback(function () {
@@ -112,7 +95,6 @@
                 initMap("map-canvas");
                 initControls();
                 initRainfallTable("rainfall-canvas");
-                initChartDivs('charts_div_container');
                 initFetchData();
                 initFeedee();
             });
@@ -814,21 +796,12 @@
         }
 
         function initRainfallTable(div) {
-
-            var prevProvince = '';
-            var maindiv = document.getElementById(div);
-            var table = $('<table/>').appendTo(maindiv);
-            var sdate = $('<td colspan="3"><a title="Click to change" href="#" id="sdate">' + key['sdate'] + '</a></td>');
-            var datepicker = $('<input type="text" style="height: 0; width:0; border: 0;" id="dtpicker2"/>');
-            datepicker.appendTo(sdate);
-
-            $('<tr/>').append($('<th>Rainfall</th>'))
-                .append(sdate)
-                .appendTo(table);
+            $sdate = $("#sdate");
+            $sdate.text(key['sdate']);
 
             $('#dtpicker2').datepicker({
                 onSelect: function (data) {
-                    sdate.find('a').text(data);
+                    $sdate.text(data);
                     newsdate = Date.parseExact(data, 'MM/dd/yyyy');
                     newedate = Date.parseExact(data, 'MM/dd/yyyy');
                     newedate = newedate.addDays(1);
@@ -845,70 +818,21 @@
                     clearRainfallTable();
                     clearAllTicker('ticker1list');
                     clearAllTicker('ticker2list');
-                    console.log(key);
                     LAST_RAIN_DEVID = 0;
                     LAST_AWS_DEVID = 0;
                     LAST_WTR_DEVID = 0;
                     initFetchData(true);
 
-                }/*,
-                 altField: '#datepicker_start',
-                 altFormat : 'mm/dd/yy',
-                 dateFormat : 'yymmdd'*/
+                }
             });
-            $('#sdate').click(function () {
+            $sdate.click(function () {
                 $('#dtpicker2').datepicker('show');
             });
 
+            $("#serverdate").text(SERVER_DATE);
+            $("#servertime").text(SERVER_TIME);
+            $("#numraindevices").text(rainfall_device_ids_enabled.length  + rainfall_device_ids_disabled.length);
 
-            $('<tr><th>Server DateTime</th><td id="serverdtr" colspan="3"><table><tr><td colspan="3">' + SERVER_DATE + '</td></tr> <tr><td colspan="3">' + SERVER_TIME + '</tr></td></table></td><tr>').appendTo(table);
-            $('<tr><th>Total Devices</th><td id="numraindevices" colspan="3">' + rainfall_devices.length + '</td><tr>').appendTo(table);
-            $('<tr><th>Loaded</th><td id="loadedraindevices" colspan="3">0</td><tr>').appendTo(table);
-            for (var i = 0; i < rainfall_devices.length; i++) {
-                var cur = rainfall_devices[i];
-
-
-                if (cur['province'] != prevProvince) {
-                    prevProvince = cur.province;
-                    $('<tr/>').addClass('province_tr')
-                        .append($('<th>' + prevProvince + '</th>'))
-                        .append($('<th>Time</th>'))
-                        .append($('<th>Rain (mm)</th>'))
-                        .append($('<th>Cumulative (mm)</th>')).appendTo(table);
-                }
-
-                $('<tr/>', {'data-dev_id': cur.dev_id})
-                    .append($('<td>' + cur.municipality + ' - ' + cur.location + '</td>'))
-                    //.append($('<td title="'+ cur.location + '">' + cur.municipality + '</td>'))
-                    .append($('<td/>', {'data-col': 'dtr'}))
-                    .append($('<td/>', {'data-col': 'rv'}))
-                    .append($('<td/>', {'data-col': 'cr'})).appendTo(table);
-
-                if (cur['status'] != null && cur['status'] != 0) {
-                    updateRainfallTable(cur['dev_id'], '[DISABLED]', '', '', 'disabled');
-                }
-
-            }
-        }
-
-        function initChartDivs(chartdiv) {
-            var charts_container = document.getElementById(chartdiv);
-            var chart_wrapper = $('<div/>').attr({'class': 'innerWrap'}).appendTo(charts_container);
-            for (var i = 0; i < waterlevel_devices.length; i++) {
-                var device = waterlevel_devices[i];
-                $('<div/>').attr({
-                    'id': 'chart_div_' + device['dev_id'],
-                    'class': 'chartWithOverlay list divrowwrapper'
-                })
-                    .append($('<p/>').addClass('overlay').text(device['municipality'] + ' - ' + device['location']))
-                    .append($('<div/>', {'id': "line-chart-marker_" + device['dev_id']}).addClass('chart'))
-                    .appendTo(chart_wrapper);
-
-                var div = 'line-chart-marker_' + device['dev_id'];
-                if (device['status'] != null && device['status'] != 0) {
-                    $(document.getElementById(div)).css({'background': 'url(images/disabled.png)'}).addClass('disabled');
-                }
-            }
         }
 
         function initFeedee(div) {
@@ -1412,6 +1336,55 @@
 
     </div>
     <div id='rainfall-canvas'>
+        <table>
+            <tr>
+                <th>Rainfall</th>
+                <td colspan="3">
+                    <a title="Click to change" href="#" id="sdate"></a>
+                    <input type="text" style="height: 0; width:0; border: 0;" id="dtpicker2">
+                </td>
+            </tr>
+            <tr>
+                <th>Server DateTime</th>
+                <td id="serverdtr" colspan="3">
+                    <table>
+                        <tr>
+                            <td colspan="3" id="serverdate"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" id="servertime"></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <th>Total Devices</th>
+                <td id="numraindevices" colspan="3">119</td>
+            </tr>
+            <tr><th>Loaded</th><td id="loadedraindevices" colspan="3"></td></tr>
+            <?php
+                $rainfall_devices = Devices::GetDevicesByParam('Rainfall');
+                $prevProvince = "";
+
+                foreach ($rainfall_devices as $dev) {
+                    $province = $dev["province"];
+                    $dev_id = $dev['dev_id'];
+                    $location = $dev['municipality'] . ' - ' . $dev['location'];
+                    $status = $dev['status'];
+                    if ($prevProvince != $province) {
+                        echo '<tr class="province_tr">' . "<th>$province</th><th>Time</th><th>Rain (mm)</th><th>Cumulative (mm)</th></tr>";
+                        $prevProvince = $province;
+                    }
+                    echo "<tr data-dev_id=" . $dev_id . "><td>" . $location . '</td>';
+                    if ($status != null && $status != '0') {
+                        echo '<td data-col="dtr" class="disabled">[DISABLED]</td><td data-col="rv" class="disabled"></td><td data-col="cr" class="disabled"></td>';
+                    } else {
+                        echo '<td data-col="dtr"></td><td data-col="rv"></td><td data-col="cr"></td>';
+                    }
+                    echo "</tr>";
+                }
+            ?>
+        </table>
     </div>
     <div style="display: none;">
         <div id='legends' class="custom-ctrl">
@@ -1452,6 +1425,27 @@
         </div>
     </div>
     <div id="charts_div_container">
+        <div class="innerWrap">
+            <?php
+                $waterlevel_devices = Devices::GetDevicesByParam('Waterlevel');
+
+                foreach ($waterlevel_devices as $dev) {
+                    $dev_id = $dev['dev_id'];
+                    $location = $dev['municipality'] . ' - ' . $dev['location'];
+                    $status = $dev['status'];
+
+                    echo '<div id="chart_div'.$dev_id.'" class="chartWithOverlay list divrowwrapper">'.
+                        '<p class="overlay">'. $location . '</p>';
+                    if ($status != null && $status != '0') {
+                        echo '<div id="line-chart-marker_' . $dev_id .'" class="chart disabled" style="background: url(&quot;images/disabled.png&quot;);"></div>';
+                    } else {
+                        echo '<div id="line-chart-marker_' . $dev_id .'" class="chart"></div>';
+                    }
+
+                    echo '</div>';
+                }
+            ?>
+        </div>
     </div>
     <div id="feeds">
         <div id="regionalweather" style="display:none" class="feedcontainer">
@@ -1476,8 +1470,8 @@
     <p>DRRM Unit - Department of Science and Technology Regional Office No. VI</p>
 </div>
 <script type="text/javascript">
-    var rainfall_devices = <?php echo json_encode(Devices::GetDevicesByParam('Rainfall'));?>;
-    var waterlevel_devices = <?php echo json_encode(Devices::GetDevicesByParam('Waterlevel'));?>;
+    var rainfall_devices = <?php echo json_encode($rainfall_devices);?>;
+    //var waterlevel_devices = <?php echo json_encode($waterlevel_devices);?>;
     var temperature_devices = <?php echo json_encode(Devices::GetDevicesByParam('Temperature'));?>;
     var rainfall_device_ids_enabled = <?php echo json_encode(Devices::GetEnabledDeviceIdsByParam('Rainfall'));?>;
     var rainfall_device_ids_disabled = <?php echo json_encode(Devices::GetDisabledDeviceIdsByParam('Rainfall'));?>;
