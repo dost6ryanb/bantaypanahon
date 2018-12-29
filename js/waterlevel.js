@@ -6,6 +6,7 @@ var app = {
     endDateTime: '',
     xhrHelper: xhrPoolHelper($),
     history: false,
+    hiddenNoData: false,
 };
 
 app.startDateTime = Date.parseExact(app.sdate + ' 08:00:00', 'yyyy-MM-dd HH:mm:ss');
@@ -24,6 +25,23 @@ google.charts.setOnLoadCallback(function () {
         initFetchData();
         $('#beta-info').one('click', function () {
             $(this).hide();
+        });
+        $('#toggle').on('click', function() {
+
+            $('.chart_div').each(function(i, el) {
+                if ($(el).children('div.chart').hasClass('nodata')) {
+                    if (!app.hiddenNoData) {
+                        $(el).hide();
+                    } else {
+                        $(el).show();
+                    }
+                } else {
+                    $(el).show();
+                }
+            });
+
+            app.hiddenNoData = !app.hiddenNoData;
+
         });
     });
 });
@@ -177,7 +195,7 @@ function initializeChartDivs(div) {
         var cur = waterlevel_devices[i];
         if (cur['province'] != prevProvince) {
             prevProvince = cur['province'];
-            $('<br/><h3 class="provincelabel">' + prevProvince + '</h3>').appendTo(charts_container);
+            $('<h3 class="provincelabel">' + prevProvince + '</h3>').appendTo(charts_container);
         }
 
         if (cur['riverindex'] && prevRiverIndex && cur['riverindex'].charAt(0) == prevRiverIndex.charAt(0)) {
