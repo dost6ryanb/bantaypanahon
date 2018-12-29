@@ -1313,48 +1313,8 @@
     </div>
 </div>
 <div id='footer'>
-    <div id='contactus'>
-        <div class='contact'>
-            <p class='contactname'>Department of Science and Technology Regional Office No. VI</p>
-            <p class='contactaddress'>Magsaysay Village La paz, Iloilo 5000</p>
-            <p class='contactnumber'>(033) 508-6739 / 320-0908 (Telefax)</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Aklan Provincial Science & Technology Center</p>
-            <p class='contactaddress'>Capitol Compound, Kalibo, Aklan</p>
-            <p class='contactnumber'>(036) 500-7550 (Telefax)</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Antique Provincial Science & Technology Center</p>
-            <p class='contactaddress'>San Jose de Buenevista, Antique</p>
-            <p class='contactnumber'>(036) 540-8025</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Capiz Provincial Science & Technology Center</p>
-            <p class='contactaddress'>CapSU, Roxas City, Capiz</p>
-            <p class='contactnumber'>(036) 522-1044</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Guimaras Provincial Science & Technology Center</p>
-            <p class='contactaddress'>PSHS Research Center, Jordan, Guimaras</p>
-            <p class='contactnumber'>(033) 396-1765</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Iloilo Provincial Science & Technology Center</p>
-            <p class='contactaddress'>DOST VI Compound, Iloilo City, Iloilo</p>
-            <p class='contactnumber'>(033) 508-7183</p>
-        </div>
-        <div class='contact'>
-            <p class='contactname'>Negros Occidental Provincial Science & Technology Center</p>
-            <p class='contactaddress'>Cottage Road, Bacolod City</p>
-            <p class='contactnumber'>(034) 707-0170</p>
-        </div>
-    </div>
-    <div id='footerbanner' class='centeralign'>
-        Disaster Risk Reduction and Management Unit</br>
-        Department of Science and Technology Regional Office No. VI</br>
-        Copyright 2014
-    </div>
+    <p>Contact Bantay Panahon on <a href="https://www.facebook.com/bantaypanahonph/" target="_blank">Facebook</a></p>
+    <p>DRRM Unit - Department of Science and Technology Regional Office No. VI</p>
 </div>
 </body>
 <script type="text/javascript">
