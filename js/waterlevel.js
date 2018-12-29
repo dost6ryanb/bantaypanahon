@@ -364,7 +364,7 @@ function drawChartWaterlevel(chartdiv, json) {
     var options = {
         title: title_enddatetime,
         hAxis: {
-            title: 'Waterlevel: ' + json.Data[0]['Waterlevel'] + ' m',
+            title: 'Waterlevel: ' + json.Data[last]['Waterlevel'] + ' m',
             format: 'LLL d, h a',
             gridlines: {
                 color: 'none'

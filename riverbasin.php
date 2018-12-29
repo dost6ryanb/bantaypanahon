@@ -491,7 +491,7 @@ switch ($q) {
                 title: title_enddatetime,
 
                 hAxis: {
-                    title: 'Waterlevel: ' + json.Data[0]['Waterlevel'] + ' m',
+                    title: 'Waterlevel: ' + json.Data[last]['Waterlevel'] + ' m',
                     format: 'LLL d h:mm:ss a',
                     viewWindow: {min: d, max: d2},
                     gridlines: {color: 'none'},
