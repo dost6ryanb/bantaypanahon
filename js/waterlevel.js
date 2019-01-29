@@ -225,6 +225,7 @@ function initializeChartDivs(div) {
             chart_div.children('.chart').each(function (id, el) {
                 $(el).addClass('disabled');
             });
+            chart_div.hide();
         }
 
     }
@@ -296,6 +297,8 @@ function onWaterlevelDataResponseSuccess(data) {
         //console.log(chartdiv);
         // console.log($(document.getElementById(div)).hasClass( "disabled" ));
         if ($(document.getElementById(div)).hasClass("disabled")) return;
+    } else {
+        $('#'+div).show();
     }
 
     if (app.history) {

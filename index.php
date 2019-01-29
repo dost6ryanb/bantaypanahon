@@ -932,6 +932,8 @@
 
             if (!HISTORY) {
                 if (dtr.hasClass("disabled")) return;
+            } else {
+                tr.removeClass('hideme');
             }
 
             if (dateTimeRead != null) dtr.html(dateTimeRead); else dtr.text('');
@@ -1195,8 +1197,11 @@
             var device_id = data[0]['station_id'];
             LAST_WTR_DEVID = device_id;
             var div = 'line-chart-marker_' + device_id;
+            var parentDiv = $('#chart_div' + device_id);
             if (!HISTORY) {
                 if ($(document.getElementById(div)).hasClass("disabled")) return;
+            } else {
+                parentDiv.show();
             }
             if (HISTORY) {
                 var newdata = $.grep(data.Data, function (n, i) {
@@ -1375,10 +1380,12 @@
                         echo '<tr class="province_tr">' . "<th>$province</th><th>Time</th><th>Rain (mm)</th><th>Cumulative (mm)</th></tr>";
                         $prevProvince = $province;
                     }
-                    echo "<tr data-dev_id=" . $dev_id . "><td>" . $location . '</td>';
+
                     if ($status != null && $status != '0') {
+                        echo '<tr data-dev_id="' . $dev_id . '" class="hideme"><td>' . $location . '</td>';
                         echo '<td data-col="dtr" class="disabled">[DISABLED]</td><td data-col="rv" class="disabled"></td><td data-col="cr" class="disabled"></td>';
                     } else {
+                        echo "<tr data-dev_id=" . $dev_id . "><td>" . $location . '</td>';
                         echo '<td data-col="dtr"></td><td data-col="rv"></td><td data-col="cr"></td>';
                     }
                     echo "</tr>";
@@ -1434,11 +1441,14 @@
                     $location = $dev['municipality'] . ' - ' . $dev['location'];
                     $status = $dev['status'];
 
-                    echo '<div id="chart_div'.$dev_id.'" class="chartWithOverlay list divrowwrapper">'.
-                        '<p class="overlay">'. $location . '</p>';
+
                     if ($status != null && $status != '0') {
+                        echo '<div id="chart_div'.$dev_id.'" class="chartWithOverlay list divrowwrapper" style="display:none">'.
+                            '<p class="overlay">'. $location . '</p>';
                         echo '<div id="line-chart-marker_' . $dev_id .'" class="chart disabled" style="background: url(&quot;images/disabled.png&quot;);"></div>';
                     } else {
+                        echo '<div id="chart_div'.$dev_id.'" class="chartWithOverlay list divrowwrapper">'.
+                            '<p class="overlay">'. $location . '</p>';
                         echo '<div id="line-chart-marker_' . $dev_id .'" class="chart"></div>';
                     }
 
