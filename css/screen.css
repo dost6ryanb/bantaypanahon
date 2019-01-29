@@ -172,3 +172,7 @@ img {
 	font-weight: normal;
 	padding: 10px 0 5px 5px;
 }
+
+.hideme {
+	display: none;
+}
