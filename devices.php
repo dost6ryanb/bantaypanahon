@@ -137,17 +137,21 @@
                 c.attr("class", "dialog--table");
 
                 var datatable = new google.visualization.DataTable();
-                datatable.addColumn('datetime', 'DateTimeRead');
+                datatable.addColumn('datetime', 'DateTime Read');
                 //datatable.addColumn('datetime', 'dateTimeReceived');
 
-                var columnLength = 2;
+                var columnLength = data.Columns.length;
 
                 for (var key in data.Data[0]) {
                     if (key != 'Datetime Read') {
                         datatable.addColumn('string', key);
-                        columnLength++;
+                        // columnLength++;
                     }
                 }
+
+                console.log('columnLength:' + columnLength);
+                console.log('datatable:' + datatable);
+
 
                 for (var j = 0; j < data.Data.length; j++) {
                     var datum = data.Data[j];
@@ -166,8 +170,16 @@
                             row.push(datum[key2]);
                     }
 
+                    if (row.length < columnLength) {
+                        do {
+                            row.push('');
+                        } while (row.length < columnLength)
+                    }
+
                     datatable.addRow(row);
                 }
+
+
 
 
                 var maxdate;
