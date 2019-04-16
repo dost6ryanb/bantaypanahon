@@ -142,10 +142,13 @@
 
                 var columnLength = data.Columns.length;
 
-                for (var key in data.Data[0]) {
-                    if (key != 'Datetime Read') {
-                        datatable.addColumn('string', key);
-                        // columnLength++;
+                for (col in data.Columns) {
+                    keyReal = data.Columns[col];
+
+                    if (keyReal != 'Datetime Read' && keyReal != 'Rain Cumulative') {
+                        datatable.addColumn('string', keyReal);
+                     } else if(keyReal == 'Rain Cumulative') {
+                        columnLength -= 1;
                     }
                 }
 
@@ -164,10 +167,17 @@
                         f: dtrd.toString('yyyy-MM-dd HH:mm:ss')
                     });
 
-                    for (var key2 in datum) {
+                    for (col in data.Columns) {
+                        keyReal = data.Columns[col];
 
-                        if (key2 != 'Datetime Read')
-                            row.push(datum[key2]);
+                        if (keyReal != 'Datetime Read'  && keyReal != 'Rain Cumulative') {
+                            if (typeof(datum[keyReal]) != 'undefined') {
+                                row.push(datum[keyReal]);
+                                console.log('key: ' + keyReal + " : " +  datum[keyReal]);
+                            }
+                        }
+
+                        console.log(row);
                     }
 
                     if (row.length < columnLength) {
@@ -176,11 +186,9 @@
                         } while (row.length < columnLength)
                     }
 
+                    console.log(row);
                     datatable.addRow(row);
                 }
-
-
-
 
                 var maxdate;
                 var mindate;
