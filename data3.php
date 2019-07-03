@@ -9,13 +9,13 @@ if ($limit == FALSE) $limit = '';
 if ($sdate == FALSE) $sdate = '';
 if ($edate == FALSE) $edate = $sdate;
 
-$key = md5("$dev_id-$limit-$sdate-$edate").'-device';
+$key = md5("$dev_id-$limit-$sdate-$edate") . '-device';
 header('Access-Control-Allow-Origin: *');
 header('Cache-Control: max-age=300, private');
 header('Content-Type: application/json');
 
 $cache = getCacheFqfname($key);
-$cb = function() use ($dev_id, $sdate, $edate) {
+$cb = function () use ($dev_id, $sdate, $edate) {
     return getFromPhilSensorsService($dev_id, $sdate, $edate);
 };
 
@@ -44,7 +44,8 @@ if ($cache) { //cache available
 //@return
 // on success - returns response (http 200)
 // on failure - returns null (http code is not 200)
-function getDataFromPredictService($dev_id, $limit, $sdate, $edate) {
+function getDataFromPredictService($dev_id, $limit, $sdate, $edate)
+{
     $url = 'http://fmon.asti.dost.gov.ph/api/index.php/device/getData/'; //ASTI API
     $data = array('start' => '0', 'limit' => $limit, 'sDate' => $sdate, 'eDate' => $edate, 'pattern' => $dev_id);
     $ch = curl_init($url);
@@ -63,7 +64,8 @@ function getDataFromPredictService($dev_id, $limit, $sdate, $edate) {
 
 }
 
-function getDataFromWeatherAstiService($dev_id, $limit, $sdate, $edate) {
+function getDataFromWeatherAstiService($dev_id, $limit, $sdate, $edate)
+{
     $username = 'dostregion06';
     $password = 'dost.reg06[1117]';
     $url = 'http://weather.asti.dost.gov.ph/web-api/index.php/api/data/' . $dev_id . '/from/' . $sdate . '/to/' . $edate; //ASTI API
@@ -74,15 +76,20 @@ function getDataFromWeatherAstiService($dev_id, $limit, $sdate, $edate) {
     curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
     curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
     //curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    //curl_setopt($ch, CURLOPT_PROXY, "http://192.168.1.242:8888");
     $response = curl_exec($ch);
     curl_close($ch);
     return $response;
 }
 
-function getFromPhilSensorsService($dev_id, $sdate, $edate) {
-    $url = 'http://philsensors.asti.dost.gov.ph/php/dataduration.php?stationid=' . $dev_id . '&from=' . $sdate .'&to='. $edate;
+function getFromPhilSensorsService($dev_id, $sdate, $edate)
+{
+    $url = 'http://philsensors.asti.dost.gov.ph/php/dataduration.php?stationid=' . $dev_id . '&from=' . $sdate . '&to=' . $edate;
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    //curl_setopt($ch, CURLOPT_PROXY, "http://192.168.1.242:8888");
+    curl_setopt($ch,CURLOPT_USERAGENT, 'BANTAYPANAHONDOSTVI :D (TEMP)');
+
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -97,7 +104,8 @@ function getFromPhilSensorsService($dev_id, $sdate, $edate) {
 //@return
 // on success - file is available, returns cache filename
 // on failure - no cache, returns null
-function getCacheFqfName($key) {
+function getCacheFqfName($key)
+{
     $fqfname = getCacheFileName($key);
     if (file_exists($fqfname)) {
         return $fqfname;
@@ -120,7 +128,7 @@ function printCache($key, $lockDir)
                 releaseLock($lockDir);
             }
             usleep(rand(300, 1000));
-        }else {
+        } else {
             $success = true;
         }
     } while (!$success);
@@ -148,7 +156,8 @@ function printCache($key, $lockDir)
 //@return
 // true - meanings file age is older than cache life
 // false - not true duh!
-function isCacheExpired($filename, $life = 5) {
+function isCacheExpired($filename, $life = 5)
+{
     $filetime = filemtime($filename);
     $cache_life = intval($life); // minutes
     $expirytime = (time() - 60 * $cache_life);
@@ -187,7 +196,7 @@ function putCache($key, $cb, $lockDir)
                 fwrite($fp, $response);
                 $success = true;
             } else {
-                usleep ( rand ( 300, 1000));
+                usleep(rand(300, 1000));
             }
         } while (!$success);
 
@@ -211,12 +220,14 @@ function renewCache($key, $cb, $lockDir)
     return true;
 }
 
-function getCacheFileName($key) {
-    return  __DIR__ . DIRECTORY_SEPARATOR . "cache/$key.json";
+function getCacheFileName($key)
+{
+    return __DIR__ . DIRECTORY_SEPARATOR . "cache/$key.json";
 }
 
-function getLockname($key) {
-    return  __DIR__ . DIRECTORY_SEPARATOR . "cache/tmp-$key.lock";
+function getLockname($key)
+{
+    return __DIR__ . DIRECTORY_SEPARATOR . "cache/tmp-$key.lock";
 }
 
 function createLock($lockDir)
@@ -243,7 +254,8 @@ function isLockExist($lockDir)
     return is_dir($lockDir);
 }
 
-function isLockExpired($lockDir, $life = 1) {
+function isLockExpired($lockDir, $life = 1)
+{
     if (isLockExist($lockDir)) {
         $filetime = filemtime($lockDir);
         $cache_life = intval($life); // minutes
