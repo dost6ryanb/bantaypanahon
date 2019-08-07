@@ -87,8 +87,8 @@ function getFromPhilSensorsService($dev_id, $sdate, $edate)
     $url = 'http://philsensors.asti.dost.gov.ph/php/dataduration.php?stationid=' . $dev_id . '&from=' . $sdate . '&to=' . $edate;
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    //curl_setopt($ch, CURLOPT_PROXY, "http://192.168.1.242:8888");
-    curl_setopt($ch,CURLOPT_USERAGENT, 'BANTAYPANAHONDOSTVI :D (TEMP)');
+    //curl_setopt($ch, CURLOPT_PROXY, "http://192.168.1.140:8888");
+    curl_setopt($ch,CURLOPT_USERAGENT, 'BANTAYPANAHONDOSTVI');
 
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
