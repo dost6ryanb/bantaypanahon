@@ -900,7 +900,7 @@
                 title: title_enddatetime,
 
                 hAxis: {
-                    title: 'Waterlevel: ' + (data.data[0].waterlevel / 100)  + ' m',
+                    title: 'Waterlevel: ' + (data.data[0].waterlevel / 100).toFixed(2)  + ' m',
                     format: 'LLL d h:mm:ss a',
                     //viewWindow: {min: d, max: d2},
                     gridlines: {color: 'none'},
