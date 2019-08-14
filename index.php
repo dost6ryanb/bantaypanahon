@@ -226,37 +226,34 @@
         }
 
         function onRainfallDataResponseSuccess(data) {
-            var device_id = data[0].station_id;
+            var device_id = data.dev_id;
             LAST_RAIN_DEVID = device_id;
             $('#loadedraindevices').text(++key['loadedraindevices']);
 
-            var newdata = $.grep(data.Data, function (n, i) {
-                thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+            var newdata = $.grep(data.data, function (n, i) {
+                var tmp = n['dateTimeRead'].substring(0, 19);
+                thisdate = Date.parseExact(tmp, 'yyyy-MM-dd HH:mm:ss');
                 result = thisdate.between(key['startDateTime'], key['endDateTime']);
                 //if (result) console.log(thisdate.toString() + " - " + result);
                 return result;
             });
             var len = newdata.length;
-            data.Data = newdata;
-            data.Data.length = len;
+            data.data = newdata;
+            data.data.length = len;
 
-            if (data.Data.length == 0) {
+            if (data.data.length == 0) {
                 updateRainfallTable(device_id, '[NO DATA]', '', '', 'nodata');
             } else {
-                var last = data.Data.length - 1;
+                var last = 0;
                 var device = search(rainfall_devices, 'dev_id', device_id);
-                var devicedtr = Date.parseExact(data.Data[last]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
-                //<#-- ASTI BSWM_Lufft not ISO STANDARD dateTimeRead FIX -_-
-                if (!devicedtr) {
-                    var datefixed = data.data[0].dateTimeRead.substring(0, 19);
-//				console.log(datefixed);
-                    devicedtr = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
-                }//--#>
+                var datefixed = data.data[0].dateTimeRead.substring(0, 19);
+                var devicedtr = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
+
                 var serverdtr = Date.parseExact(key['serverdate'] + ' ' + key['servertime'] + ':00', 'yyyy-MM-dd HH:mm:ss');
                 var hour12time = devicedtr.toString("h:mm tt");
 
-                var rc = getRainCumulative(data.Data);
-                var rv = parseFloat(data.Data[last]['Rainfall Amount']).toFixed(2);
+                var rc = getRainCumulative(data.data);
+                var rv = parseFloat(data.data[last]['rain_value']).toFixed(2);
                 if (key['sdate'] == key['serverdate'] && devicedtr.add({minutes: 15}).compareTo(serverdtr) == -1) { //late
                     updateRainfallTable(device_id, hour12time, rv, rc, 'latedata');
                 } else {
@@ -289,7 +286,7 @@
         function getRainCumulative(data) {
             var total = 0;
             $.each(data, function () {
-                var rn = parseFloat(this['Rainfall Amount']);
+                var rn = parseFloat(this['rain_value']);
                 total += rn;
             });
             return total.toFixed(2);
@@ -865,39 +862,47 @@
 
         }
 
-        function drawChartWaterlevel(chartdiv, json) {
-            var last = json.Data.length - 1;
+        function drawChartWaterlevel(chartdiv, data) {
+            var last = 0;
             var datatable = new google.visualization.DataTable();
-            datatable.addColumn('datetime', 'DateTimeRead');
-            datatable.addColumn('number', 'Waterlevel'); //add column from index i
+            datatable.addColumn('datetime', 'dateTimeRead');
+            datatable.addColumn('number', 'waterlevel'); //add column from index i
 
-            for (var j = 0; j < json.Data.length; j++) {
+
+            for (var j = 0; j < data.data.length; j++) {
                 var row = Array(2);
-                row[0] = Date.parseExact(json.Data[j]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
-                waterlevel = json.Data[j]['Waterlevel'];
-                if (waterlevel != null) {
+
+                var datefixed = data.data[j].dateTimeRead.substring(0, 19);
+                var date = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
+
+                row[0] = date;
+                if (data.data[j].waterlevel != null) {
+                    var waterlevel = parseFloat(data.data[j].waterlevel) / 100;
+
                     row[1] = {
-                        v: parseFloat(waterlevel),
+                        v: waterlevel,
                         f: waterlevel + ' m'
                     };
                 }
+
                 datatable.addRow(row);
             }
 
-            var d = Date.parseExact(json.Data[0]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
-            var d2 = Date.parseExact(json.Data[last]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
 
-            //var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); //from last data
-            var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); // from 8:00 AM
-            var title_enddatetime = d2.toString('MMMM d yyyy h:mm:ss tt');
+            var datefixed = data.data[0].dateTimeRead.substring(0, 19);
+            var d = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
+
+
+            var title_enddatetime = d.toString('MMMM d yyyy h:mm:ss tt');
+
 
             var options = {
                 title: title_enddatetime,
 
                 hAxis: {
-                    title: 'Waterlevel: ' + json.Data[last]['Waterlevel'] + ' m',
+                    title: 'Waterlevel: ' + (data.data[0].waterlevel / 100)  + ' m',
                     format: 'LLL d h:mm:ss a',
-                    viewWindow: {min: d, max: d2},
+                    //viewWindow: {min: d, max: d2},
                     gridlines: {color: 'none'},
                     textStyle: {fontSize: 10},
                     textPosition: 'none'
@@ -918,6 +923,8 @@
                 crosshair: {trigger: 'both'},
                 allowHtml: true
             };
+
+            console.log(options.hAxis.title);
 
             var chart = new google.visualization.ComboChart(document.getElementById(chartdiv));
             chart.draw(datatable, options);
@@ -1194,7 +1201,7 @@
 
 
         function updateWaterlevelChart(data) {
-            var device_id = data[0]['station_id'];
+            var device_id = data.dev_id;
             LAST_WTR_DEVID = device_id;
             var div = 'line-chart-marker_' + device_id;
             var parentDiv = $('#chart_div' + device_id);
@@ -1204,17 +1211,20 @@
                 parentDiv.show();
             }
             if (HISTORY) {
-                var newdata = $.grep(data.Data, function (n, i) {
-                    thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+                var newdata = $.grep(data.data, function (n, i) {
+                    var tmp = n['dateTimeRead'].substring(0, 19);
+                    thisdate = Date.parseExact(tmp, 'yyyy-MM-dd HH:mm:ss');
                     result = thisdate.between(key['startDateTime'], key['endDateTime']);
                     //if (result) console.log(thisdate.toString() + " - " + result);
                     return result;
                 });
-                data.Data = newdata;
-                data.Data.length = newdata.length;
+                data.data = newdata;
+                data.data.length = newdata.length;
             }
 
-            if (data.Data.length == 0) {
+            if (device_id == 1872) console.log(data)
+
+            if (data.data.length == 0) {
                 $(document.getElementById(div)).css({'background': 'url(images/nodata.png)'});
             } else {
                 drawChartWaterlevel(div, data);
