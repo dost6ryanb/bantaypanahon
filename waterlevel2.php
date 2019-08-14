@@ -137,22 +137,24 @@
                 updateWaterlevelChart(data);
             }, 200);
 
-            var device_id = data[0]['station_id'];
+            var device_id = data.dev_id;
 
             $('#loadedwaterleveldevices').text(++key['loadedwaterleveldevices']);
 
-            var last = data.Data.length - 1;
-            if (data.Data.length == 0 || (typeof  data.Data[last]['Waterlevel'] == 'undefined') || (typeof data.Data[last - 1]['Waterlevel'] == 'undefined')) {
+            var last = data.data.length - 1;
+
+            if (data.data.length < 2 || (typeof  data.data[0]['waterlevel'] == 'undefined') || (typeof data.data[1]['waterlevel'] == 'undefined')) {
                 updateWaterlevelTable(device_id, '[NO DATA]', '', '', 'nodata');
             } else {
                 var device = search(waterlevel_devices, 'dev_id', device_id);
-                var devicedtr = Date.parseExact(data.Data[last]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+                var datefixed = data.data[0]['dateTimeRead'].substring(0, 19);
+                var devicedtr = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
                 var serverdtr = Date.parseExact(key['serverdate'] + ' ' + key['servertime'] + ':00', 'yyyy-MM-dd HH:mm:ss');
 
                 var hour12time = devicedtr.toString("h:mm tt");
-                var wtrlvl = parseFloat(data.Data[last]['Waterlevel']).toFixed(2);
+                var wtrlvl = parseFloat(data.data[0]['waterlevel'] / 100).toFixed(2);
                 var wl0 = wtrlvl;
-                var wl1 = parseFloat(data.Data[last - 1]['Waterlevel']).toFixed(2);
+                var wl1 = parseFloat(data.data[1]['waterlevel'] / 100).toFixed(2);
                 var deviation = parseFloat(wl0 - wl1).toFixed(2);
 
                 if (key['sdate'] == key['serverdate'] && devicedtr.add({
@@ -412,38 +414,42 @@
         }
 
         function drawChartWaterlevel(chartdiv, json) {
-            var last = json.Data.length - 1;
+            var last = json.data.length - 1;
             var datatable = new google.visualization.DataTable();
             datatable.addColumn('datetime', 'DateTimeRead');
             datatable.addColumn('number', 'Waterlevel'); //add column from index i
 
-            for (var j = 0; j < json.Data.length; j++) {
+            for (var j = 0; j < json.data.length; j++) {
                 var row = Array(2);
-                row[0] = Date.parseExact(json.Data[j]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
-                waterlevel = json.Data[j]['Waterlevel'];
-                if (waterlevel != null) {
+
+                var datefixed = json.data[j].dateTimeRead.substring(0, 19);
+                var date = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
+
+                row[0] = date;
+                if (json.data[j].waterlevel != null) {
+                    var waterlevel = parseFloat(json.data[j].waterlevel) / 100;
+
                     row[1] = {
-                        v: parseFloat(waterlevel),
+                        v: waterlevel,
                         f: waterlevel + ' m'
                     };
                 }
+
                 datatable.addRow(row);
             }
 
-            var d = Date.parseExact(json.Data[0]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
-            var d2 = Date.parseExact(json.Data[last]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+            var datefixed = json.data[0].dateTimeRead.substring(0, 19);
+            var d = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
 
-            //var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); //from last data
-            var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); // from 8:00 AM
-            var title_enddatetime = d2.toString('MMMM d yyyy h:mm:ss tt');
+            var title_enddatetime = d.toString('MMMM d yyyy h:mm:ss tt');
 
             var options = {
                 title: title_enddatetime,
 
                 hAxis: {
-                    title: 'Waterlevel: ' + json.Data[last]['Waterlevel'] + ' m',
+                    title: 'Waterlevel: ' + (json.data[0].waterlevel / 100).toFixed(2) + ' m',
                     format: 'LLL d h:mm:ss a',
-                    viewWindow: {min: d, max: d2},
+                    //viewWindow: {min: d, max: d2},
                     gridlines: {color: 'none'},
                     textStyle: {fontSize: 10},
                     textPosition: 'none'
@@ -561,10 +567,10 @@
         }
 
         function updateWaterlevelChart(data) {
-            var device_id = data[0]['station_id'];
+            var device_id = data.dev_id;
             var div = 'line-chart-marker_' + device_id;
 
-            if (data.Data.length == 0) {
+            if (data.data.length == 0) {
                 $(document.getElementById(div)).css({
                     'background': 'url(images/nodata.png)'
                 });
