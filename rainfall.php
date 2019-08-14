@@ -230,20 +230,21 @@
 
 
         var onDataArrive = function (data) {
-            var dev_id = data[0].station_id;
+            var dev_id = data.dev_id;
 
-            var newdata = $.grep(data.Data, function (n, i) {
-                thisdate = Date.parseExact(n['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+            var newdata = $.grep(data.data, function (n, i) {
+                var tmp = n['dateTimeRead'].substring(0, 19);
+                thisdate = Date.parseExact(tmp, 'yyyy-MM-dd HH:mm:ss');
                 result = thisdate.between(MyApp.startDateTime, MyApp.endDateTime);
                 //if (result) console.log(thisdate.toString() + " - " + result);
                 return result;
             });
 
             var len = newdata.length;
-            data.Data = newdata;
-            data.Data.length = len;
+            data.data = newdata;
+            data.data.length = len;
 
-            if (data.Data.length == 0) {
+            if (data.data.length == 0) {
                 updateDeviceDataTD(dev_id, "Sorry. No Data available for this date.");
             } else {
                 drawChartDualRain(data, dev_id);
@@ -267,22 +268,29 @@
         };
 
         var trimAndRecalculateRain = function (data) {
-            var last = data.Data.length - 1;
-            var startDtr = Date.parseExact(data.Data[last]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+            //var last = data.Data.length - 1;
+            var datefixed = data.data[0].dateTimeRead.substring(0, 19);
+
+            var startDtr = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
             var endDtr = startDtr.clone().addMinutes(-parseInt(requestParam.duration));
+
             var cumulativeRain = null;
 
             var i = 0;
-            for (i = 0; i < data.Data.length; i++) {
-                var deviceDtr = Date.parseExact(data.Data[i]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+            for (i = 0; i < data.data.length; i++) {
+                var datefixed = data.data[i].dateTimeRead.substring(0, 19);
+                var deviceDtr = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
+
 
                 if (deviceDtr.between(endDtr, startDtr)) {
+                    continue;
+                } else {
                     break;
                 }
             }
 
-            filterData = data.Data.splice(i);
-            data.Data = filterData;
+            filterData = data.data.slice(0, i);
+              data.data = filterData;
 
             return data;
         };
@@ -438,14 +446,15 @@
         datatable.addColumn('number', 'Rain Value');
 
         var rain_cumulative_tmp = 0.00;
-        for (var j = 0; j < data.Data.length; j++) {
-            var rainValue = parseFloat(data.Data[j]['Rainfall Amount']);
+        for (var j = data.data.length - 1; j >= 0; j--) {
+            var rainValue = parseFloat(data.data[j]['rain_value']);
             var rainCumulative = rainValue + rain_cumulative_tmp;
             rain_cumulative_tmp = rainCumulative;
 
             var row = Array(3);
 
-            row[0] = Date.parseExact(data.Data[j]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+            var datefixed = data.data[j].dateTimeRead.substring(0, 19);
+            row[0] = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
             row[1] = {
                 v: rainCumulative, //cumulative rain
                 f: rainCumulative.toFixed(2) + ' mm'
@@ -460,13 +469,15 @@
         var maxdate;
         var mindate;
 
-        var last = data.Data.length - 1;
+        var last = data.data.length - 1;
 
-        var d2 = Date.parseExact(data.Data[last]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
-        var d = Date.parseExact(data.Data[0]['Datetime Read'], 'yyyy-MM-dd HH:mm:ss');
+        var datefixed = data.data[last].dateTimeRead.substring(0, 19);
+        var d2 = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
+        var datefixed = data.data[0].dateTimeRead.substring(0, 19);
+        var d = Date.parseExact(datefixed, 'yyyy-MM-dd HH:mm:ss');
 
-        var title_startdatetime = d.toString('MMMM d yyyy h:mm:ss tt'); // from 8:00 AM
-        var title_enddatetime = d2.toString('MMMM d yyyy h:mm:ss tt');
+        var title_startdatetime = d2.toString('MMMM d yyyy h:mm:ss tt'); // from 8:00 AM
+        var title_enddatetime = d.toString('MMMM d yyyy h:mm:ss tt');
 
 
         var options = {
