@@ -16,7 +16,7 @@ header('Content-Type: application/json');
 
 $cache = getCacheFqfname($key);
 $cb = function () use ($dev_id, $sdate, $edate) {
-    return getFromPhilSensorsService($dev_id, $sdate, $edate);
+    return getDataFromWeatherAstiService($dev_id, $sdate, $edate);
 };
 
 function shutdown($lockDir)
@@ -64,31 +64,37 @@ function getDataFromPredictService($dev_id, $limit, $sdate, $edate)
 
 }
 
-function getDataFromWeatherAstiService($dev_id, $limit, $sdate, $edate)
+function getDataFromWeatherAstiService($dev_id, $sdate, $edate)
 {
     $username = 'dostregion06';
     $password = 'dost.reg06[1117]';
     $url = 'http://weather.asti.dost.gov.ph/web-api/index.php/api/data/' . $dev_id . '/from/' . $sdate . '/to/' . $edate; //ASTI API
     //$data = array('start' => '0', 'limit' => $limit, 'sDate' => $sdate, 'eDate' => $edate, 'pattern' => $dev_id);
     $ch = curl_init($url);
-    //curl_setopt($ch, CURLOPT_PROXY, 'http://192.168.1.239:8888');
+    //curl_setopt($ch, CURLOPT_PROXY, 'http://192.168.1.59:8888');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
     curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
     //curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
     //curl_setopt($ch, CURLOPT_PROXY, "http://192.168.1.242:8888");
     $response = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
-    return $response;
+
+    if ($http_code == 200) {
+        return $response;
+    } else {
+        return null;
+    }
 }
 
 function getFromPhilSensorsService($dev_id, $sdate, $edate)
 {
-    $url = 'http://philsensors.asti.dost.gov.ph/php/dataduration.php?stationid=' . $dev_id . '&from=' . $sdate . '&to=' . $edate;
+    $url = 'http://philsensors.asti.dost.gov.ph/index.php?r=site/get-by-duration&stationid=' . $dev_id . '&from=' . $sdate . '&to=' . $edate;
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    //curl_setopt($ch, CURLOPT_PROXY, "http://192.168.1.140:8888");
-    curl_setopt($ch,CURLOPT_USERAGENT, 'BANTAYPANAHONDOSTVI');
+    curl_setopt($ch, CURLOPT_PROXY, "http://192.168.1.59:8888");
+    curl_setopt($ch,CURLOPT_USERAGENT, 'DOSTVI');
 
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);

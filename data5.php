@@ -117,14 +117,18 @@ function shutdown($lockDir)
 }
 
 function getFromApiMulti($dev_id, $sdate, $edate) {
-    $url = 'http://philsensors.asti.dost.gov.ph/php/dataduration.php?stationid=' . $dev_id . '&from=' . $sdate . '&to=' . $edate;
+    //$url = 'http://philsensors.asti.dost.gov.ph/php/dataduration.php?stationid=' . $dev_id . '&from=' . $sdate . '&to=' . $edate;
+    $username = 'dostregion06';
+    $password = 'dost.reg06[1117]';
+    $url = 'http://weather.asti.dost.gov.ph/web-api/index.php/api/data/' . $dev_id . '/from/' . $sdate . '/to/' . $edate; //ASTI API
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4 );
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 4);
     curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-    curl_setopt($ch,CURLOPT_USERAGENT, 'BANTAYPANAHONDOSTVI');
-    //curl_setopt($ch, CURLOPT_PROXY, "http://192.168.1.242:8888");
+    curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
+    //curl_setopt($ch,CURLOPT_USERAGENT, 'BANTAYPANAHONDOSTV');
+    curl_setopt($ch, CURLOPT_PROXY, "http://192.168.1.59:8888");
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -157,6 +161,7 @@ function getCacheFqfname($key)
 // false - not true duh!
 function isCacheExpired($filepath, $life = 5)
 {
+    return false;
     $filetime = filemtime($filepath);
     $cache_life = intval($life); // minutes
     $expirytime = (time() - 60 * $cache_life);
