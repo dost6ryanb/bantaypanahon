@@ -128,7 +128,7 @@ function getFromApiMulti($dev_id, $sdate, $edate) {
     curl_setopt($ch, CURLOPT_TIMEOUT, 15);
     curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
     //curl_setopt($ch,CURLOPT_USERAGENT, 'BANTAYPANAHONDOSTV');
-    curl_setopt($ch, CURLOPT_PROXY, "http://192.168.1.59:8888");
+    //curl_setopt($ch, CURLOPT_PROXY, "http://192.168.1.59:8888");
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
@@ -161,7 +161,6 @@ function getCacheFqfname($key)
 // false - not true duh!
 function isCacheExpired($filepath, $life = 5)
 {
-    return false;
     $filetime = filemtime($filepath);
     $cache_life = intval($life); // minutes
     $expirytime = (time() - 60 * $cache_life);
