@@ -924,7 +924,6 @@
                 allowHtml: true
             };
 
-            console.log(options.hAxis.title);
 
             var chart = new google.visualization.ComboChart(document.getElementById(chartdiv));
             chart.draw(datatable, options);
@@ -1221,8 +1220,6 @@
                 data.data = newdata;
                 data.data.length = newdata.length;
             }
-
-            if (device_id == 1872) console.log(data)
 
             if (data.data.length == 0) {
                 $(document.getElementById(div)).css({'background': 'url(images/nodata.png)'});
