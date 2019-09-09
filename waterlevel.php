@@ -63,6 +63,6 @@
 <script src="js/ajax.helper.js"></script>
 <script type="text/javascript" src="vendor/gasparesganga-jquery-loading-overlay-2.1.6/loadingoverlay.min.js"></script>
 <script src="js/waterlevel.js"></script>
-<?php //include_once("analyticstracking.php") ?>
+<?php include_once("analyticstracking.php") ?>
 </body>
 </html>

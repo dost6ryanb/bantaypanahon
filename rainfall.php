@@ -509,6 +509,6 @@
     }
 
 </script>
-<?php //include_once("analyticstracking.php") ?>
+<?php include_once("analyticstracking.php") ?>
 </body>
 </html>

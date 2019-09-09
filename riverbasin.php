@@ -774,6 +774,6 @@ switch ($q) {
     var waterlevel_device_ids_enabled = <?php echo json_encode(Devices::GetEnabledWaterDeviceFromBasin($riverbasin));?>;
     var waterlevel_device_ids_disabled = <?php echo json_encode(Devices::GetDisabledWaterDeviceFromBasin($riverbasin));?>;
 </script>
-<?php //include_once("analyticstracking.php") ?>
+<?php include_once("analyticstracking.php") ?>
 </body>
 </html>
