@@ -117,24 +117,48 @@ function shutdown($lockDir)
 }
 
 function getFromApiMulti($dev_id, $sdate, $edate) {
-    //$url = 'http://philsensors.asti.dost.gov.ph/php/dataduration.php?stationid=' . $dev_id . '&from=' . $sdate . '&to=' . $edate;
-    $username = 'dostregion06';
-    $password = 'dost.reg06[1117]';
-    $url = 'http://weather.asti.dost.gov.ph/web-api/index.php/api/data/' . $dev_id . '/from/' . $sdate . '/to/' . $edate; //ASTI API
+    $params = array(
+        "r" => "site/get-by-duration",
+        "stationid" => $dev_id,
+        "from" => $sdate,
+        "to" => $edate
+    );
+    $url = 'http://philsensors.asti.dost.gov.ph/index.php?' . http_build_query($params);
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4 );
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 4);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-    curl_setopt($ch, CURLOPT_USERPWD, "$username:$password");
-    //curl_setopt($ch,CURLOPT_USERAGENT, 'BANTAYPANAHONDOSTV');
-    //curl_setopt($ch, CURLOPT_PROXY, "http://192.168.1.59:8888");
+    //curl_setopt($ch, CURLOPT_PROXY, "http://192.168.1.62:8888");
+    curl_setopt($ch, CURLOPT_USERAGENT, 'BPDOSTVI992019');
+
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     curl_close($ch);
 
     if ($http_code == 200) {
-        return $response;
+        $chart = new \stdClass();
+
+        $response_chart = json_decode($response)->{'chrt_'};
+        $columns = ['Datetime Read'];
+
+        foreach ($response_chart as $key => $value) {
+            $columns[] = $key;
+            foreach ($value as $key2 => $value2) {
+                $chart->{$value2[0]}[$key] = strval($value2[1]);
+            }
+
+        }
+
+        $data = [];
+        foreach ($chart as $okey => $oval) {
+            $timestamp = intval($okey) / 1000;
+            //$datetimeread = Carbon::createFromTimestamp($timestamp)->toDateTimeString();
+            $dt = new DateTime('@' . $timestamp);
+            $datetimeread = $dt->format('Y-m-d H:i:s');
+            $a = array("Datetime Read" => $datetimeread);
+            $data[] = array_merge($a, $oval);
+        }
+
+        return json_encode(array("0" => array("station_id" => $dev_id), "Columns" => $columns, "Data" => $data));
+
     } else {
         return null;
     }
