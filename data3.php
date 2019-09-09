@@ -16,7 +16,7 @@ header('Content-Type: application/json');
 
 $cache = getCacheFqfname($key);
 $cb = function () use ($dev_id, $sdate, $edate) {
-    return getFromPhilSensorsService($dev_id, $sdate, $edate);
+    return getDataFromWeatherAstiService($dev_id, $sdate, $edate);
 };
 
 function shutdown($lockDir)
