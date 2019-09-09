@@ -1395,6 +1395,6 @@
 <script type="text/javascript">
     var devices = <?php echo json_encode(Devices::GetDevicesAll());?>;
 </script>
-<?php include_once("analyticstracking.php") ?>
+<?php //include_once("analyticstracking.php") ?>
 
 </html>
