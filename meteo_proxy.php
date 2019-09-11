@@ -124,6 +124,8 @@ function getcytrck()
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
     //$referer = 'https://v2.meteopilipinas.gov.ph/';
     //curl_setopt($ch, CURLOPT_REFERER, $referer);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(
