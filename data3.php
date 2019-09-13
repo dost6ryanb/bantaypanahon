@@ -220,7 +220,7 @@ function putCache($key, $cb, $lockDir)
     if ($fp && flock($fp, LOCK_EX)) {
         do {
             $response = $cb();
-            if ($response != null) {
+            if ($response !== null) {
                 ftruncate($fp, 0); // <-- this will erase the contents such as 'w+'
                 rewind($fp);
                 fwrite($fp, $response);
