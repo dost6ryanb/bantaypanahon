@@ -216,6 +216,8 @@ function putCache($key, $cb, $lockDir)
 
     $maxTry = 3;
     $try = 1;
+    $ret = false;
+
     if ($fp && flock($fp, LOCK_EX)) {
         do {
             $response = $cb();
@@ -224,9 +226,11 @@ function putCache($key, $cb, $lockDir)
                 rewind($fp);
                 fwrite($fp, $response);
                 $success = true;
+                $ret = true;
             } else {
                 if ($try++ > $maxTry) {
-                    return false; // max retry
+                    $success = true;
+                    $ret = false; // max retry
                 }
             }
         } while (!$success);
@@ -236,7 +240,7 @@ function putCache($key, $cb, $lockDir)
 
     fclose($fp);
 
-    return $success;
+    return $ret;
 }
 
 function renewCache($key, $cb, $lockDir)
