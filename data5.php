@@ -43,8 +43,8 @@ do {
             if (!isCacheExpired($cache)) {
                 $read = readCache($key, $lockDir);
             } else {
-                renewCache($key, $cb, $lockDir);
-                $nextTaskQueue[] = $dev_id;
+                $r = renewCache($key, $cb, $lockDir);
+                if ($r !== "MAXRETRY") $nextTaskQueue[] = $dev_id; //max retry
             }
         } elseif ($cache && $lockExists) {
             if (isLockExpired($lockDir)) {
@@ -154,7 +154,7 @@ function getFromApiMulti($dev_id, $sdate, $edate) {
             $dt = new DateTime('@' . $timestamp);
             $datetimeread = $dt->format('Y-m-d H:i:s');
             $a = array("Datetime Read" => $datetimeread);
-            $data[] = array_merge($a, $oval);
+            $data[] = (object)(array_merge($a, $oval));
         }
 
         return json_encode(array("0" => array("station_id" => $dev_id), "Columns" => $columns, "Data" => $data));
@@ -226,7 +226,7 @@ function putCache($key, $cb, $lockDir)
                 $success = true;
             } else {
                 if ($try++ > $maxTry) {
-                    $success = true;
+                    return false; // max retry
                 }
             }
         } while (!$success);
@@ -242,7 +242,8 @@ function putCache($key, $cb, $lockDir)
 function renewCache($key, $cb, $lockDir)
 {
     if (createLock($lockDir)) { // create lock to update cache
-        putCache($key, $cb, $lockDir); //cache renewed
+        $r = putCache($key, $cb, $lockDir); //cache renewed
+        if ($r === false) return "MAXRETRY";
         releaseLock($lockDir);
     } else {
         return false;
